@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
                 .nickname(signUpDto.getNickname())
-                .roles(Collections.singletonList("ROLE_USER"))
+                .roles(Collections.singletonList("USER"))
                 .createAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

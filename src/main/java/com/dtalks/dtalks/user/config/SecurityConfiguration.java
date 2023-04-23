@@ -33,7 +33,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
                 .requestMatchers("/sign-in", "/sign-up", "exception").permitAll()
                 .requestMatchers("**exception**").permitAll()
-                .anyRequest().hasRole("ADMIN")
+                .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
@@ -46,7 +46,6 @@ public class SecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers("/v2/api-docs", "/swagger-resources/**",
-                "/swagger-ui.html", "/webjars/**", "/swagger/**", "/sign-api/exception", "/swagger-ui/**", "/v3/api-docs/**");
+        return web -> web.ignoring().requestMatchers("/swagger-ui/**", "/v3/api-docs/**");
     }
 }
