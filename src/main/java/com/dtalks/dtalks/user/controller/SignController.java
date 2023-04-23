@@ -5,6 +5,7 @@ import com.dtalks.dtalks.user.dto.SignInResponseDto;
 import com.dtalks.dtalks.user.dto.SignUpDto;
 import com.dtalks.dtalks.user.dto.SignUpResponseDto;
 import com.dtalks.dtalks.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +29,7 @@ public class SignController {
     }
 
     @PostMapping(value = "/sign-up")
-    public SignUpResponseDto signUp(@RequestBody SignUpDto signUpDto) {
+    public SignUpResponseDto signUp(@Valid @RequestBody SignUpDto signUpDto) {
         SignUpResponseDto signUpResponseDto = userService.signUp(signUpDto);
         return signUpResponseDto;
     }

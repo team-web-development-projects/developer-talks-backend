@@ -2,6 +2,7 @@ package com.dtalks.dtalks.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,17 +27,18 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true, length = 15)
+    @Column(unique = true)
+    @Size(min = 5, max = 15)
     private String username;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(unique = true, length = 15)
+    @Column(unique = true)
+    @Size(min = 5, max = 15)
     private String nickname;
 
     @ElementCollection(fetch = FetchType.EAGER)
