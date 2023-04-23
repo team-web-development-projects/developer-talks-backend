@@ -5,6 +5,8 @@ import com.dtalks.dtalks.user.config.JwtTokenProvider;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import java.util.Collections;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public final UserRepository userRepository;
     public final JwtTokenProvider jwtTokenProvider;
@@ -29,6 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SignUpResponseDto signUp(SignUpDto signUpDto) {
+        LOGGER.info("SERVICE signUp");
         User user = User.builder()
                 .username(signUpDto.getUsername())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
@@ -54,6 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SignInResponseDto signIn(SignInDto signInDto) {
+        LOGGER.info("SERVICE signIn");
         User user = userRepository.getByUsername(signInDto.getUsername());
 
         if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
