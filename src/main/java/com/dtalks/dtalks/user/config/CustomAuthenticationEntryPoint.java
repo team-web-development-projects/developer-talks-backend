@@ -1,5 +1,7 @@
 package com.dtalks.dtalks.user.config;
 
+import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
 import com.dtalks.dtalks.user.dto.EntryPointErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -24,12 +26,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         LOGGER.info("인증 실패: " + authException.getMessage());
         ObjectMapper objectMapper = new ObjectMapper();
 
-        EntryPointErrorResponse entryPointErrorResponse = new EntryPointErrorResponse();
-        entryPointErrorResponse.setMsg("인증이 실패하였습니다.");
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.AUTHENTICATION_ERROR, "인증이 실패하였습니다.");
 
         response.setStatus(401);
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
-        response.getWriter().write(objectMapper.writeValueAsString(entryPointErrorResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponseDto));
     }
 }

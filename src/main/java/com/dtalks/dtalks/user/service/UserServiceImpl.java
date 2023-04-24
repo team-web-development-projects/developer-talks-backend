@@ -1,5 +1,7 @@
 package com.dtalks.dtalks.user.service;
 
+import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.exception.UserDuplicateException;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.config.JwtTokenProvider;
 import com.dtalks.dtalks.user.dto.*;
@@ -33,6 +35,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SignUpResponseDto signUp(SignUpDto signUpDto) {
+
+        User userCheck = userRepository.getByUserid(signUpDto.getUserid());
+        User userCheck2 = userRepository.getByEmail(signUpDto.getEmail());
+        User userCheck3 = userRepository.getByNickname(signUpDto.getNickname());
+        if(userCheck != null) {
+            throw new UserDuplicateException("userid duplicated", ErrorCode.USER_DUPLICATION_ERROR);
+        }
+        if(userCheck2 != null) {
+            throw new UserDuplicateException("email duplicated", ErrorCode.USER_DUPLICATION_ERROR);
+        }
+        if(userCheck3 != null) {
+            throw new UserDuplicateException("nickname duplicated", ErrorCode.USER_DUPLICATION_ERROR);
+        }
+
         LOGGER.info("SERVICE signUp");
         User user = User.builder()
                 .userid(signUpDto.getUserid())
