@@ -15,7 +15,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         this.userRepository = userRepository;
     }
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        return userRepository.getByUsername(username);
+    public UserDetails loadUserByUserid(String userid) {
+        return userRepository.getByUserid(userid);
     }
 }

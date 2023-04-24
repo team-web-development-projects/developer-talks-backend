@@ -1,17 +1,17 @@
 package com.dtalks.dtalks.user.dto;
 
 public class UserDto {
-    private String username;
+    private String userid;
     private String password;
     private String email;
     private String nickname;
 
-    public String getUsername() {
-        return username;
+    public String getUserid() {
+        return userid;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserid(String username) {
+        this.userid = username;
     }
 
     public String getPassword() {
