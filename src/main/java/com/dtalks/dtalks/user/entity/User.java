@@ -29,7 +29,7 @@ public class User implements UserDetails {
 
     @Column(unique = true)
     @Size(min = 5, max = 15)
-    private String username;
+    private String userid;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
@@ -59,7 +59,7 @@ public class User implements UserDetails {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Override
     public String getUsername() {
-        return this.username;
+        return this.userid;
     }
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     public SignUpResponseDto signUp(SignUpDto signUpDto) {
         LOGGER.info("SERVICE signUp");
         User user = User.builder()
-                .username(signUpDto.getUsername())
+                .userid(signUpDto.getUserid())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
                 .nickname(signUpDto.getNickname())
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public SignInResponseDto signIn(SignInDto signInDto) {
         LOGGER.info("SERVICE signIn");
-        User user = userRepository.getByUsername(signInDto.getUsername());
+        User user = userRepository.getByUserid(signInDto.getUserid());
 
         if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
             throw new RuntimeException();
