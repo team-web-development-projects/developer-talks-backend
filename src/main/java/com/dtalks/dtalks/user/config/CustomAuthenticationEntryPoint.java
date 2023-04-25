@@ -2,7 +2,6 @@ package com.dtalks.dtalks.user.config;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
-import com.dtalks.dtalks.user.dto.EntryPointErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
