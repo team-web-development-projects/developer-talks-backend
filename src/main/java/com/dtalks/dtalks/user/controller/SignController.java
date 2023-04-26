@@ -9,9 +9,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class SignController {
@@ -37,5 +35,11 @@ public class SignController {
         LOGGER.info("POST /sign-up");
         SignUpResponseDto signUpResponseDto = userService.signUp(signUpDto);
         return signUpResponseDto;
+    }
+
+    @GetMapping(value = "/sign-in/oauth")
+    public SignInResponseDto SignInOAuth(@RequestParam String token) {
+        SignInResponseDto signInResponseDto = new SignInResponseDto(true, 0, "Success", token);
+        return signInResponseDto;
     }
 }

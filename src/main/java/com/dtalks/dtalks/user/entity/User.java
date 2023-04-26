@@ -41,6 +41,8 @@ public class User implements UserDetails {
     @Size(min = 5, max = 15)
     private String nickname;
 
+    private String registrationId;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
