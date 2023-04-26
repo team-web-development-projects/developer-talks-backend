@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
         }
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .token(jwtTokenProvider.createToken(String.valueOf(user.getUsername()), user.getRoles()))
+                .token(jwtTokenProvider.createToken(String.valueOf(user.getEmail()), user.getRoles()))
                 .build();
         setSuccessResult(signInResponseDto);
         return signInResponseDto;
