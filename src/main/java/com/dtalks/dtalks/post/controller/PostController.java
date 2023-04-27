@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,12 +36,12 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updatePost(@Valid @RequestBody PostDto postDto, @PathVariable Long id) {
-        return ResponseEntity.ok(postService.updatePost(postDto, id));
+    public ResponseEntity<Long> updatePost(@Valid @RequestBody PostDto postDto, @PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+        return ResponseEntity.ok(postService.updatePost(postDto, id, user));
     }
 
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    public void deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+        postService.deletePost(id, user);
     }
 }
