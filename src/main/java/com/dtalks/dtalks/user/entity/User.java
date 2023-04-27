@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.user.entity;
 
+import com.dtalks.dtalks.post.entity.Post;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -52,6 +53,9 @@ public class User implements UserDetails {
     private LocalDateTime createAt;
 
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<Post> postList = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
