@@ -36,10 +36,4 @@ public class SignController {
         SignUpResponseDto signUpResponseDto = userService.signUp(signUpDto);
         return signUpResponseDto;
     }
-
-    @GetMapping(value = "/sign-in/oauth")
-    public SignInResponseDto SignInOAuth(@RequestParam String token) {
-        SignInResponseDto signInResponseDto = new SignInResponseDto(true, 0, "Success", token);
-        return signInResponseDto;
-    }
 }

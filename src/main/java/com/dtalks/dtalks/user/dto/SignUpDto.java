@@ -23,7 +23,7 @@ public class SignUpDto{
     @Size(min = 5, max = 15, message = "id는 5~15자 사이이어야 합니다.")
     private String userid;
 
-    @Pattern(regexp = "(?=.*\\W)(?=\\S+$).{5,15}",
+    @Pattern(regexp = "(?=.*\\W)(?=\\S+$).{8,15}",
             message = "특수기호가 적어도 1개 이상 포함된 5~15자의 비밀번호이어야 합니다.")
     private String password;
 }
