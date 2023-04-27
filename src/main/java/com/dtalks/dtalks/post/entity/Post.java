@@ -1,7 +1,7 @@
 package com.dtalks.dtalks.post.entity;
 
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
-import com.dtalks.dtalks.post.dto.PostDto;
+import com.dtalks.dtalks.post.dto.PostRequestDto;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,9 +28,8 @@ public class Post extends BaseTimeEntity {
     private String content;
 
     @Builder
-    public static Post toEntity(PostDto postDto, User user) {
+    public static Post toEntity(PostRequestDto postDto, User user) {
         return Post.builder()
-                .id(postDto.getId())
                 .title(postDto.getTitle())
                 .content(postDto.getContent())
                 .user(user)
