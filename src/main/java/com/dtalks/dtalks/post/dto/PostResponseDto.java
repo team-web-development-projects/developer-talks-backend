@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostDto {
+public class PostResponseDto {
     private Long id;
 
     @NotBlank
@@ -22,8 +22,8 @@ public class PostDto {
     private String nickname;
 
     @Builder
-    public static PostDto toDto(Post post) {
-        return PostDto.builder()
+    public static PostResponseDto toDto(Post post) {
+        return PostResponseDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())

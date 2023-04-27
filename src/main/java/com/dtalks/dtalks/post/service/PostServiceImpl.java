@@ -1,7 +1,8 @@
 package com.dtalks.dtalks.post.service;
 
 import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
-import com.dtalks.dtalks.post.dto.PostDto;
+import com.dtalks.dtalks.post.dto.PostRequestDto;
+import com.dtalks.dtalks.post.dto.PostResponseDto;
 import com.dtalks.dtalks.post.entity.Post;
 import com.dtalks.dtalks.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
@@ -32,36 +33,36 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public PostDto searchById(Long id) {
+    public PostResponseDto searchById(Long id) {
         Optional<Post> post = postRepository.findById(id);
         if (post.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
         }
-        return PostDto.toDto(post.get());
+        return PostResponseDto.toDto(post.get());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto> searchAllPost(Pageable pageable) {
+    public Page<PostResponseDto> searchAllPost(Pageable pageable) {
         Page<Post> postsPage = postRepository.findAllByOrderByIdDesc(pageable);
-        return postsPage.map(PostDto::toDto);
+        return postsPage.map(PostResponseDto::toDto);
     }
 
     @Override
     @Transactional
-    public Long createPost(PostDto postDto) {
-        User user = userRepository.getByNickname(postDto.getNickname());
-        if (user == null) {
+    public Long createPost(PostRequestDto postDto, UserDetails userDetails) {
+        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(userDetails.getUsername()));
+        if (user .isEmpty()) {
             throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
         }
-        Post post = Post.toEntity(postDto, user);
+        Post post = Post.toEntity(postDto, user.get());
         postRepository.save(post);
         return post.getId();
     }
 
     @Override
     @Transactional
-    public Long updatePost(PostDto postDto, Long postId, UserDetails userDetails) {
+    public Long updatePost(PostRequestDto postDto, Long postId, UserDetails userDetails) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
