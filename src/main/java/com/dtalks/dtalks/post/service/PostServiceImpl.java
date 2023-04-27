@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.post.service;
 
+import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
 import com.dtalks.dtalks.post.dto.PostDto;
 import com.dtalks.dtalks.post.entity.Post;
 import com.dtalks.dtalks.post.repository.PostRepository;
@@ -11,6 +12,7 @@ import com.dtalks.dtalks.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +35,7 @@ public class PostServiceImpl implements PostService {
     public PostDto searchById(Long id) {
         Optional<Post> post = postRepository.findById(id);
         if (post.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "게시글이 존재하지 않습니다.");
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
         }
         return PostDto.toDto(post.get());
     }
@@ -50,7 +52,7 @@ public class PostServiceImpl implements PostService {
     public Long createPost(PostDto postDto) {
         User user = userRepository.getByNickname(postDto.getNickname());
         if (user == null) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "유저가 존재하지 않습니다.");
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
         }
         Post post = Post.toEntity(postDto, user);
         postRepository.save(post);
@@ -59,24 +61,36 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long updatePost(PostDto postDto, Long id) {
-        Optional<Post> optionalPost = postRepository.findById(id);
+    public Long updatePost(PostDto postDto, Long postId, UserDetails userDetails) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "게시글이 존재하지 않습니다.");
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
         }
 
         Post post = optionalPost.get();
+        String userId = post.getUser().getUserid();
+        if (!userId.equals(userDetails.getUsername())) {
+            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
+        }
+
         post.update(postDto.getTitle(), postDto.getContent());
-        return id;
+        return postId;
     }
 
     @Override
     @Transactional
-    public void deletePost(Long id) {
-        Optional<Post> post = postRepository.findById(id);
-        if (post.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "게시글이 존재하지 않습니다.");
+    public void deletePost(Long postId, UserDetails userDetails) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
         }
-        postRepository.delete(post.get());
+
+        Post post = optionalPost.get();
+        String userId = post.getUser().getUserid();
+        if (!userId.equals(userDetails.getUsername())) {
+            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
+        }
+
+        postRepository.delete(post);
     }
 }

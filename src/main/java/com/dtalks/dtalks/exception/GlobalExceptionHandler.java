@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.exception;
 
 import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
+import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
 import com.dtalks.dtalks.exception.exception.UserDuplicateException;
 import com.dtalks.dtalks.exception.exception.UserNotFoundException;
@@ -50,6 +51,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PostNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handlePostNotFoundException(PostNotFoundException ex) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.POST_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(PermissionNotGrantedException.class)
+    public ResponseEntity<ErrorResponseDto> handlePermissionNotGrantedException(PermissionNotGrantedException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.PERMISSION_NOT_GRANTED_ERROR);
         LOGGER.info("error : " + errorResponseDto.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
