@@ -89,6 +89,34 @@ public class UserServiceImpl implements UserService {
         return signInResponseDto;
     }
 
+    @Override
+    public DuplicateResponseDto useridDuplicated(String userid) {
+        LOGGER.info("useridDuplicated 호출됨");
+        User user = userRepository.getByUserid(userid);
+        DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
+        if(user == null) {
+            duplicateResponseDto.setDuplicated(false);
+        }
+        else {
+            duplicateResponseDto.setDuplicated(true);
+        }
+        return duplicateResponseDto;
+    }
+
+    @Override
+    public DuplicateResponseDto nicknameDuplicated(String nickname) {
+        LOGGER.info("nicknameDuplicated 호출됨");
+        User user = userRepository.getByNickname(nickname);
+        DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
+        if(user == null) {
+            duplicateResponseDto.setDuplicated(false);
+        }
+        else {
+            duplicateResponseDto.setDuplicated(true);
+        }
+        return duplicateResponseDto;
+    }
+
     private void setSuccessResult(SignUpResponseDto result) {
         result.setSuccess(true);
         result.setCode(CommonResponse.SUCCESS.getCode());
