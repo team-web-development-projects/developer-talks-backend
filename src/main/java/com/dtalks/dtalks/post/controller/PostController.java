@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.post.controller;
 
 import com.dtalks.dtalks.post.dto.PostDto;
+import com.dtalks.dtalks.post.dto.PostRequestDto;
 import com.dtalks.dtalks.post.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +32,12 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> createPost(@Valid @RequestBody PostDto postDto) {
-        return ResponseEntity.ok(postService.createPost(postDto));
+    public ResponseEntity<Long> createPost(@Valid @RequestBody PostRequestDto postDto, @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(postService.createPost(postDto, userDetails));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updatePost(@Valid @RequestBody PostDto postDto, @PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<Long> updatePost(@Valid @RequestBody PostRequestDto postDto, @PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
         return ResponseEntity.ok(postService.updatePost(postDto, id, user));
     }
 
