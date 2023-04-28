@@ -100,30 +100,4 @@ public class UserServiceImpl implements UserService {
         result.setCode(CommonResponse.FAIL.getCode());
         result.setMsg(CommonResponse.FAIL.getMsg());
     }
-
-//    @Override
-//    public UserResponseDto saveUser(UserDto userDto) {
-//
-//        User user = new User();
-//        user.setUsername(userDto.getUsername());
-//        user.setPassword(userDto.getPassword());
-//        user.setEmail(userDto.getEmail());
-//        user.setNickname(userDto.getNickname());
-//        user.setCreateAt(LocalDateTime.now());
-//        user.setUpdatedAt(LocalDateTime.now());
-//
-//        userRepository.save(user);
-//
-//        UserResponseDto userResponseDto = new UserResponseDto();
-//        userResponseDto.setUsername(userDto.getUsername());
-//        userResponseDto.setEmail(userDto.getEmail());
-//        userResponseDto.setNickname(userDto.getNickname());
-//
-//        return userResponseDto;
-//    }
-//
-//    @Override
-//    public UserDetails loadUserByUsername(String username) {
-//        return userRepository.getByUsername(username);
-//    }
 }
