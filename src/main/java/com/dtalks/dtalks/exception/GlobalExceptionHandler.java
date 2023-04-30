@@ -1,16 +1,14 @@
 package com.dtalks.dtalks.exception;
 
 import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
-import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
-import com.dtalks.dtalks.exception.exception.PostNotFoundException;
-import com.dtalks.dtalks.exception.exception.UserDuplicateException;
-import com.dtalks.dtalks.exception.exception.UserNotFoundException;
+import com.dtalks.dtalks.exception.exception.*;
 import com.dtalks.dtalks.user.service.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -58,6 +56,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PermissionNotGrantedException.class)
     public ResponseEntity<ErrorResponseDto> handlePermissionNotGrantedException(PermissionNotGrantedException ex) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.PERMISSION_NOT_GRANTED_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(MailException.class)
+    public ResponseEntity<ErrorResponseDto> handleMailException(EmailException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.EMAIL_ERROR);
         LOGGER.info("error : " + errorResponseDto.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
