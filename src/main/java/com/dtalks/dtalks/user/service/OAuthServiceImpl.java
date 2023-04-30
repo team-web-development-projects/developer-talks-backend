@@ -68,6 +68,7 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
         }
         else {
             user.setEmail(userDto.getEmail());
+            user.setNickname(userDto.getNickname());
         }
         return userRepository.save(user);
     }

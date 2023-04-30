@@ -39,7 +39,7 @@ public class User implements UserDetails {
     private String email;
 
     @Column(unique = true)
-    @Size(min = 5, max = 15)
+    @Size(min = 1, max = 30)
     private String nickname;
 
     private String registrationId;
