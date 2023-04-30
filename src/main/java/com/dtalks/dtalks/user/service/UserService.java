@@ -9,4 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public interface UserService {
     SignUpResponseDto signUp(SignUpDto signUpDto);
     SignInResponseDto signIn(SignInDto signInDto);
+
+    DuplicateResponseDto useridDuplicated(String userid);
+    DuplicateResponseDto nicknameDuplicated(String nickname);
 }
