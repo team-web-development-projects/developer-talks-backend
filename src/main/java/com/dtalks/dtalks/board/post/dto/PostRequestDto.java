@@ -1,4 +1,4 @@
-package com.dtalks.dtalks.post.dto;
+package com.dtalks.dtalks.board.post.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

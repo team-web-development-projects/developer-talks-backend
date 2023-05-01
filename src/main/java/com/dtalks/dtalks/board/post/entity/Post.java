@@ -1,7 +1,7 @@
-package com.dtalks.dtalks.post.entity;
+package com.dtalks.dtalks.board.post.entity;
 
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
-import com.dtalks.dtalks.post.dto.PostRequestDto;
+import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +18,7 @@ public class Post extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     @Column(nullable = false)
