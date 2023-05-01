@@ -1,8 +1,8 @@
-package com.dtalks.dtalks.post.controller;
+package com.dtalks.dtalks.board.post.controller;
 
-import com.dtalks.dtalks.post.dto.PostDto;
-import com.dtalks.dtalks.post.dto.PostRequestDto;
-import com.dtalks.dtalks.post.service.PostService;
+import com.dtalks.dtalks.board.post.service.PostService;
+import com.dtalks.dtalks.board.post.dto.PostDto;
+import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

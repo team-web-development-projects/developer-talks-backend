@@ -1,7 +1,7 @@
-package com.dtalks.dtalks.post.service;
+package com.dtalks.dtalks.board.post.service;
 
-import com.dtalks.dtalks.post.dto.PostDto;
-import com.dtalks.dtalks.post.dto.PostRequestDto;
+import com.dtalks.dtalks.board.post.dto.PostDto;
+import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;

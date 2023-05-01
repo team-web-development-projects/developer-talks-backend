@@ -1,10 +1,10 @@
-package com.dtalks.dtalks.post.service;
+package com.dtalks.dtalks.board.post.service;
 
+import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
-import com.dtalks.dtalks.post.dto.PostDto;
-import com.dtalks.dtalks.post.dto.PostRequestDto;
-import com.dtalks.dtalks.post.entity.Post;
-import com.dtalks.dtalks.post.repository.PostRepository;
+import com.dtalks.dtalks.board.post.dto.PostDto;
+import com.dtalks.dtalks.board.post.dto.PostRequestDto;
+import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
 import com.dtalks.dtalks.exception.exception.UserNotFoundException;
