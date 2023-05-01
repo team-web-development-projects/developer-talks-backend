@@ -18,9 +18,9 @@ import java.util.List;
 public class AnswerController {
     private AnswerService answerService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<List<AnswerResponseDto>> getAnswerByQuestionId(@PathVariable Long questionId){
-        return ResponseEntity.ok(answerService.getAnswerByQuestionId(questionId));
+    @GetMapping
+    public ResponseEntity<List<AnswerResponseDto>> getAnswersByQuestionId(@PathVariable Long questionId){
+        return ResponseEntity.ok(answerService.getAnswersByQuestionId(questionId));
     }
 
     @PostMapping
@@ -29,12 +29,12 @@ public class AnswerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updateAnswer(@Valid @RequestBody AnswerDto answerDto, @PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Long> updateAnswer(@Valid @RequestBody AnswerDto answerDto, @PathVariable Long id, @PathVariable Long questionId, @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(answerService.updateAnswer(id, answerDto, userDetails));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAnswer(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+    public void deleteAnswer(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails, @PathVariable Long questionId) {
         answerService.deleteAnswer(id, userDetails);
     }
 }

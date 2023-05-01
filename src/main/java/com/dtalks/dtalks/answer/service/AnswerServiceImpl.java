@@ -29,7 +29,7 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<AnswerResponseDto> getAnswerByQuestionId(Long questionId) {
+    public List<AnswerResponseDto> getAnswersByQuestionId(Long questionId) {
         return answerRepository.findByQuestionId(questionId).stream()
                 .map(AnswerResponseDto::toDto)
                 .collect(Collectors.toList());
