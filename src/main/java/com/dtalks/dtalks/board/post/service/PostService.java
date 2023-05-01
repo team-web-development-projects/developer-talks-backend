@@ -10,7 +10,7 @@ public interface PostService {
     PostDto searchById(Long id);
     Page<PostDto> searchAllPost(Pageable pageable);
 
-    Long createPost(PostRequestDto postDto, UserDetails userDetails);
-    Long updatePost(PostRequestDto postDto, Long id, UserDetails user);
-    void deletePost(Long id, UserDetails user);
+    Long createPost(PostRequestDto postDto);
+    Long updatePost(PostRequestDto postDto, Long id);
+    void deletePost(Long id);
 }

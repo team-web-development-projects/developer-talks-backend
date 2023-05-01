@@ -8,12 +8,12 @@ import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
 import com.dtalks.dtalks.exception.exception.UserNotFoundException;
+import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,8 +50,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long createPost(PostRequestDto postDto, UserDetails userDetails) {
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(userDetails.getUsername()));
+    public Long createPost(PostRequestDto postDto) {
+        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (user.isEmpty()) {
             throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
         }
@@ -62,7 +62,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long updatePost(PostRequestDto postDto, Long postId, UserDetails userDetails) {
+    public Long updatePost(PostRequestDto postDto, Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
@@ -70,7 +70,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = optionalPost.get();
         String userId = post.getUser().getUserid();
-        if (!userId.equals(userDetails.getUsername())) {
+        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
         }
 
@@ -80,7 +80,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePost(Long postId, UserDetails userDetails) {
+    public void deletePost(Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
@@ -88,7 +88,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = optionalPost.get();
         String userId = post.getUser().getUserid();
-        if (!userId.equals(userDetails.getUsername())) {
+        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
         }
 

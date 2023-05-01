@@ -10,8 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,17 +30,17 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> createPost(@Valid @RequestBody PostRequestDto postDto, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(postService.createPost(postDto, userDetails));
+    public ResponseEntity<Long> createPost(@Valid @RequestBody PostRequestDto postDto) {
+        return ResponseEntity.ok(postService.createPost(postDto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updatePost(@Valid @RequestBody PostRequestDto postDto, @PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
-        return ResponseEntity.ok(postService.updatePost(postDto, id, user));
+    public ResponseEntity<Long> updatePost(@Valid @RequestBody PostRequestDto postDto, @PathVariable Long id) {
+        return ResponseEntity.ok(postService.updatePost(postDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
-        postService.deletePost(id, user);
+    public void deletePost(@PathVariable Long id) {
+        postService.deletePost(id);
     }
 }
