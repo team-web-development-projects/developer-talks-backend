@@ -21,7 +21,7 @@ public class Answer extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User writer;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Question question;
@@ -30,9 +30,9 @@ public class Answer extends BaseTimeEntity {
     private String content;
 
     @Builder
-    public static Answer toEntity(AnswerDto answerDto, Question question, User writer) {
+    public static Answer toEntity(AnswerDto answerDto, Question question, User user) {
         return Answer.builder()
-                .writer(writer)
+                .user(user)
                 .question(question)
                 .content(answerDto.getContent())
                 .build();

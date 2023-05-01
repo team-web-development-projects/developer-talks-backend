@@ -25,7 +25,7 @@ public class AnswerResponseDto {
         return AnswerResponseDto.builder()
                 .id(answer.getId())
                 .content(answer.getContent())
-                .nickname(answer.getWriter().getNickname())
+                .nickname(answer.getUser().getNickname())
                 .build();
     }
 }

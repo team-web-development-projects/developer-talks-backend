@@ -26,7 +26,7 @@ public class Question extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.MERGE, orphanRemoval = true)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Answer> answerList = new ArrayList<>();
 
     @Column(nullable = false)

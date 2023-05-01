@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.question.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.exception.DeleteNotPermittedException;
 import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
 import com.dtalks.dtalks.question.dto.QuestionDto;
@@ -70,8 +71,8 @@ public class QuestionServiceImpl implements QuestionService {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
         Question question = optionalQuestion.get();
-        String userid = question.getUser().getUserid();
-        if (!user.equals(userDetails.getUsername())) {
+        String userId = question.getUser().getUserid();
+        if (!userId.equals(userDetails.getUsername())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다");
         }
         question.update(questionDto.getTitle(), questionDto.getContent());
@@ -85,8 +86,11 @@ public class QuestionServiceImpl implements QuestionService {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다");
         }
         Question question = optionalQuestion.get();
-        String userid = question.getUser().getUserid();
-        if (!userid.equals(userDetails.getUsername())) {
+        if (!question.getAnswerList().isEmpty()) {
+            throw new DeleteNotPermittedException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "해당 질문글을 삭제할 수 없습니다");
+        }
+        String userId = question.getUser().getUserid();
+        if (!userId.equals(userDetails.getUsername())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다.");
         }
         questionRepository.delete(question);
