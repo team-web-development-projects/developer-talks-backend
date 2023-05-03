@@ -48,11 +48,11 @@ public class SecurityConfiguration {
                 .exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login()
-                .successHandler(oAuthSuccessHandler)
-                .userInfoEndpoint()
-                .userService(oAuthService);
+                        UsernamePasswordAuthenticationFilter.class);
+//                .oauth2Login()
+//                .successHandler(oAuthSuccessHandler)
+//                .userInfoEndpoint()
+//                .userService(oAuthService);
         return httpSecurity.build();
     }
 

@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.user.entity;
 
+import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -56,6 +57,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Post> postList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<Comment> commentList = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
