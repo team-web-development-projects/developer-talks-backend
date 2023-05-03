@@ -1,6 +1,6 @@
 package com.dtalks.dtalks.user.entity;
 
-import com.dtalks.dtalks.post.entity.Post;
+import com.dtalks.dtalks.board.post.entity.Post;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -34,6 +35,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public SignUpResponseDto signUp(SignUpDto signUpDto) {
 
         User userCheck = userRepository.getByUserid(signUpDto.getUserid());
@@ -74,6 +76,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SignInResponseDto signIn(SignInDto signInDto) {
         LOGGER.info("SERVICE signIn");
         User user = userRepository.getByUserid(signInDto.getUserid());
@@ -90,6 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DuplicateResponseDto useridDuplicated(String userid) {
         LOGGER.info("useridDuplicated 호출됨");
         User user = userRepository.getByUserid(userid);
@@ -104,6 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DuplicateResponseDto nicknameDuplicated(String nickname) {
         LOGGER.info("nicknameDuplicated 호출됨");
         User user = userRepository.getByNickname(nickname);

@@ -14,10 +14,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 @Slf4j
@@ -33,14 +32,11 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         LOGGER.info("onAuthenticationSuccess 호출됨");
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String token = jwtTokenProvider.createToken(oAuth2User.getAttribute("email"), Collections.singletonList("USER"));
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("accessToken", token);
 
-        response.setStatus(HttpStatus.OK.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000")
+                .queryParam("accessToken", token)
+                .build().toString();
 
-        PrintWriter printWriter = response.getWriter();
-        printWriter.write(jsonObject.toString());
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
