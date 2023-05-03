@@ -59,7 +59,7 @@ public class QuestionServiceImpl implements QuestionService {
     public Long createQuestion(QuestionDto questionDto, UserDetails userDetails) {
         Optional<User> user = Optional.ofNullable(userRepository.getByUserid(userDetails.getUsername()));
         if (user.isEmpty()) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다. ");
         }
         Question question = Question.toEntity(questionDto, user.get());
         questionRepository.save(question);
@@ -77,7 +77,7 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = optionalQuestion.get();
         String userId = question.getUser().getUserid();
         if (!userId.equals(userDetails.getUsername())) {
-            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다");
+            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다. ");
         }
         question.update(questionDto.getTitle(), questionDto.getContent());
         return questionId;
@@ -87,15 +87,15 @@ public class QuestionServiceImpl implements QuestionService {
     public void deleteQuestion(Long id, UserDetails userDetails) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다");
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
         Question question = optionalQuestion.get();
         if (!question.getAnswerList().isEmpty()) {
-            throw new DeleteNotPermittedException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "해당 질문글을 삭제할 수 없습니다");
+            throw new DeleteNotPermittedException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "답변이 달린 질문은 삭제할 수 없습니다. ");
         }
         String userId = question.getUser().getUserid();
         if (!userId.equals(userDetails.getUsername())) {
-            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다.");
+            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다. ");
         }
         questionRepository.delete(question);
     }

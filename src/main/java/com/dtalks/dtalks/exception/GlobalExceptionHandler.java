@@ -1,10 +1,7 @@
 package com.dtalks.dtalks.exception;
 
 import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
-import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
-import com.dtalks.dtalks.exception.exception.PostNotFoundException;
-import com.dtalks.dtalks.exception.exception.UserDuplicateException;
-import com.dtalks.dtalks.exception.exception.UserNotFoundException;
+import com.dtalks.dtalks.exception.exception.*;
 import com.dtalks.dtalks.user.service.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -59,6 +56,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handlePermissionNotGrantedException(PermissionNotGrantedException ex) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.PERMISSION_NOT_GRANTED_ERROR);
         LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(DeleteNotPermittedException.class)
+    public ResponseEntity<ErrorResponseDto> handleDeleteNotPermittedException(DeleteNotPermittedException exception) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.DELETE_NOT_PERMITTED_ERROR);
+        LOGGER.info(("error: " + errorResponseDto.getMessage()));
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
 }
