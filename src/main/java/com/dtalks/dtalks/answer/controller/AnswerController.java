@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/questions/{questionId}/answers")
 public class AnswerController {
-    private AnswerService answerService;
+    private final AnswerService answerService;
 
     @GetMapping
     public ResponseEntity<List<AnswerResponseDto>> getAnswersByQuestionId(@PathVariable Long questionId){

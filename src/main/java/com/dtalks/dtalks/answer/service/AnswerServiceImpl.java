@@ -7,6 +7,7 @@ import com.dtalks.dtalks.answer.repository.AnswerRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
+import com.dtalks.dtalks.exception.exception.UserNotFoundException;
 import com.dtalks.dtalks.question.entity.Question;
 import com.dtalks.dtalks.question.repository.QuestionRepository;
 import com.dtalks.dtalks.user.entity.User;
@@ -38,10 +39,15 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional
     public Long createAnswer(AnswerDto answerDto,  Long questionId, UserDetails userDetails) {
-        User user = userRepository.getByNickname(userDetails.getUsername());
-        Optional<Question> optionalQuestion = questionRepository.findById(questionId);
-        Question question = optionalQuestion.get();
-        Answer answer = Answer.toEntity(answerDto, question, user);
+        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(userDetails.getUsername()));
+        if (user.isEmpty()) {
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
+        }
+        Optional<Question> question = questionRepository.findById(questionId);
+        if(question.isEmpty()){
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문이 존재하지 않습니다. ");
+        }
+        Answer answer = Answer.toEntity(answerDto, question.get(), user.get());
         answerRepository.save(answer);
         return answer.getId();
     }
