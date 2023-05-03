@@ -4,6 +4,7 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.DeleteNotPermittedException;
 import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
+import com.dtalks.dtalks.exception.exception.UserNotFoundException;
 import com.dtalks.dtalks.question.dto.QuestionDto;
 import com.dtalks.dtalks.question.dto.QuestionResponseDto;
 import com.dtalks.dtalks.question.entity.Question;
@@ -47,7 +48,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional(readOnly = true)
     public Page<QuestionResponseDto> searchQuestions(String keyword, Pageable pageable) {
         Page<Question> questionPage = questionRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
-        if (!questionPage.isEmpty()) {
+        if (questionPage.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
         return questionPage.map(QuestionResponseDto::toDto);
@@ -56,8 +57,11 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public Long createQuestion(QuestionDto questionDto, UserDetails userDetails) {
-        User user = userRepository.getByNickname(userDetails.getUsername());
-        Question question = Question.toEntity(questionDto, user);
+        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(userDetails.getUsername()));
+        if (user.isEmpty()) {
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
+        }
+        Question question = Question.toEntity(questionDto, user.get());
         questionRepository.save(question);
         return question.getId();
     }

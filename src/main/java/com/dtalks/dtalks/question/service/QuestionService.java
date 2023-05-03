@@ -13,7 +13,7 @@ public interface QuestionService {
 
     Page<QuestionResponseDto> searchQuestions(String keyword, Pageable pageable);
 
-    Long createQuestion(QuestionDto questionDto, UserDetails user);
+    Long createQuestion(QuestionDto questionDto, UserDetails userDetails);
 
     Long updateQuestion(Long id, QuestionDto questionDto, UserDetails user);
 
