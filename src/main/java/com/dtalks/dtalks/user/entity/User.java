@@ -29,7 +29,7 @@ public class User implements UserDetails {
     private long id;
 
     @Column(unique = true)
-    @Size(min = 5, max = 15)
+    @Size(min = 5, max = 30)
     private String userid;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

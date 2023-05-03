@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -59,7 +60,9 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
         Map<String, Object> customAttribute = new LinkedHashMap<>();
         customAttribute.put(userNameAttributeName, attributes.get(userNameAttributeName));
         customAttribute.put("email", userDto.getEmail());
+        customAttribute.put("userid", userDto.getEmail());
         customAttribute.put("registrationId", registrationId);
+        customAttribute.put("nickname", userDto.getNickname());
         return customAttribute;
     }
 
@@ -71,6 +74,9 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
         else {
             user.setEmail(userDto.getEmail());
             user.setNickname(userDto.getNickname());
+            user.setUserid(userDto.getEmail());
+            user.setUpdatedAt(LocalDateTime.now());
+            user.setCreateAt(LocalDateTime.now());
         }
         return userRepository.save(user);
     }

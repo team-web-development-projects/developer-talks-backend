@@ -1,7 +1,7 @@
 package com.dtalks.dtalks.user.config;
 
+import com.dtalks.dtalks.user.dto.UserTokenDto;
 import com.dtalks.dtalks.user.service.UserDetailsService;
-import com.dtalks.dtalks.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -36,9 +36,10 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createToken(String email, List<String> roles) {
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
+    public String createToken(UserTokenDto userTokenDto, List<String> roles) {
+        Claims claims = Jwts.claims().setSubject(userTokenDto.getEmail());
+        claims.put("userid", userTokenDto.getUserid());
+        claims.put("nickname", userTokenDto.getNickname());
         Date now = new Date();
 
         String token = Jwts.builder()
