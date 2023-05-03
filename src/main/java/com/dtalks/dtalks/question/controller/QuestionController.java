@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/questions")
 public class QuestionController {
-    private QuestionService questionService;
+    private final QuestionService questionService;
 
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponseDto> searchById(@PathVariable Long id) {
