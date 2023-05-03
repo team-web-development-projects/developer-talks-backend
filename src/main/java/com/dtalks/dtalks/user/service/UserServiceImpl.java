@@ -81,12 +81,17 @@ public class UserServiceImpl implements UserService {
         LOGGER.info("SERVICE signIn");
         User user = userRepository.getByUserid(signInDto.getUserid());
 
+        UserTokenDto userTokenDto = new UserTokenDto();
+        userTokenDto.setEmail(user.getEmail());
+        userTokenDto.setNickname(user.getNickname());
+        userTokenDto.setUserid(user.getUserid());
+
         if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
             throw new RuntimeException();
         }
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .token(jwtTokenProvider.createToken(String.valueOf(user.getEmail()), user.getRoles()))
+                .token(jwtTokenProvider.createToken(userTokenDto, user.getRoles()))
                 .build();
         setSuccessResult(signInResponseDto);
         return signInResponseDto;
