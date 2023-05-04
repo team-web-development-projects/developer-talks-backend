@@ -1,0 +1,44 @@
+package com.dtalks.dtalks.answer.entity;
+
+import com.dtalks.dtalks.answer.dto.AnswerDto;
+import com.dtalks.dtalks.base.entity.BaseTimeEntity;
+import com.dtalks.dtalks.question.entity.Question;
+import com.dtalks.dtalks.user.entity.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Answer extends BaseTimeEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Question question;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @Builder
+    public static Answer toEntity(AnswerDto answerDto, Question question, User user) {
+        return Answer.builder()
+                .user(user)
+                .question(question)
+                .content(answerDto.getContent())
+                .build();
+    }
+
+    public void update(String content) {
+        this.content = content;
+    }
+}
