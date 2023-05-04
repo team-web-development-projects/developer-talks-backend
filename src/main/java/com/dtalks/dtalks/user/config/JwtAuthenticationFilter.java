@@ -1,6 +1,6 @@
 package com.dtalks.dtalks.user.config;
 
-import com.dtalks.dtalks.user.service.OAuthServiceImpl;
+import com.dtalks.dtalks.user.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,11 +15,11 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenService tokenService;
     private final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
+    public JwtAuthenticationFilter(TokenService tokenService) {
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -27,10 +27,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         LOGGER.info("doFilterInternal 호출됨");
-        String token = jwtTokenProvider.resolveToken(request);
+        String token = tokenService.resolveToken(request);
 
-        if(token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        if(token != null && tokenService.validateToken(token)) {
+            Authentication authentication = tokenService.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 

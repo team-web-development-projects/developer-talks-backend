@@ -1,7 +1,6 @@
-package com.dtalks.dtalks.user.config;
+package com.dtalks.dtalks.user.service;
 
 import com.dtalks.dtalks.user.dto.UserTokenDto;
-import com.dtalks.dtalks.user.service.UserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -13,61 +12,68 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class JwtTokenProvider {
+public class TokenServiceImpl implements TokenService {
 
     private final UserDetailsService userDetailsService;
-
     @Value("${springboot.jwt.secret}")
-    private String secretKey = "secretKey";
-    private final long tokenValidMillisecond = 1000L * 60 * 60 * 3;
+    private String secretKey;
+
+    private final long accessTokenValidMillisecond = 1000L * 60 * 60 * 3;
+    private final long refreshTokenValidMillisecond = 1000L * 60 * 60 * 24;
 
     @PostConstruct
     protected void init() {
         // secretKey 를 base64 형식으로 인코딩
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
-
-    public String createToken(UserTokenDto userTokenDto, List<String> roles) {
+    @Override
+    public String createAccessToken(UserTokenDto userTokenDto) {
         Claims claims = Jwts.claims().setSubject(userTokenDto.getEmail());
         claims.put("userid", userTokenDto.getUserid());
         claims.put("nickname", userTokenDto.getNickname());
         Date now = new Date();
 
-        String token = Jwts.builder()
+        String accessToken = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidMillisecond))
+                .setExpiration(new Date(now.getTime() + accessTokenValidMillisecond))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
 
-        return token;
+        return accessToken;
     }
 
-    public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByEmail(this.getEmail(token));
+    @Override
+    public String createRefreshToken(UserTokenDto userTokenDto) {
+        Claims claims = Jwts.claims().setSubject(userTokenDto.getEmail());
+        claims.put("userid", userTokenDto.getUserid());
+        claims.put("nickname", userTokenDto.getNickname());
+        Date now = new Date();
 
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        String refreshToken = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + refreshTokenValidMillisecond))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+
+        return refreshToken;
     }
 
-    public String getEmail(String token) {
-        String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-        return info;
-    }
-
+    @Override
     public String resolveToken(HttpServletRequest request) {
-        // header 에서 token 값 추출
         return request.getHeader("X-AUTH-TOKEN");
     }
 
+    @Override
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -77,5 +83,17 @@ public class JwtTokenProvider {
         catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public Authentication getAuthentication(String token) {
+        UserDetails userDetails = userDetailsService.loadUserByEmail(this.getEmail(token));
+
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    }
+
+    public String getEmail(String token) {
+        String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        return info;
     }
 }

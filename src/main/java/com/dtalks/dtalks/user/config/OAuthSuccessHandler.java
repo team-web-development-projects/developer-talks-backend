@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.user.config;
 
 import com.dtalks.dtalks.user.dto.UserTokenDto;
+import com.dtalks.dtalks.user.service.TokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +24,7 @@ import java.util.Collections;
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final Logger LOGGER = LoggerFactory.getLogger(OAuthSuccessHandler.class);
-    public final JwtTokenProvider jwtTokenProvider;
+    public final TokenService tokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -34,10 +35,12 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         userTokenDto.setEmail(oAuth2User.getAttribute("email"));
         userTokenDto.setNickname(oAuth2User.getAttribute("nickname"));
         userTokenDto.setUserid(oAuth2User.getAttribute("userid"));
-        String token = jwtTokenProvider.createToken(userTokenDto, Collections.singletonList("USER"));
+        String accessToken = tokenService.createAccessToken(userTokenDto);
+        String refreshToken = tokenService.createRefreshToken(userTokenDto);
 
         String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000")
-                .queryParam("accessToken", token)
+                .queryParam("accessToken", accessToken)
+                .queryParam("refreshToken", refreshToken)
                 .build().toString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

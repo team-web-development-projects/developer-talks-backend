@@ -1,7 +1,6 @@
 package com.dtalks.dtalks.user.service;
 
 import com.dtalks.dtalks.user.common.CommonResponse;
-import com.dtalks.dtalks.user.config.JwtTokenProvider;
 import com.dtalks.dtalks.user.dto.SignUpDto;
 import com.dtalks.dtalks.user.dto.SignUpResponseDto;
 import com.dtalks.dtalks.user.entity.User;

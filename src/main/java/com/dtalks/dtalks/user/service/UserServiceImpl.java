@@ -3,7 +3,6 @@ package com.dtalks.dtalks.user.service;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.UserDuplicateException;
 import com.dtalks.dtalks.user.common.CommonResponse;
-import com.dtalks.dtalks.user.config.JwtTokenProvider;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
@@ -14,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 
 @Service
@@ -23,14 +21,14 @@ public class UserServiceImpl implements UserService {
     private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public final UserRepository userRepository;
-    public final JwtTokenProvider jwtTokenProvider;
+    public final TokenService tokenService;
     public PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, JwtTokenProvider jwtTokenProvider,
+    public UserServiceImpl(UserRepository userRepository, TokenService tokenService,
                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -89,7 +87,7 @@ public class UserServiceImpl implements UserService {
         }
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .token(jwtTokenProvider.createToken(userTokenDto, user.getRoles()))
+                .token(tokenService.createAccessToken(userTokenDto))
                 .build();
         setSuccessResult(signInResponseDto);
         return signInResponseDto;
