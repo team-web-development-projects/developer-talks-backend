@@ -11,32 +11,27 @@ import com.dtalks.dtalks.exception.exception.UserNotFoundException;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
-    @Autowired
-    public PostServiceImpl(UserRepository userRepository, PostRepository postRepository) {
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-    }
 
     @Override
     @Transactional(readOnly = true)
     public PostDto searchById(Long id) {
         Optional<Post> post = postRepository.findById(id);
         if (post.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
         return PostDto.toDto(post.get());
     }
@@ -53,7 +48,7 @@ public class PostServiceImpl implements PostService {
     public Long createPost(PostRequestDto postDto) {
         Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (user.isEmpty()) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
         Post post = Post.toEntity(postDto, user.get());
         postRepository.save(post);
@@ -65,7 +60,7 @@ public class PostServiceImpl implements PostService {
     public Long updatePost(PostRequestDto postDto, Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
         Post post = optionalPost.get();
@@ -83,7 +78,7 @@ public class PostServiceImpl implements PostService {
     public void deletePost(Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글이 존재하지 않습니다.");
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
         Post post = optionalPost.get();

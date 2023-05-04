@@ -3,6 +3,7 @@ package com.dtalks.dtalks.user.entity;
 import com.dtalks.dtalks.answer.entity.Answer;
 import com.dtalks.dtalks.question.entity.Question;
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
+import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -54,6 +55,9 @@ public class User extends BaseTimeEntity implements UserDetails{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Post> postList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<Comment> commentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Question> questionList = new ArrayList<>();

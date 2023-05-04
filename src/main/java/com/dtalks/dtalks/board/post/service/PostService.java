@@ -4,7 +4,6 @@ import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
 
 public interface PostService {
     PostDto searchById(Long id);
