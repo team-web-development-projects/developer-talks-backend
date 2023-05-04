@@ -73,4 +73,11 @@ public class GlobalExceptionHandler {
         LOGGER.info("error : " + errorResponseDto.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleCommentNotFoundException(CommentNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.COMMENT_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
 }
