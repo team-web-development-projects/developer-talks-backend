@@ -17,7 +17,7 @@ public class SignUpDto{
     @Email(message = "이메일 형식이 맞지 않습니다.")
     private String email;
 
-    @Size(min = 5, max = 15, message = "닉네임은 5~15자 사이이어야 합니다.")
+    @Size(min = 1, max = 30, message = "닉네임은 1~30자 사이이어야 합니다.")
     private String nickname;
 
     @Size(min = 5, max = 15, message = "id는 5~15자 사이이어야 합니다.")

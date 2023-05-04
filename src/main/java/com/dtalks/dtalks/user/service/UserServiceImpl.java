@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -34,6 +35,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public SignUpResponseDto signUp(SignUpDto signUpDto) {
 
         User userCheck = userRepository.getByUserid(signUpDto.getUserid());
@@ -56,8 +58,6 @@ public class UserServiceImpl implements UserService {
                 .email(signUpDto.getEmail())
                 .nickname(signUpDto.getNickname())
                 .roles(Collections.singletonList("USER"))
-                .createAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -74,19 +74,55 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SignInResponseDto signIn(SignInDto signInDto) {
         LOGGER.info("SERVICE signIn");
         User user = userRepository.getByUserid(signInDto.getUserid());
+
+        UserTokenDto userTokenDto = new UserTokenDto();
+        userTokenDto.setEmail(user.getEmail());
+        userTokenDto.setNickname(user.getNickname());
+        userTokenDto.setUserid(user.getUserid());
 
         if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
             throw new RuntimeException();
         }
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .token(jwtTokenProvider.createToken(String.valueOf(user.getEmail()), user.getRoles()))
+                .token(jwtTokenProvider.createToken(userTokenDto, user.getRoles()))
                 .build();
         setSuccessResult(signInResponseDto);
         return signInResponseDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DuplicateResponseDto useridDuplicated(String userid) {
+        LOGGER.info("useridDuplicated 호출됨");
+        User user = userRepository.getByUserid(userid);
+        DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
+        if(user == null) {
+            duplicateResponseDto.setDuplicated(false);
+        }
+        else {
+            duplicateResponseDto.setDuplicated(true);
+        }
+        return duplicateResponseDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DuplicateResponseDto nicknameDuplicated(String nickname) {
+        LOGGER.info("nicknameDuplicated 호출됨");
+        User user = userRepository.getByNickname(nickname);
+        DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
+        if(user == null) {
+            duplicateResponseDto.setDuplicated(false);
+        }
+        else {
+            duplicateResponseDto.setDuplicated(true);
+        }
+        return duplicateResponseDto;
     }
 
     private void setSuccessResult(SignUpResponseDto result) {

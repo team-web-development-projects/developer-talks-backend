@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService{
@@ -16,11 +17,13 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         this.userRepository = userRepository;
     }
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUserid(String userid) {
         return userRepository.getByUserid(userid);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
         return userRepository.getByEmail(email);
     }

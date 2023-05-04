@@ -15,7 +15,9 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +30,7 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
     private final Logger LOGGER = LoggerFactory.getLogger(OAuthServiceImpl.class);
 
     @Override
+    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         LOGGER.info("loadUser 호출됨");
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
@@ -57,7 +60,9 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
         Map<String, Object> customAttribute = new LinkedHashMap<>();
         customAttribute.put(userNameAttributeName, attributes.get(userNameAttributeName));
         customAttribute.put("email", userDto.getEmail());
+        customAttribute.put("userid", userDto.getEmail());
         customAttribute.put("registrationId", registrationId);
+        customAttribute.put("nickname", userDto.getNickname());
         return customAttribute;
     }
 
@@ -68,6 +73,8 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
         }
         else {
             user.setEmail(userDto.getEmail());
+            user.setNickname(userDto.getNickname());
+            user.setUserid(userDto.getEmail());
         }
         return userRepository.save(user);
     }

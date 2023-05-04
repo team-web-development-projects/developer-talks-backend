@@ -1,6 +1,6 @@
-package com.dtalks.dtalks.post.dto;
+package com.dtalks.dtalks.board.post.dto;
 
-import com.dtalks.dtalks.post.entity.Post;
+import com.dtalks.dtalks.board.post.entity.Post;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 

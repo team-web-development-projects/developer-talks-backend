@@ -10,6 +10,8 @@ public enum OAuthAttributes {
     GOOGLE("google", (attributes) -> {
         UserDto userDto = new UserDto();
         userDto.setEmail((String) attributes.get("email"));
+        userDto.setUserid((String) attributes.get("email"));
+        userDto.setNickname((String) attributes.get("name"));
         return userDto;
     });
 
