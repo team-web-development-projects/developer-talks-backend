@@ -60,11 +60,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
 
-    @ExceptionHandler(DeleteNotPermittedException.class)
-    public ResponseEntity<ErrorResponseDto> handleDeleteNotPermittedException(DeleteNotPermittedException exception) {
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.DELETE_NOT_PERMITTED_ERROR);
-        LOGGER.info(("error: " + errorResponseDto.getMessage()));
-
     @ExceptionHandler(MailException.class)
     public ResponseEntity<ErrorResponseDto> handleMailException(EmailException ex) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.EMAIL_ERROR);
