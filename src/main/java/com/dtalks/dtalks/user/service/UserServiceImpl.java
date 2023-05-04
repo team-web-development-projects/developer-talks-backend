@@ -58,8 +58,6 @@ public class UserServiceImpl implements UserService {
                 .email(signUpDto.getEmail())
                 .nickname(signUpDto.getNickname())
                 .roles(Collections.singletonList("USER"))
-                .createAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         User savedUser = userRepository.save(user);

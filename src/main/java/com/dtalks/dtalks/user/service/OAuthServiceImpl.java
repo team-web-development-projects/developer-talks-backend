@@ -75,8 +75,6 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
             user.setEmail(userDto.getEmail());
             user.setNickname(userDto.getNickname());
             user.setUserid(userDto.getEmail());
-            user.setUpdatedAt(LocalDateTime.now());
-            user.setCreateAt(LocalDateTime.now());
         }
         return userRepository.save(user);
     }
