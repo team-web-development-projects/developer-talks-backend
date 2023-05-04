@@ -1,7 +1,6 @@
 package com.dtalks.dtalks.user.entity;
 
 import com.dtalks.dtalks.answer.entity.Answer;
-import com.dtalks.dtalks.post.entity.Post;
 import com.dtalks.dtalks.question.entity.Question;
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
 import com.dtalks.dtalks.board.post.entity.Post;
