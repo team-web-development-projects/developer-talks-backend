@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
-                        ,"users/token/refresh").permitAll()
+                        ,"/token/refresh").permitAll()
                 .requestMatchers("**exception**").permitAll()
                 .anyRequest().authenticated()
                 .and()
