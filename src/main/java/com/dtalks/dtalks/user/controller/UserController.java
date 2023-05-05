@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.user.controller;
 
 import com.dtalks.dtalks.user.dto.DuplicateResponseDto;
+import com.dtalks.dtalks.user.dto.SignInResponseDto;
 import com.dtalks.dtalks.user.dto.UserResponseDto;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserDetailsService;
@@ -13,7 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
@@ -47,5 +48,12 @@ public class UserController {
         userResponseDto.setUserid(user.getUsername());
         userResponseDto.setRegistrationId(user.getRegistrationId());
         return ResponseEntity.ok(userResponseDto);
+    }
+
+    @PostMapping(value = "token/refresh")
+    public ResponseEntity<SignInResponseDto> tokenRefresh(String refreshToken) {
+        SignInResponseDto signInResponseDto = userService.reSignIn(refreshToken);
+
+        return ResponseEntity.ok(signInResponseDto);
     }
 }

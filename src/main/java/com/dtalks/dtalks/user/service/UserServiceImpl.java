@@ -87,7 +87,8 @@ public class UserServiceImpl implements UserService {
         }
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .token(tokenService.createAccessToken(userTokenDto))
+                .accessToken(tokenService.createAccessToken(userTokenDto))
+                .refreshToken(tokenService.createRefreshToken(userTokenDto))
                 .build();
         setSuccessResult(signInResponseDto);
         return signInResponseDto;
@@ -121,6 +122,37 @@ public class UserServiceImpl implements UserService {
             duplicateResponseDto.setDuplicated(true);
         }
         return duplicateResponseDto;
+    }
+
+    /*
+    reSignIn은 토큰 재발급 서비스 입니다.
+    oauth 로그인과, 일반 로그인 모두 토큰 재발급을 가능하게 하기 위해
+    signIn 메서드와 구분하여 만들었습니다.
+     */
+    @Override
+    public SignInResponseDto reSignIn(String refreshToken) {
+        SignInResponseDto signInResponseDto = new SignInResponseDto();
+        if(refreshToken == null || !tokenService.validateToken(refreshToken)) {
+            setFailResult(signInResponseDto);
+            return signInResponseDto;
+        }
+
+        String email = tokenService.getEmailByToken(refreshToken);
+        User user = userRepository.getByEmail(email);
+
+        if(user == null) {
+            setFailResult(signInResponseDto);
+            return signInResponseDto;
+        }
+        UserTokenDto userTokenDto = new UserTokenDto();
+        userTokenDto.setEmail(user.getEmail());
+        userTokenDto.setUserid(user.getUserid());
+        userTokenDto.setNickname(user.getNickname());
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        setSuccessResult(signInResponseDto);
+
+        return signInResponseDto;
     }
 
     private void setSuccessResult(SignUpResponseDto result) {

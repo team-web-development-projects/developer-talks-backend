@@ -10,6 +10,8 @@ public interface UserService {
     SignUpResponseDto signUp(SignUpDto signUpDto);
     SignInResponseDto signIn(SignInDto signInDto);
 
+    SignInResponseDto reSignIn(String refreshToken);
+
     DuplicateResponseDto useridDuplicated(String userid);
     DuplicateResponseDto nicknameDuplicated(String nickname);
 }

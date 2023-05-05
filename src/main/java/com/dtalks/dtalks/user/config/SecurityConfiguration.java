@@ -36,7 +36,8 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/sign-in/**", "/sign-up", "exception", "/user/check/**", "/email/**").permitAll()
+                .requestMatchers("/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
+                        ,"users/token/refresh").permitAll()
                 .requestMatchers("**exception**").permitAll()
                 .anyRequest().authenticated()
                 .and()
