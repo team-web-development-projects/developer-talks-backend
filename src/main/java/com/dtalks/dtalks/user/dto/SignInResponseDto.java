@@ -10,10 +10,12 @@ import lombok.*;
 public class SignInResponseDto extends SignUpResponseDto {
 
     private String accessToken;
+    private String refreshToken;
 
     @Builder
-    public SignInResponseDto(boolean success, int code, String msg, String token) {
+    public SignInResponseDto(boolean success, int code, String msg, String accessToken, String refreshToken) {
         super(success, code, msg);
-        this.accessToken = token;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 }

@@ -87,12 +87,13 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByEmail(this.getEmail(token));
+        UserDetails userDetails = userDetailsService.loadUserByEmail(this.getEmailByToken(token));
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getEmail(String token) {
+    @Override
+    public String getEmailByToken(String token) {
         String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
         return info;
     }
