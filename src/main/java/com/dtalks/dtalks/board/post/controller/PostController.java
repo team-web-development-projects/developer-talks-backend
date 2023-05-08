@@ -12,6 +12,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/post")
 public class PostController {
@@ -27,6 +29,11 @@ public class PostController {
     @GetMapping("/all")
     public ResponseEntity<Page<PostDto>> searchAll(@PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(postService.searchAllPost(pageable));
+    }
+
+    @GetMapping("/list/user/{id}")
+    public ResponseEntity<List<PostDto>> searchPostListByUser(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.searchPostListByUser(id));
     }
 
     @PostMapping
