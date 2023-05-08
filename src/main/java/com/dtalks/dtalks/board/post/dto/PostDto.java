@@ -29,6 +29,8 @@ public class PostDto {
 
     private List<CommentInfoDto> commentList = new ArrayList<>();
 
+    private Integer viewCount;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
 
@@ -43,6 +45,7 @@ public class PostDto {
                 .content(post.getContent())
                 .nickname(post.getUser().getNickname())
                 .commentList(new ArrayList<>())
+                .viewCount(post.getViewCount())
                 .createDate(post.getCreateDate())
                 .modifiedDate(post.getModifiedDate())
                 .build();
