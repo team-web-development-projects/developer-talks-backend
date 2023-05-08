@@ -43,4 +43,9 @@ public class PostController {
     public void deletePost(@PathVariable Long id) {
         postService.deletePost(id);
     }
+
+    @PutMapping("/view/{id}")
+    public void updateViewCount(@PathVariable Long id) {
+        postService.updateViewCount(id);
+    }
 }

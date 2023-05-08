@@ -12,4 +12,6 @@ public interface PostService {
     Long createPost(PostRequestDto postDto);
     Long updatePost(PostRequestDto postDto, Long id);
     void deletePost(Long id);
+
+    void updateViewCount(Long id);
 }

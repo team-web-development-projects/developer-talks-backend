@@ -89,4 +89,17 @@ public class PostServiceImpl implements PostService {
 
         postRepository.delete(post);
     }
+
+    @Override
+    @Transactional
+    public void updateViewCount(Long id) {
+        Optional<Post> optionalPost = postRepository.findById(id);
+        if (optionalPost.isEmpty()) {
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+        }
+
+        Post post = optionalPost.get();
+        post.setViewCount(post.getViewCount() + 1);
+    }
+
 }
