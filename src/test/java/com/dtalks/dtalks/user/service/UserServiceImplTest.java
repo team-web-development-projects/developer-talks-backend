@@ -18,13 +18,13 @@ import static org.mockito.Mockito.verify;
 class UserServiceImplTest {
 
     UserRepository userRepository = Mockito.mock(UserRepository.class);
-    JwtTokenProvider jwtTokenProvider = Mockito.mock(JwtTokenProvider.class);
+    TokenService tokenService = Mockito.mock(TokenService.class);
     PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
     UserServiceImpl userService;
 
     @BeforeEach
     public void setUpTest() {
-        userService = new UserServiceImpl(userRepository, jwtTokenProvider, passwordEncoder);
+        userService = new UserServiceImpl(userRepository, tokenService, passwordEncoder);
     }
     @Test
     void signUpSuccess() {
