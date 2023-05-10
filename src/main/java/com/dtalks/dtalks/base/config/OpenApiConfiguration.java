@@ -20,8 +20,7 @@ public class OpenApiConfiguration {
                 .title("dtalks API Document")
                 .version("1.0.0");
         return new OpenAPI()
-                .addServersItem(new Server().url(url))
-                .addServersItem(new Server().url("http://localhost:8080"))
+                .addServersItem(new Server().url("/"))
                 .components(new Components())
                 .info(info);
     }
