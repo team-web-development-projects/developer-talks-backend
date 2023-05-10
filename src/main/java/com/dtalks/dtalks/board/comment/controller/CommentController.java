@@ -45,9 +45,9 @@ public class CommentController {
         commentService.saveReComment(postId, parentId, dto);
     }
 
-    @PutMapping("/{postId}")
-    public void updateComment(@PathVariable Long postId, @Valid @RequestBody CommentRequestDto dto) {
-        commentService.updateComment(postId, dto);
+    @PutMapping("/{id}")
+    public void updateComment(@PathVariable Long id, @Valid @RequestBody CommentRequestDto dto) {
+        commentService.updateComment(id, dto);
     }
 
     @DeleteMapping("/{id}")
