@@ -155,6 +155,11 @@ public class CommentServiceImpl implements CommentService{
         }
 
         Comment comment = optionalComment.get();
+        Optional<Post> optionalPost = postRepository.findById(comment.getPost().getId());
+        if (optionalPost.isEmpty()) {
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+        }
+
         String currentUserId = user.get().getUserid();
         if (!comment.getUser().getUserid().equals(currentUserId)) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 댓글을 수정할 권한이 없습니다.");
