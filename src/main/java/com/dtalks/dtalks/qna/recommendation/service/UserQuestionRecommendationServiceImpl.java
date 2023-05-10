@@ -2,7 +2,7 @@ package com.dtalks.dtalks.qna.recommendation.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
-import com.dtalks.dtalks.exception.exception.RecommendNotFoundExeption;
+import com.dtalks.dtalks.exception.exception.RecommendNotFoundException;
 import com.dtalks.dtalks.exception.exception.RecommendationAlreadyExistException;
 import com.dtalks.dtalks.exception.exception.UserNotFoundException;
 import com.dtalks.dtalks.qna.question.entity.Question;
@@ -62,7 +62,7 @@ public class UserQuestionRecommendationServiceImpl implements UserQuestionRecomm
         User user = optionalUser.get();
 
         if(!userQuestionRecommendationRepository.existsByUserAndQuestion(user,question)){
-            throw new RecommendNotFoundExeption(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
+            throw new RecommendNotFoundException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
         }
         UserQuestionRecommendation userQuestionRecommendation = UserQuestionRecommendation.builder().user(user).question(question).build();
 
