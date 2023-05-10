@@ -12,6 +12,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/post")
 public class PostController {
@@ -29,6 +31,11 @@ public class PostController {
         return ResponseEntity.ok(postService.searchAllPost(pageable));
     }
 
+    @GetMapping("/list/user/{id}")
+    public ResponseEntity<List<PostDto>> searchPostListByUser(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.searchPostListByUser(id));
+    }
+
     @PostMapping
     public ResponseEntity<Long> createPost(@Valid @RequestBody PostRequestDto postDto) {
         return ResponseEntity.ok(postService.createPost(postDto));
@@ -42,5 +49,10 @@ public class PostController {
     @DeleteMapping("/{id}")
     public void deletePost(@PathVariable Long id) {
         postService.deletePost(id);
+    }
+
+    @PutMapping("/view/{id}")
+    public void updateViewCount(@PathVariable Long id) {
+        postService.updateViewCount(id);
     }
 }

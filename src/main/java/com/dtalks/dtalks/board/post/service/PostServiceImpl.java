@@ -44,6 +44,18 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<PostDto> searchPostListByUser(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+
+        List<Post> postList = postRepository.findByUserId(userId);
+        return postList.stream().map(PostDto::toDto).toList();
+    }
+
+    @Override
     @Transactional
     public Long createPost(PostRequestDto postDto) {
         Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
@@ -89,4 +101,17 @@ public class PostServiceImpl implements PostService {
 
         postRepository.delete(post);
     }
+
+    @Override
+    @Transactional
+    public void updateViewCount(Long id) {
+        Optional<Post> optionalPost = postRepository.findById(id);
+        if (optionalPost.isEmpty()) {
+            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+        }
+
+        Post post = optionalPost.get();
+        post.setViewCount(post.getViewCount() + 1);
+    }
+
 }

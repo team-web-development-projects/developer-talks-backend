@@ -34,12 +34,15 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> commentList = new ArrayList<>();
 
+    private Integer viewCount;
+
     @Builder
     public static Post toEntity(PostRequestDto postDto, User user) {
         return Post.builder()
                 .title(postDto.getTitle())
                 .content(postDto.getContent())
                 .user(user)
+                .viewCount(0)
                 .build();
     }
 
