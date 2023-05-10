@@ -24,17 +24,17 @@ public class AnswerController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> createAnswer(@Valid @RequestBody AnswerDto answerDto, @PathVariable Long questionId, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(answerService.createAnswer(answerDto, questionId, userDetails));
+    public ResponseEntity<Long> createAnswer(@Valid @RequestBody AnswerDto answerDto, @PathVariable Long questionId) {
+        return ResponseEntity.ok(answerService.createAnswer(answerDto, questionId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updateAnswer(@Valid @RequestBody AnswerDto answerDto, @PathVariable Long id, @PathVariable Long questionId, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(answerService.updateAnswer(id, answerDto, userDetails));
+    public ResponseEntity<Long> updateAnswer(@Valid @RequestBody AnswerDto answerDto, @PathVariable Long id, @PathVariable Long questionId) {
+        return ResponseEntity.ok(answerService.updateAnswer(id, answerDto));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAnswer(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails, @PathVariable Long questionId) {
-        answerService.deleteAnswer(id, userDetails);
+    public void deleteAnswer(@PathVariable Long id, @PathVariable Long questionId) {
+        answerService.deleteAnswer(id);
     }
 }

@@ -36,17 +36,17 @@ public class QuestionController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> createQuestion(@Valid @RequestBody QuestionDto questionDto, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(questionService.createQuestion(questionDto, userDetails));
+    public ResponseEntity<Long> createQuestion(@Valid @RequestBody QuestionDto questionDto) {
+        return ResponseEntity.ok(questionService.createQuestion(questionDto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Long> updateQuestion(@Valid @RequestBody QuestionDto questionDto, @PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(questionService.updateQuestion(id, questionDto, userDetails));
+        return ResponseEntity.ok(questionService.updateQuestion(id, questionDto));
     }
 
     @DeleteMapping("/{id}")
     public void deleteQuestion(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        questionService.deleteQuestion(id, userDetails);
+        questionService.deleteQuestion(id);
     }
 }

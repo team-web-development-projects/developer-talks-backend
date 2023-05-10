@@ -9,6 +9,7 @@ import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
+import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +57,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Long createQuestion(QuestionDto questionDto, UserDetails userDetails) {
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(userDetails.getUsername()));
+    public Long createQuestion(QuestionDto questionDto) {
+        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (user.isEmpty()) {
             throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다. ");
         }
@@ -68,15 +69,15 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Long updateQuestion(Long questionId, QuestionDto questionDto, UserDetails userDetails) {
-        User user = userRepository.getByNickname(userDetails.getUsername());
+    public Long updateQuestion(Long questionId, QuestionDto questionDto) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if (optionalQuestion.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
         Question question = optionalQuestion.get();
         String userId = question.getUser().getUserid();
-        if (!userId.equals(userDetails.getUsername())) {
+        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다. ");
         }
         question.update(questionDto.getTitle(), questionDto.getContent());
@@ -84,7 +85,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public void deleteQuestion(Long id, UserDetails userDetails) {
+    public void deleteQuestion(Long id) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
@@ -94,7 +95,7 @@ public class QuestionServiceImpl implements QuestionService {
             throw new DeleteNotPermittedException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "답변이 달린 질문은 삭제할 수 없습니다. ");
         }
         String userId = question.getUser().getUserid();
-        if (!userId.equals(userDetails.getUsername())) {
+        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다. ");
         }
         questionRepository.delete(question);
