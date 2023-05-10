@@ -42,3 +42,7 @@ out/
 
 ### log ###
 logs/
+
+
+### querydsl ###
+src/main/generated/
