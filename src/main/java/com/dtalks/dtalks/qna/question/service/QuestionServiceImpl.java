@@ -1,14 +1,14 @@
-package com.dtalks.dtalks.question.service;
+package com.dtalks.dtalks.qna.question.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.DeleteNotPermittedException;
 import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
 import com.dtalks.dtalks.exception.exception.PostNotFoundException;
 import com.dtalks.dtalks.exception.exception.UserNotFoundException;
-import com.dtalks.dtalks.question.dto.QuestionDto;
-import com.dtalks.dtalks.question.dto.QuestionResponseDto;
-import com.dtalks.dtalks.question.entity.Question;
-import com.dtalks.dtalks.question.repository.QuestionRepository;
+import com.dtalks.dtalks.qna.question.entity.Question;
+import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
+import com.dtalks.dtalks.qna.question.dto.QuestionDto;
+import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

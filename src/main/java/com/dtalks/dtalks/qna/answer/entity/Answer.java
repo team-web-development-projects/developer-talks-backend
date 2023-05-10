@@ -1,8 +1,8 @@
-package com.dtalks.dtalks.answer.entity;
+package com.dtalks.dtalks.qna.answer.entity;
 
-import com.dtalks.dtalks.answer.dto.AnswerDto;
+import com.dtalks.dtalks.qna.answer.dto.AnswerDto;
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
-import com.dtalks.dtalks.question.entity.Question;
+import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

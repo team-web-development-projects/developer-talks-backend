@@ -1,7 +1,7 @@
-package com.dtalks.dtalks.question.service;
+package com.dtalks.dtalks.qna.question.service;
 
-import com.dtalks.dtalks.question.dto.QuestionDto;
-import com.dtalks.dtalks.question.dto.QuestionResponseDto;
+import com.dtalks.dtalks.qna.question.dto.QuestionDto;
+import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;

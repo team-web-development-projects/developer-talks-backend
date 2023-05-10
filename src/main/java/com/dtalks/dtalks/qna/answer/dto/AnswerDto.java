@@ -1,4 +1,4 @@
-package com.dtalks.dtalks.answer.dto;
+package com.dtalks.dtalks.qna.answer.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
-package com.dtalks.dtalks.answer.service;
+package com.dtalks.dtalks.qna.answer.service;
 
-import com.dtalks.dtalks.answer.dto.AnswerDto;
-import com.dtalks.dtalks.answer.dto.AnswerResponseDto;
+import com.dtalks.dtalks.qna.answer.dto.AnswerDto;
+import com.dtalks.dtalks.qna.answer.dto.AnswerResponseDto;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
