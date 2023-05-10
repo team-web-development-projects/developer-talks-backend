@@ -1,8 +1,8 @@
-package com.dtalks.dtalks.answer.controller;
+package com.dtalks.dtalks.qna.answer.controller;
 
-import com.dtalks.dtalks.answer.dto.AnswerDto;
-import com.dtalks.dtalks.answer.dto.AnswerResponseDto;
-import com.dtalks.dtalks.answer.service.AnswerService;
+import com.dtalks.dtalks.qna.answer.dto.AnswerDto;
+import com.dtalks.dtalks.qna.answer.dto.AnswerResponseDto;
+import com.dtalks.dtalks.qna.answer.service.AnswerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

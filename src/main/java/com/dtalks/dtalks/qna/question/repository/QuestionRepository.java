@@ -1,6 +1,6 @@
-package com.dtalks.dtalks.question.repository;
+package com.dtalks.dtalks.qna.question.repository;
 
-import com.dtalks.dtalks.question.entity.Question;
+import com.dtalks.dtalks.qna.question.entity.Question;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
-package com.dtalks.dtalks.answer.repository;
+package com.dtalks.dtalks.qna.answer.repository;
 
-import com.dtalks.dtalks.answer.entity.Answer;
+import com.dtalks.dtalks.qna.answer.entity.Answer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

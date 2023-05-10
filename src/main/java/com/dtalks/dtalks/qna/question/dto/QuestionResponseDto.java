@@ -1,6 +1,6 @@
-package com.dtalks.dtalks.question.dto;
+package com.dtalks.dtalks.qna.question.dto;
 
-import com.dtalks.dtalks.question.entity.Question;
+import com.dtalks.dtalks.qna.question.entity.Question;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
