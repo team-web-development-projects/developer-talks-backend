@@ -3,6 +3,7 @@ package com.dtalks.dtalks.studyroom.controller;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomRequestDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomResponseDto;
 import com.dtalks.dtalks.studyroom.service.StudyRoomService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ public class StudyRoomController {
         this.studyRoomService = studyRoomService;
     }
 
+    @Operation(summary = "스터디룸 생성")
     @PostMapping
     public ResponseEntity<StudyRoomResponseDto> createStudyRoom(@Valid @RequestBody StudyRoomRequestDto studyRoomRequestDto) {
         LOGGER.info("createStudyRoom controller 호출됨");
@@ -32,6 +34,7 @@ public class StudyRoomController {
         return ResponseEntity.ok(studyRoomResponseDto);
     }
 
+    @Operation(summary = "id를 이용한 스터디룸 조회")
     @GetMapping("/{id}")
     public ResponseEntity<StudyRoomResponseDto> findStudyRoomById(@PathVariable Long id) {
         LOGGER.info("findStudyRoomById controller 호출됨");

@@ -5,6 +5,7 @@ import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
 import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
+import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -64,6 +65,9 @@ public class User extends BaseTimeEntity implements UserDetails{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Answer> answerList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudyRoomUser> studyRoomUserList = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
