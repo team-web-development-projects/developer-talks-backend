@@ -56,6 +56,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Page<PostDto> searchByWord(String keyword, Pageable pageable) {
+        Page<Post> posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
+        return posts.map(PostDto::toDto);
+    }
+
+    @Override
     @Transactional
     public Long createPost(PostRequestDto postDto) {
         Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));

@@ -11,6 +11,7 @@ public interface PostService {
     PostDto searchById(Long id);
     Page<PostDto> searchAllPost(Pageable pageable);
     List<PostDto> searchPostListByUser(Long userId);
+    Page<PostDto> searchByWord(String keyword, Pageable pageable);
 
     Long createPost(PostRequestDto postDto);
     Long updatePost(PostRequestDto postDto, Long id);
