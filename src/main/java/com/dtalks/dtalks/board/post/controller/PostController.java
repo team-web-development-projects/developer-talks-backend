@@ -22,7 +22,7 @@ public class PostController {
     @Autowired
     private PostService postService;
 
-    @Operation(summary = "특정 게시글 조회")
+    @Operation(summary = "특정 게시글 id로 조회")
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> searchById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.searchById(id));
@@ -34,10 +34,18 @@ public class PostController {
         return ResponseEntity.ok(postService.searchAllPost(pageable));
     }
 
-    @Operation(summary = "특정 유저의 게시글 리스트 조회")
+    @Operation(summary = "특정 유저의 게시글 조회 (페이지 사용 - 기본 post id로 정렬)")
     @GetMapping("/list/user/{id}")
-    public ResponseEntity<List<PostDto>> searchPostListByUser(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.searchPostListByUser(id));
+    public ResponseEntity<Page<PostDto>> searchPostsByUser(@PathVariable Long id,
+                                                           @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(postService.searchPostsByUser(id, pageable));
+    }
+
+    @Operation(summary = "검색어로 게시글 검색")
+    @GetMapping("/search")
+    public ResponseEntity<Page<PostDto>> searchPosts(@RequestParam String keyword,
+                                                    @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(postService.searchByWord(keyword, pageable));
     }
 
     @Operation(summary = "게시글 생성")

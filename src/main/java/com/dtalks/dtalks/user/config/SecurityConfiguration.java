@@ -5,6 +5,7 @@ import com.dtalks.dtalks.user.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -37,8 +38,9 @@ public class SecurityConfiguration {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
-                        ,"/token/refresh").permitAll()
+                        ,"/token/refresh", "/post/view").permitAll()
                 .requestMatchers("**exception**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/post/**", "/comment/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())

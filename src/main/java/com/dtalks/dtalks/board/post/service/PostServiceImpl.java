@@ -44,15 +44,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<PostDto> searchPostListByUser(Long userId) {
+    public Page<PostDto> searchPostsByUser(Long userId, Pageable pageable) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
 
-        List<Post> postList = postRepository.findByUserId(userId);
-        return postList.stream().map(PostDto::toDto).toList();
+        Page<Post> posts = postRepository.findByUserId(userId, pageable);
+        return posts.map(PostDto::toDto);
+    }
+
+    @Override
+    public Page<PostDto> searchByWord(String keyword, Pageable pageable) {
+        Page<Post> posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
+        return posts.map(PostDto::toDto);
     }
 
     @Override

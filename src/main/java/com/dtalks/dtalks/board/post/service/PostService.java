@@ -10,7 +10,8 @@ import java.util.List;
 public interface PostService {
     PostDto searchById(Long id);
     Page<PostDto> searchAllPost(Pageable pageable);
-    List<PostDto> searchPostListByUser(Long userId);
+    Page<PostDto> searchPostsByUser(Long userId, Pageable pageable);
+    Page<PostDto> searchByWord(String keyword, Pageable pageable);
 
     Long createPost(PostRequestDto postDto);
     Long updatePost(PostRequestDto postDto, Long id);
