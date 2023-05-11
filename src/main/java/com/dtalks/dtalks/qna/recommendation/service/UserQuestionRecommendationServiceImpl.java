@@ -42,7 +42,8 @@ public class UserQuestionRecommendationServiceImpl implements UserQuestionRecomm
         }
         UserQuestionRecommendation userQuestionRecommendation = UserQuestionRecommendation.builder().user(user).question(question).build();
 
-        userQuestionRecommendationRepository.save(userQuestionRecommendation);
+        question.updateLike(true);
+        userQuestionRecommendationRepository.save((userQuestionRecommendation));
 
         return userQuestionRecommendation.getId();
     }
@@ -65,6 +66,8 @@ public class UserQuestionRecommendationServiceImpl implements UserQuestionRecomm
             throw new RecommendNotFoundException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
         }
         UserQuestionRecommendation userQuestionRecommendation = UserQuestionRecommendation.builder().user(user).question(question).build();
+
+        question.updateLike(false);
 
         userQuestionRecommendationRepository.deleteByUserAndQuestion(user, question);
         return userQuestionRecommendation.getId();

@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +34,7 @@ public class Question extends BaseTimeEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+    private Integer likeCount;
 
     @Builder
     public static  Question toEntity(QuestionDto questionDto, User user) {
@@ -42,6 +42,7 @@ public class Question extends BaseTimeEntity {
                 .user(user)
                 .title(questionDto.getTitle())
                 .content(questionDto.getContent())
+                .likeCount(0)
                 .build();
     }
 
@@ -50,6 +51,12 @@ public class Question extends BaseTimeEntity {
         this.content = content;
     }
 
-
-
+    public void updateLike(boolean like){
+        if(like){
+            this.likeCount ++;
+        }
+        else{
+            this.likeCount--;
+        }
+    }
 }
