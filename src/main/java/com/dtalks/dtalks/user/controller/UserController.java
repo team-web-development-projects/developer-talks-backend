@@ -30,14 +30,14 @@ public class UserController {
     }
 
     @Operation(summary = "userid 중복 체크")
-    @GetMapping(value = "/check/{userid}")
+    @GetMapping(value = "/check/userid/{userid}")
     public ResponseEntity<DuplicateResponseDto> useridDuplicateCheck(@PathVariable String userid) {
         DuplicateResponseDto duplicateResponseDto = userService.useridDuplicated(userid);
         return ResponseEntity.ok(duplicateResponseDto);
     }
 
     @Operation(summary = "nickname 중복 체크")
-    @GetMapping(value = "/check/{nickname}")
+    @GetMapping(value = "/check/nickname/{nickname}")
     public ResponseEntity<DuplicateResponseDto> nicknameDuplicatedCheck(@PathVariable String nickname) {
         DuplicateResponseDto duplicateResponseDto = userService.nicknameDuplicated(nickname);
         return  ResponseEntity.ok(duplicateResponseDto);
