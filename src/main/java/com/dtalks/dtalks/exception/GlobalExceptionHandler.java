@@ -80,4 +80,11 @@ public class GlobalExceptionHandler {
         LOGGER.info("error : " + errorResponseDto.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
+
+    @ExceptionHandler(StudyRoomNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleStudyRoomNotFoundException(StudyRoomNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.STUDYROOM_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
 }
