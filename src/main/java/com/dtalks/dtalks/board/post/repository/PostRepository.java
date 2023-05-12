@@ -12,5 +12,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByUserId(Long id, Pageable pageable);
     Page<Post> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String title, String content, Pageable pageable);
 
-    List<Post> findTop5ByOrderByViewCountDesc();
+    List<Post> findTop5ByOrderByRecommendCountDesc();
 }

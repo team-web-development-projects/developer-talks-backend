@@ -62,7 +62,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostDto> search5BestPosts() {
-        List<Post> top5Posts = postRepository.findTop5ByOrderByViewCountDesc();
+        List<Post> top5Posts = postRepository.findTop5ByOrderByRecommendCountDesc();
         return top5Posts.stream().map(PostDto::toDto).toList();
     }
 
