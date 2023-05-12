@@ -10,6 +10,7 @@ import com.dtalks.dtalks.exception.exception.PostNotFoundException;
 import com.dtalks.dtalks.exception.exception.UserNotFoundException;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
+import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +39,8 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     @Transactional
-    public Long createAnswer(AnswerDto answerDto,  Long questionId, UserDetails userDetails) {
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(userDetails.getUsername()));
+    public Long createAnswer(AnswerDto answerDto,  Long questionId) {
+        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (user.isEmpty()) {
             throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
         }
@@ -54,15 +55,15 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     @Transactional
-    public Long updateAnswer(Long answerId, AnswerDto answerDto, UserDetails userDetails) {
-        User user = userRepository.getByNickname(userDetails.getUsername());
+    public Long updateAnswer(Long answerId, AnswerDto answerDto) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         Optional<Answer> optionalAnswer = answerRepository.findById(answerId);
         if (optionalAnswer.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
         }
         Answer answer = optionalAnswer.get();
         String userId = answer.getUser().getUserid();
-        if (!userId.equals(userDetails.getUsername())) {
+        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 답변을 수정할 수 있는 권한이 없습니다.");
         }
         answer.update(answerDto.getContent());
@@ -71,14 +72,14 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     @Transactional
-    public void deleteAnswer(Long id, UserDetails userDetails) {
+    public void deleteAnswer(Long id) {
         Optional<Answer> optionalAnswer = answerRepository.findById(id);
         if(optionalAnswer.isEmpty()){
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
         }
         Answer answer = optionalAnswer.get();
         String userId = answer.getUser().getUserid();
-        if (!userId.equals(userDetails.getUsername())) {
+        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 답변을 삭제할 수 있는 권한이 없습니다.");
         }
         answerRepository.delete(answer);
