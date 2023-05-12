@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.board.post.controller;
 
+import com.dtalks.dtalks.board.post.dto.FavoriteAndRecommendStatusDto;
 import com.dtalks.dtalks.board.post.service.FavoritePostService;
 import com.dtalks.dtalks.board.post.service.PostService;
 import com.dtalks.dtalks.board.post.dto.PostDto;
@@ -80,6 +81,18 @@ public class PostController {
     @PutMapping("/view/{id}")
     public void updateViewCount(@PathVariable Long id) {
         postService.updateViewCount(id);
+    }
+
+    @Operation(summary = "게시글에 대한 사용자의 즐겨찾기, 추천 여부 확인, 로그인한 사용자일 경우에만 api 보내면 됨")
+    @GetMapping("/check/status/{postId}")
+    public FavoriteAndRecommendStatusDto checkFavoriteAndRecommendStatus(@PathVariable Long postId) {
+        boolean favorite = favoritePostService.checkFavorite(postId);
+        boolean recommend = recommendPostService.checkRecommend(postId);
+
+        return FavoriteAndRecommendStatusDto.builder()
+                .favorite(favorite)
+                .recommend(recommend)
+                .build();
     }
 
     @Operation(summary = "게시글 즐겨찾기 설정")
