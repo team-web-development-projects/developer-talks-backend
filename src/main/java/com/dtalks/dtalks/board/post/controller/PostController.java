@@ -1,10 +1,12 @@
 package com.dtalks.dtalks.board.post.controller;
 
+import com.dtalks.dtalks.board.post.service.FavoritePostService;
 import com.dtalks.dtalks.board.post.service.PostService;
 import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +19,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/post")
+@RequiredArgsConstructor
 public class PostController {
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
+    private final FavoritePostService favoritePostService;
 
     @Operation(summary = "특정 게시글 id로 조회")
     @GetMapping("/{id}")
@@ -76,5 +79,17 @@ public class PostController {
     @PutMapping("/view/{id}")
     public void updateViewCount(@PathVariable Long id) {
         postService.updateViewCount(id);
+    }
+
+    @Operation(summary = "게시글 즐겨찾기 설정")
+    @PostMapping("/favorite/{id}")
+    public void favorite(@PathVariable Long id) {
+        favoritePostService.favorite(id);
+    }
+
+    @Operation(summary = "게시글 즐겨찾기 해제")
+    @DeleteMapping("/favorite/{id}")
+    public void unFavorite(@PathVariable Long id) {
+        favoritePostService.unFavorite(id);
     }
 }
