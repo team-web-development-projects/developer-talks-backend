@@ -48,6 +48,12 @@ public class PostController {
         return ResponseEntity.ok(postService.searchByWord(keyword, pageable));
     }
 
+    @Operation(summary = "조회수 베스트 5 게시글 가져오기 (리스트)")
+    @GetMapping("/best")
+    public ResponseEntity<List<PostDto>> search5BestPosts() {
+        return ResponseEntity.ok(postService.search5BestPosts());
+    }
+
     @Operation(summary = "게시글 생성")
     @PostMapping
     public ResponseEntity<Long> createPost(@Valid @RequestBody PostRequestDto postDto) {
