@@ -6,6 +6,7 @@ import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,13 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> commentList = new ArrayList<>();
 
+    @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer viewCount;
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Integer favoriteCount;
 
     @Builder
     public static Post toEntity(PostRequestDto postDto, User user) {
@@ -43,6 +50,7 @@ public class Post extends BaseTimeEntity {
                 .content(postDto.getContent())
                 .user(user)
                 .viewCount(0)
+                .favoriteCount(0)
                 .build();
     }
 
