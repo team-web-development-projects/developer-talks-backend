@@ -80,4 +80,16 @@ public class GlobalExceptionHandler {
         LOGGER.info("error : " + errorResponseDto.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
+    @ExceptionHandler(RecommendationAlreadyExistException.class)
+    public ResponseEntity<ErrorResponseDto> handleRecommendationAlreadyExistException(RecommendationAlreadyExistException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.RECOMMENDATION_ALREADY_EXIST_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+    @ExceptionHandler(RecommendNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleRecommendNotFoundException(RecommendNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
 }

@@ -23,6 +23,8 @@ public class QuestionResponseDto {
     @NotBlank
     private String nickname;
 
+    private Integer likeCount;
+
     @Builder
     public static QuestionResponseDto toDto(Question question) {
         return QuestionResponseDto.builder()
@@ -30,6 +32,7 @@ public class QuestionResponseDto {
                 .title(question.getTitle())
                 .content(question.getContent())
                 .nickname(question.getUser().getNickname())
+                .likeCount(question.getLikeCount())
                 .build();
     }
 }
