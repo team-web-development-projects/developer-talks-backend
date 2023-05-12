@@ -43,6 +43,10 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer favoriteCount;
 
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Integer recommendCount;
+
     @Builder
     public static Post toEntity(PostRequestDto postDto, User user) {
         return Post.builder()
@@ -51,6 +55,7 @@ public class Post extends BaseTimeEntity {
                 .user(user)
                 .viewCount(0)
                 .favoriteCount(0)
+                .recommendCount(0)
                 .build();
     }
 

@@ -33,6 +33,8 @@ public class PostDto {
 
     private Integer favoriteCount;
 
+    private Integer recommendCount;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
 
@@ -49,6 +51,7 @@ public class PostDto {
                 .commentList(new ArrayList<>())
                 .viewCount(post.getViewCount())
                 .favoriteCount(post.getFavoriteCount())
+                .recommendCount(post.getRecommendCount())
                 .createDate(post.getCreateDate())
                 .modifiedDate(post.getModifiedDate())
                 .build();
