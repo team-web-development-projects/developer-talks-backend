@@ -4,10 +4,10 @@ import com.dtalks.dtalks.board.post.service.FavoritePostService;
 import com.dtalks.dtalks.board.post.service.PostService;
 import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
+import com.dtalks.dtalks.board.post.service.RecommendPostService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,6 +24,7 @@ public class PostController {
 
     private final PostService postService;
     private final FavoritePostService favoritePostService;
+    private final RecommendPostService recommendPostService;
 
     @Operation(summary = "특정 게시글 id로 조회")
     @GetMapping("/{id}")
@@ -87,9 +88,21 @@ public class PostController {
         favoritePostService.favorite(id);
     }
 
-    @Operation(summary = "게시글 즐겨찾기 해제")
+    @Operation(summary = "게시글 즐겨찾기 취소")
     @DeleteMapping("/favorite/{id}")
     public void unFavorite(@PathVariable Long id) {
         favoritePostService.unFavorite(id);
+    }
+
+    @Operation(summary = "게시글 추천")
+    @PostMapping("/recommend/{id}")
+    public void recommend(@PathVariable Long id) {
+        recommendPostService.recommend(id);
+    }
+
+    @Operation(summary = "게시글 추천 취소")
+    @DeleteMapping("/recommend/{id}")
+    public void cancelRecommend(@PathVariable Long id) {
+        recommendPostService.cancelRecommend(id);
     }
 }

@@ -56,7 +56,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FavoritePostNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handlePostNotFoundException(FavoritePostNotFoundException ex) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.FAVORITE_POST_NOT_FOUND_ERROR);
-        LOGGER.info("error : " + errorResponseDto.getMessage());
+        LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(RecommendPostNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleRecommendPostNotFoundException(RecommendPostNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.RECOMMEND_POST_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
 
