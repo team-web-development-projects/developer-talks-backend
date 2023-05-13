@@ -53,6 +53,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
 
+    @ExceptionHandler(FavoritePostNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handlePostNotFoundException(FavoritePostNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.FAVORITE_POST_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(RecommendPostNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleRecommendPostNotFoundException(RecommendPostNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.RECOMMEND_POST_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
     @ExceptionHandler(PermissionNotGrantedException.class)
     public ResponseEntity<ErrorResponseDto> handlePermissionNotGrantedException(PermissionNotGrantedException ex) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.PERMISSION_NOT_GRANTED_ERROR);
@@ -97,6 +111,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleStudyRoomNotFoundException(StudyRoomNotFoundException ex) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.STUDYROOM_NOT_FOUND_ERROR);
         LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDto> handleAlreadyExistsException(AlreadyExistsException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.ALREADY_EXISTS_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
 }

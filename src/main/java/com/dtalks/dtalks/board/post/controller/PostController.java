@@ -1,11 +1,14 @@
 package com.dtalks.dtalks.board.post.controller;
 
+import com.dtalks.dtalks.board.post.dto.FavoriteAndRecommendStatusDto;
+import com.dtalks.dtalks.board.post.service.FavoritePostService;
 import com.dtalks.dtalks.board.post.service.PostService;
 import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
+import com.dtalks.dtalks.board.post.service.RecommendPostService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,10 +20,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/post")
+@RequiredArgsConstructor
 public class PostController {
 
-    @Autowired
-    private PostService postService;
+    private final PostService postService;
+    private final FavoritePostService favoritePostService;
+    private final RecommendPostService recommendPostService;
 
     @Operation(summary = "특정 게시글 id로 조회")
     @GetMapping("/{id}")
@@ -48,6 +53,12 @@ public class PostController {
         return ResponseEntity.ok(postService.searchByWord(keyword, pageable));
     }
 
+    @Operation(summary = "추천수 베스트 5 게시글 가져오기 (리스트)")
+    @GetMapping("/best")
+    public ResponseEntity<List<PostDto>> search5BestPosts() {
+        return ResponseEntity.ok(postService.search5BestPosts());
+    }
+
     @Operation(summary = "게시글 생성")
     @PostMapping
     public ResponseEntity<Long> createPost(@Valid @RequestBody PostRequestDto postDto) {
@@ -70,5 +81,41 @@ public class PostController {
     @PutMapping("/view/{id}")
     public void updateViewCount(@PathVariable Long id) {
         postService.updateViewCount(id);
+    }
+
+    @Operation(summary = "게시글에 대한 사용자의 즐겨찾기, 추천 여부 확인, 로그인한 사용자일 경우에만 api 보내면 됨")
+    @GetMapping("/check/status/{postId}")
+    public FavoriteAndRecommendStatusDto checkFavoriteAndRecommendStatus(@PathVariable Long postId) {
+        boolean favorite = favoritePostService.checkFavorite(postId);
+        boolean recommend = recommendPostService.checkRecommend(postId);
+
+        return FavoriteAndRecommendStatusDto.builder()
+                .favorite(favorite)
+                .recommend(recommend)
+                .build();
+    }
+
+    @Operation(summary = "게시글 즐겨찾기 설정")
+    @PostMapping("/favorite/{id}")
+    public void favorite(@PathVariable Long id) {
+        favoritePostService.favorite(id);
+    }
+
+    @Operation(summary = "게시글 즐겨찾기 취소")
+    @DeleteMapping("/favorite/{id}")
+    public void unFavorite(@PathVariable Long id) {
+        favoritePostService.unFavorite(id);
+    }
+
+    @Operation(summary = "게시글 추천")
+    @PostMapping("/recommend/{id}")
+    public void recommend(@PathVariable Long id) {
+        recommendPostService.recommend(id);
+    }
+
+    @Operation(summary = "게시글 추천 취소")
+    @DeleteMapping("/recommend/{id}")
+    public void cancelRecommend(@PathVariable Long id) {
+        recommendPostService.cancelRecommend(id);
     }
 }

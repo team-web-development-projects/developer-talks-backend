@@ -13,6 +13,8 @@ public interface PostService {
     Page<PostDto> searchPostsByUser(Long userId, Pageable pageable);
     Page<PostDto> searchByWord(String keyword, Pageable pageable);
 
+    List<PostDto> search5BestPosts();
+
     Long createPost(PostRequestDto postDto);
     Long updatePost(PostRequestDto postDto, Long id);
     void deletePost(Long id);

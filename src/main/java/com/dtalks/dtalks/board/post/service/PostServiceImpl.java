@@ -61,6 +61,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public List<PostDto> search5BestPosts() {
+        List<Post> top5Posts = postRepository.findTop5ByOrderByRecommendCountDesc();
+        return top5Posts.stream().map(PostDto::toDto).toList();
+    }
+
+    @Override
     @Transactional
     public Long createPost(PostRequestDto postDto) {
         Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
