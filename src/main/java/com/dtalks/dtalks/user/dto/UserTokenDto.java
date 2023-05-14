@@ -9,5 +9,7 @@ public class UserTokenDto {
     private String email;
     private String userid;
     private String nickname;
-    List<String> roles;
+
+    private String provider;
+    private List<String> roles;
 }

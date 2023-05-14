@@ -67,7 +67,6 @@ public class UserServiceImpl implements UserService {
         else {
             setFailResult(signUpResponseDto);
         }
-
         return signUpResponseDto;
     }
 
@@ -81,6 +80,7 @@ public class UserServiceImpl implements UserService {
         userTokenDto.setEmail(user.getEmail());
         userTokenDto.setNickname(user.getNickname());
         userTokenDto.setUserid(user.getUserid());
+        userTokenDto.setProvider(user.getRegistrationId());
 
         if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
             throw new RuntimeException();
@@ -148,6 +148,7 @@ public class UserServiceImpl implements UserService {
         userTokenDto.setEmail(user.getEmail());
         userTokenDto.setUserid(user.getUserid());
         userTokenDto.setNickname(user.getNickname());
+        userTokenDto.setProvider(user.getRegistrationId());
         signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
         signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
         setSuccessResult(signInResponseDto);

@@ -39,6 +39,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         userTokenDto.setEmail(oAuth2User.getAttribute("email"));
         userTokenDto.setNickname(oAuth2User.getAttribute("nickname"));
         userTokenDto.setUserid(oAuth2User.getAttribute("userid"));
+        userTokenDto.setProvider(oAuth2User.getAttribute("registrationId"));
         String accessToken = tokenService.createAccessToken(userTokenDto);
         String refreshToken = tokenService.createRefreshToken(userTokenDto);
 
