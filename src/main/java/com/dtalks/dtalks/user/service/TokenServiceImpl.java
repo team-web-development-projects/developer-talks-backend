@@ -8,6 +8,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,8 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 public class TokenServiceImpl implements TokenService {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserDetailsService userDetailsService;
     @Value("${springboot.jwt.secret}")
@@ -39,6 +43,7 @@ public class TokenServiceImpl implements TokenService {
         Claims claims = Jwts.claims().setSubject(userTokenDto.getEmail());
         claims.put("userid", userTokenDto.getUserid());
         claims.put("nickname", userTokenDto.getNickname());
+        claims.put("provider", userTokenDto.getProvider());
         Date now = new Date();
 
         String accessToken = Jwts.builder()
@@ -56,6 +61,7 @@ public class TokenServiceImpl implements TokenService {
         Claims claims = Jwts.claims().setSubject(userTokenDto.getEmail());
         claims.put("userid", userTokenDto.getUserid());
         claims.put("nickname", userTokenDto.getNickname());
+        claims.put("provider", userTokenDto.getProvider());
         Date now = new Date();
 
         String refreshToken = Jwts.builder()
