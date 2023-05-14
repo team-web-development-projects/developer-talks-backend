@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -26,6 +27,9 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final Logger LOGGER = LoggerFactory.getLogger(OAuthSuccessHandler.class);
     public final TokenService tokenService;
 
+    @Value("${spring.registration.redirect}")
+    private String url;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         LOGGER.info("onAuthenticationSuccess 호출됨");
@@ -38,7 +42,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         String accessToken = tokenService.createAccessToken(userTokenDto);
         String refreshToken = tokenService.createRefreshToken(userTokenDto);
 
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000")
+        String targetUrl = UriComponentsBuilder.fromUriString(url)
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
                 .build().toString();
