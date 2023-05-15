@@ -6,8 +6,6 @@ import com.dtalks.dtalks.qna.answer.service.AnswerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +17,7 @@ public class AnswerController {
     private final AnswerService answerService;
 
     @GetMapping
-    public ResponseEntity<List<AnswerResponseDto>> getAnswersByQuestionId(@PathVariable Long questionId){
+    public ResponseEntity<List<AnswerResponseDto>> getAnswersByQuestionId(@PathVariable Long questionId) {
         return ResponseEntity.ok(answerService.getAnswersByQuestionId(questionId));
     }
 
@@ -36,5 +34,15 @@ public class AnswerController {
     @DeleteMapping("/{id}")
     public void deleteAnswer(@PathVariable Long id, @PathVariable Long questionId) {
         answerService.deleteAnswer(id);
+    }
+
+    @PostMapping("/{id}/select")
+    public void selectAnswer(@PathVariable Long id, @PathVariable String questionId) {
+        answerService.selectAnswer(id);
+    }
+
+    @DeleteMapping("{id}/select")
+    public void cancelSelect(@PathVariable Long id, @PathVariable String questionId) {
+        answerService.cancelSelect(id);
     }
 }
