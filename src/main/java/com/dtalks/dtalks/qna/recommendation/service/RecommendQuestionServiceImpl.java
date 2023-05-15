@@ -8,8 +8,8 @@ import com.dtalks.dtalks.exception.exception.UserNotFoundException;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.qna.recommendation.dto.RecommendQuestionDto;
-import com.dtalks.dtalks.qna.recommendation.entitiy.UserQuestionRecommendation;
-import com.dtalks.dtalks.qna.recommendation.repository.UserQuestionRecommendationRepository;
+import com.dtalks.dtalks.qna.recommendation.entitiy.RecommendQuestion;
+import com.dtalks.dtalks.qna.recommendation.repository.RecommendQuestionRepository;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserQuestionRecommendationServiceImpl implements UserQuestionRecommendationService {
-    private final UserQuestionRecommendationRepository userQuestionRecommendationRepository;
+public class RecommendQuestionServiceImpl implements RecommendQuestionService {
+    private final RecommendQuestionRepository recommendQuestionRepository;
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
 
@@ -37,15 +37,15 @@ public class UserQuestionRecommendationServiceImpl implements UserQuestionRecomm
         }
         Question question = optionalQuestion.get();
         User user = optionalUser.get();
-        if(userQuestionRecommendationRepository.existsByUserAndQuestion(user,question)){
+        if(recommendQuestionRepository.existsByUserAndQuestion(user,question)){
             throw new RecommendationAlreadyExistException(ErrorCode.RECOMMENDATION_ALREADY_EXIST_ERROR, "이미 해당 질문글을 추천하였습니다. ");
         }
-        UserQuestionRecommendation userQuestionRecommendation = UserQuestionRecommendation.builder().user(user).question(question).build();
+        RecommendQuestion recommendQuestion = RecommendQuestion.builder().user(user).question(question).build();
 
         question.updateLike(true);
-        userQuestionRecommendationRepository.save((userQuestionRecommendation));
+        recommendQuestionRepository.save((recommendQuestion));
 
-        return userQuestionRecommendation.getId();
+        return recommendQuestion.getId();
     }
 
     @Override
@@ -62,15 +62,15 @@ public class UserQuestionRecommendationServiceImpl implements UserQuestionRecomm
         Question question = optionalQuestion.get();
         User user = optionalUser.get();
 
-        if(!userQuestionRecommendationRepository.existsByUserAndQuestion(user,question)){
+        if(!recommendQuestionRepository.existsByUserAndQuestion(user,question)){
             throw new RecommendNotFoundException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
         }
-        UserQuestionRecommendation userQuestionRecommendation = UserQuestionRecommendation.builder().user(user).question(question).build();
+        RecommendQuestion recommendQuestion = RecommendQuestion.builder().user(user).question(question).build();
 
         question.updateLike(false);
 
-        userQuestionRecommendationRepository.deleteByUserAndQuestion(user, question);
-        return userQuestionRecommendation.getId();
+        recommendQuestionRepository.deleteByUserAndQuestion(user, question);
+        return recommendQuestion.getId();
     }
 
 }
