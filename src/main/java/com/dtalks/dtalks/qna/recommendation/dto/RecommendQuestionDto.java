@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RecommendQuestionDto {
     private Long questionId;
-    private Long userId;
 }

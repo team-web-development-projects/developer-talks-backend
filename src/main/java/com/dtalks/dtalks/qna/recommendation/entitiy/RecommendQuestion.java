@@ -23,5 +23,12 @@ public class RecommendQuestion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Question question;
+    @Builder
+    public static RecommendQuestion toEntity(User user, Question question) {
+        return RecommendQuestion.builder()
+                .user(user)
+                .question(question)
+                .build();
+    }
 
 }
