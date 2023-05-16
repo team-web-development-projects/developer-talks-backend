@@ -4,6 +4,7 @@ import com.dtalks.dtalks.board.comment.dto.CommentInfoDto;
 import com.dtalks.dtalks.board.comment.dto.CommentRequestDto;
 import com.dtalks.dtalks.board.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,11 @@ public class CommentController {
         commentService.saveComment(postId, dto);
     }
 
-    @Operation(summary = "특정 게시글의 댓글에 대댓글 저장")
+    @Operation(summary = "특정 게시글의 댓글에 대댓글 저장", description = "대댓글 저장시에 쓰이는 api(대댓글의 댓글도 가능). 계층형 댓글인것",
+            parameters = {
+            @Parameter(name = "postId", description = "댓글을 달 게시글 id"),
+            @Parameter(name = "parentId", description = "대댓글을 달고자하는 댓글의 id -> 부모 댓글")
+    })
     @PostMapping("/{postId}/{parentId}")
     public void saveReComment(@PathVariable Long postId, @PathVariable Long parentId, @Valid @RequestBody CommentRequestDto dto) {
         commentService.saveReComment(postId, parentId, dto);
