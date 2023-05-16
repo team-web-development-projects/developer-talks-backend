@@ -31,7 +31,7 @@ public class AnswerServiceImpl implements AnswerService {
     public AnswerResponseDto searchById(Long id) {
         Optional<Answer> optionalAnswer = answerRepository.findById(id);
         if (optionalAnswer.isEmpty()) {
-            throw new AnswerNotFoundException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "존재하지 않는 답변입니다");
+            throw new AnswerNotFoundException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "존재하지 않는 답변입니다. ");
         }
         Answer answer = optionalAnswer.get();
         return AnswerResponseDto.toDto(answer);
@@ -40,6 +40,10 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional(readOnly = true)
     public List<AnswerResponseDto> getAnswersByQuestionId(Long questionId) {
+        Optional<Question> optionalQuestion = questionRepository.findById(questionId);
+        if (optionalQuestion.isEmpty()) {
+            throw new QuestionNotFoundException(ErrorCode.QUESTION_NOT_FOUND_ERROR, "존재하지 않는 질문입니다. ");
+        }
         return answerRepository.findByQuestionId(questionId).stream()
                 .map(AnswerResponseDto::toDto)
                 .collect(Collectors.toList());
@@ -48,6 +52,10 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional(readOnly = true)
     public List<AnswerResponseDto> getAnswersByUserId(Long userId){
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다. ");
+        }
         return answerRepository.findByUserId(userId).stream()
                 .map(AnswerResponseDto::toDto)
                 .collect(Collectors.toList());
