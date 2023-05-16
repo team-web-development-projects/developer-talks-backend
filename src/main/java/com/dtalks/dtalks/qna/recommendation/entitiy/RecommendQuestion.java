@@ -1,7 +1,6 @@
 package com.dtalks.dtalks.qna.recommendation.entitiy;
 
 import com.dtalks.dtalks.qna.question.entity.Question;
-import com.dtalks.dtalks.qna.recommendation.dto.RecommendQuestionDto;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserQuestionRecommendation {
+public class RecommendQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,5 +23,12 @@ public class UserQuestionRecommendation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Question question;
+    @Builder
+    public static RecommendQuestion toEntity(User user, Question question) {
+        return RecommendQuestion.builder()
+                .user(user)
+                .question(question)
+                .build();
+    }
 
 }

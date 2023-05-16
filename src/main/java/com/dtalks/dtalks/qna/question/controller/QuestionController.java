@@ -3,6 +3,9 @@ package com.dtalks.dtalks.qna.question.controller;
 import com.dtalks.dtalks.qna.question.service.QuestionService;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
+import com.dtalks.dtalks.qna.recommendation.dto.RecommendQuestionDto;
+import com.dtalks.dtalks.qna.recommendation.service.RecommendQuestionService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,8 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,33 +21,51 @@ import org.springframework.web.bind.annotation.*;
 public class QuestionController {
     private final QuestionService questionService;
 
+    private final RecommendQuestionService recommendQuestionService;
+
+    @Operation(summary = "특정 질문글 id로 조회")
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponseDto> searchById(@PathVariable Long id) {
         return ResponseEntity.ok(questionService.searchById(id));
     }
 
+    @Operation(summary = "모든 질문글 조회")
     @GetMapping("/all")
     public ResponseEntity<Page<QuestionResponseDto>> searchAll(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(questionService.searchAllQuestion(pageable));
     }
 
+    @Operation(summary = "키워드로 질물글 조회(제목과 본문에 keyword 포함시 조회)")
     @GetMapping("/search")
     public ResponseEntity<Page<QuestionResponseDto>> searchQuestions(@RequestParam String keyword, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable){
         return ResponseEntity.ok(questionService.searchQuestions(keyword, pageable));
     }
 
+    @Operation(summary = "질문글 작성")
     @PostMapping
     public ResponseEntity<Long> createQuestion(@Valid @RequestBody QuestionDto questionDto) {
         return ResponseEntity.ok(questionService.createQuestion(questionDto));
     }
 
+    @Operation(summary = "질문글 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updateQuestion(@Valid @RequestBody QuestionDto questionDto, @PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Long> updateQuestion(@Valid @RequestBody QuestionDto questionDto, @PathVariable Long id) {
         return ResponseEntity.ok(questionService.updateQuestion(id, questionDto));
     }
 
+    @Operation(summary = "질문글 삭제")
     @DeleteMapping("/{id}")
-    public void deleteQuestion(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+    public void deleteQuestion(@PathVariable Long id) {
         questionService.deleteQuestion(id);
+    }
+
+    @PostMapping("/recommend")
+    public ResponseEntity<Long> recommendQuestion(@Valid @RequestBody RecommendQuestionDto recommendQuestionDto){
+        return ResponseEntity.ok(recommendQuestionService.recommendQuestion(recommendQuestionDto));
+    }
+
+    @DeleteMapping("/recommend")
+    public ResponseEntity<Long> unrecommendQuestion(@Valid @RequestBody RecommendQuestionDto unRecommendQuestionDto){
+        return ResponseEntity.ok(recommendQuestionService.unRecommendQuestion(unRecommendQuestionDto));
     }
 }
