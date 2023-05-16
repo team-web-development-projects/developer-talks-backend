@@ -54,7 +54,7 @@ public class StudyRoomController {
     }
 
     @Operation(summary = "스터디룸 업데이트")
-    @PostMapping("/study-room/{id}")
+    @PutMapping("/study-room/{id}")
     public ResponseEntity<StudyRoomResponseDto> updateStudyRoom(@PathVariable Long id,
                                                                 StudyRoomRequestDto studyRoomRequestDto) {
         return ResponseEntity.ok(studyRoomService.updateStudyRoom(id, studyRoomRequestDto));
