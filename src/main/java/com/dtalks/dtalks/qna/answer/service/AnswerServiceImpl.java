@@ -28,8 +28,27 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     @Transactional(readOnly = true)
+    public AnswerResponseDto searchById(Long id) {
+        Optional<Answer> optionalAnswer = answerRepository.findById(id);
+        if (optionalAnswer.isEmpty()) {
+            throw new AnswerNotFoundException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "존재하지 않는 답변입니다");
+        }
+        Answer answer = optionalAnswer.get();
+        return AnswerResponseDto.toDto(answer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<AnswerResponseDto> getAnswersByQuestionId(Long questionId) {
         return answerRepository.findByQuestionId(questionId).stream()
+                .map(AnswerResponseDto::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AnswerResponseDto> getAnswersByUserId(Long userId){
+        return answerRepository.findByUserId(userId).stream()
                 .map(AnswerResponseDto::toDto)
                 .collect(Collectors.toList());
     }

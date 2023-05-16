@@ -8,8 +8,9 @@ import java.util.List;
 public interface AnswerService {
 
 
+    AnswerResponseDto searchById(Long id);
     List<AnswerResponseDto> getAnswersByQuestionId(Long questionId);
-
+    List<AnswerResponseDto> getAnswersByUserId(Long userId);
     Long createAnswer(AnswerDto answerDto, Long questionId);
 
     Long updateAnswer(Long answerId, AnswerDto answerDto);
