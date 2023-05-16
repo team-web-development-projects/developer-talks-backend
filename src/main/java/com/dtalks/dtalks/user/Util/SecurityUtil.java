@@ -1,5 +1,8 @@
 package com.dtalks.dtalks.user.Util;
 
+import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
+import com.dtalks.dtalks.user.entity.User;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,5 +20,11 @@ public class SecurityUtil {
         }
 
         return authentication.getName();
+    }
+
+    public static void checkUserPermission(User user) {
+        if(!user.getUserid().equals(getCurrentUserId())) {
+            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "권한이 없습니다.");
+        }
     }
 }
