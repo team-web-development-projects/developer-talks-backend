@@ -106,6 +106,25 @@ public class GlobalExceptionHandler {
         LOGGER.info("error : " + errorResponseDto.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
+    @ExceptionHandler(QuestionNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleQuestionNotFoundException(QuestionNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.QUESTION_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+    @ExceptionHandler(AnswerNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleAnswerNotFoundException(AnswerNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.ANSWER_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(SelectedAnswerNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleSelectedAnswerNotFoundException(SelectedAnswerNotFoundException ex){
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.SELECTED_ANSWER_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
 
     @ExceptionHandler(StudyRoomNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleStudyRoomNotFoundException(StudyRoomNotFoundException ex) {

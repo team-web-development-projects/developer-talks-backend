@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                         ,"/token/refresh", "/post/view/**").permitAll()
                 .requestMatchers("**exception**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/post/**", "/comment/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/questions/**", "/answers/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())

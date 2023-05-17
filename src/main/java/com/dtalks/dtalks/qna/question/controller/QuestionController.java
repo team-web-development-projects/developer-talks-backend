@@ -59,11 +59,13 @@ public class QuestionController {
         questionService.deleteQuestion(id);
     }
 
+    @Operation(summary = "질문글 추천")
     @PostMapping("/recommend")
     public ResponseEntity<Long> recommendQuestion(@Valid @RequestBody RecommendQuestionDto recommendQuestionDto){
         return ResponseEntity.ok(recommendQuestionService.recommendQuestion(recommendQuestionDto));
     }
 
+    @Operation(summary = "질문글 추천 취소")
     @DeleteMapping("/recommend")
     public ResponseEntity<Long> unrecommendQuestion(@Valid @RequestBody RecommendQuestionDto unRecommendQuestionDto){
         return ResponseEntity.ok(recommendQuestionService.unRecommendQuestion(unRecommendQuestionDto));

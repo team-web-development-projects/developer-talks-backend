@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -29,16 +30,23 @@ public class Answer extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @ColumnDefault("false")
+    @Column(nullable = false)
+    private boolean selected;
+
     @Builder
     public static Answer toEntity(AnswerDto answerDto, Question question, User user) {
         return Answer.builder()
                 .user(user)
                 .question(question)
                 .content(answerDto.getContent())
+                .selected(false)
                 .build();
     }
 
     public void update(String content) {
         this.content = content;
     }
+
+    public void setSelected(boolean selected) { this.selected = selected; }
 }
