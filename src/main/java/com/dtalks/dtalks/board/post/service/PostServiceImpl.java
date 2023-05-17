@@ -44,6 +44,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PostDto> searchPostsByUser(Long userId, Pageable pageable) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
@@ -55,12 +56,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PostDto> searchByWord(String keyword, Pageable pageable) {
         Page<Post> posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
         return posts.map(PostDto::toDto);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostDto> search5BestPosts() {
         List<Post> top5Posts = postRepository.findTop5ByOrderByRecommendCountDesc();
         return top5Posts.stream().map(PostDto::toDto).toList();
