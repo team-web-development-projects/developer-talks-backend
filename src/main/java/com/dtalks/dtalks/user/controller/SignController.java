@@ -1,9 +1,6 @@
 package com.dtalks.dtalks.user.controller;
 
-import com.dtalks.dtalks.user.dto.SignInDto;
-import com.dtalks.dtalks.user.dto.SignInResponseDto;
-import com.dtalks.dtalks.user.dto.SignUpDto;
-import com.dtalks.dtalks.user.dto.SignUpResponseDto;
+import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,8 +40,8 @@ public class SignController {
 
     @Operation(summary = "refresh 토큰을 이용한 토큰 재발급")
     @PostMapping(value = "token/refresh")
-    public ResponseEntity<SignInResponseDto> tokenRefresh(String refreshToken) {
-        SignInResponseDto signInResponseDto = userService.reSignIn(refreshToken);
+    public ResponseEntity<SignInResponseDto> tokenRefresh(@RequestBody()RefreshTokenDto refreshToken) {
+        SignInResponseDto signInResponseDto = userService.reSignIn(refreshToken.getRefreshToken());
 
         return ResponseEntity.ok(signInResponseDto);
     }
