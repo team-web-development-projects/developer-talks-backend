@@ -27,13 +27,15 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public PostDto searchById(Long id) {
-        Optional<Post> post = postRepository.findById(id);
-        if (post.isEmpty()) {
+        Optional<Post> optionalPost = postRepository.findById(id);
+        if (optionalPost.isEmpty()) {
             throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
-        return PostDto.toDto(post.get());
+        Post post = optionalPost.get();
+        post.setViewCount(post.getViewCount() + 1);
+        return PostDto.toDto(post);
     }
 
     @Override
@@ -44,6 +46,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PostDto> searchPostsByUser(Long userId, Pageable pageable) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
@@ -55,12 +58,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PostDto> searchByWord(String keyword, Pageable pageable) {
         Page<Post> posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
         return posts.map(PostDto::toDto);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostDto> search5BestPosts() {
         List<Post> top5Posts = postRepository.findTop5ByOrderByRecommendCountDesc();
         return top5Posts.stream().map(PostDto::toDto).toList();
@@ -111,18 +116,6 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
-    }
-
-    @Override
-    @Transactional
-    public void updateViewCount(Long id) {
-        Optional<Post> optionalPost = postRepository.findById(id);
-        if (optionalPost.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
-        Post post = optionalPost.get();
-        post.setViewCount(post.getViewCount() + 1);
     }
 
 }

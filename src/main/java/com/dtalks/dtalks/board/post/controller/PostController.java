@@ -28,7 +28,7 @@ public class PostController {
     private final FavoritePostService favoritePostService;
     private final RecommendPostService recommendPostService;
 
-    @Operation(summary = "특정 게시글 id로 조회")
+    @Operation(summary = "특정 게시글 id로 조회, 조회수 + 1 작동")
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> searchById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.searchById(id));
@@ -86,16 +86,6 @@ public class PostController {
     public void deletePost(@PathVariable Long id) {
         postService.deletePost(id);
     }
-
-
-    @Operation(summary = "게시글 조회수 업데이트 (+1)", parameters = {
-            @Parameter(name = "id", description = "조회한 게시글 id(db에 저장된 primary key)")
-    })
-    @PutMapping("/view/{id}")
-    public void updateViewCount(@PathVariable Long id) {
-        postService.updateViewCount(id);
-    }
-
 
     @Operation(summary = "게시글에 대한 사용자의 즐겨찾기, 추천 여부 확인, 로그인한 사용자일 경우에만 api 보내면 됨"
     , description = "게시글은 로그인 없이 조회가 가능하지만 로그인한 사용자의 경우에는 즐겨찾기, 추천 여부가 필요. 두 가지가 boolean 타입으로 나온다.")
