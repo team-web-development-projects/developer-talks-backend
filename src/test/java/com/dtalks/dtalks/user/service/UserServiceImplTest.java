@@ -20,11 +20,13 @@ class UserServiceImplTest {
     UserRepository userRepository = Mockito.mock(UserRepository.class);
     TokenService tokenService = Mockito.mock(TokenService.class);
     PasswordEncoder passwordEncoder = Mockito.mock(PasswordEncoder.class);
+
+    DocumentRepository documentRepository = Mockito.mock(DocumentRepository.class);
     UserServiceImpl userService;
 
     @BeforeEach
     public void setUpTest() {
-        userService = new UserServiceImpl(userRepository, tokenService, passwordEncoder);
+        userService = new UserServiceImpl(userRepository, tokenService, passwordEncoder, documentRepository);
     }
     @Test
     void signUpSuccess() {
