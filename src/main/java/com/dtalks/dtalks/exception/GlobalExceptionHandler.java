@@ -139,4 +139,18 @@ public class GlobalExceptionHandler {
         LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
     }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleFileNotFoundException(FileNotFoundException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.FILE_NOT_FOUND_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
+
+    @ExceptionHandler(FileFormatException.class)
+    public ResponseEntity<ErrorResponseDto> handleFileFormatException(FileFormatException ex) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(ErrorCode.FILE_FORMAT_ERROR);
+        LOGGER.info("error : " + errorResponseDto.getMessage() + ex.getMessage());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.valueOf(errorResponseDto.getStatus()));
+    }
 }

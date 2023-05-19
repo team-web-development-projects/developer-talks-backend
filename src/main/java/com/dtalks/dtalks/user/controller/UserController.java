@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.user.controller;
 
+import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.user.dto.DuplicateResponseDto;
 import com.dtalks.dtalks.user.dto.UserResponseDto;
 import com.dtalks.dtalks.user.entity.User;
@@ -10,9 +11,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 
 @Tag(name = "users")
 @RestController
@@ -22,7 +27,6 @@ public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserDetailsService userDetailsService;
     private final UserService userService;
-
     @Autowired
     public UserController(UserDetailsService userDetailsService, UserService userService) {
         this.userDetailsService = userDetailsService;
@@ -53,5 +57,16 @@ public class UserController {
         userResponseDto.setUserid(user.getUsername());
         userResponseDto.setRegistrationId(user.getRegistrationId());
         return ResponseEntity.ok(userResponseDto);
+    }
+
+    @Operation(summary = "프로필 이미지 업로드")
+    @PostMapping(value = "/profile/image"
+    , consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    , produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DocumentResponseDto> profileImageUpLoad(@RequestPart("file") MultipartFile file) {
+        LOGGER.info("profileImageUpLoad controller 호출됨");
+        DocumentResponseDto documentResponseDto = userService.userProfileImageUpLoad(file);
+
+        return ResponseEntity.ok(documentResponseDto);
     }
 }

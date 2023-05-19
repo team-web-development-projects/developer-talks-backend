@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                 .requestMatchers("**exception**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/post/**", "/comment/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/questions/**", "/answers/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/users/profile/image").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())

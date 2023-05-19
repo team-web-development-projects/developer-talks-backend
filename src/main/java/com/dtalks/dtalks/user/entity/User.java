@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.user.entity;
 
+import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.qna.answer.entity.Answer;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
@@ -53,6 +54,9 @@ public class User extends BaseTimeEntity implements UserDetails{
     private List<String> roles = new ArrayList<>();
 
     private String status;
+
+    @OneToOne
+    private Document profileImage;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Post> postList = new ArrayList<>();

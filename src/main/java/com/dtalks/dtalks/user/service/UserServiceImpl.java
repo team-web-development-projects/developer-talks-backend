@@ -1,6 +1,11 @@
 package com.dtalks.dtalks.user.service;
 
+import com.dtalks.dtalks.base.dto.DocumentResponseDto;
+import com.dtalks.dtalks.base.entity.Document;
+import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.exception.FileFormatException;
+import com.dtalks.dtalks.exception.exception.FileNotFoundException;
 import com.dtalks.dtalks.exception.exception.UserDuplicateException;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
@@ -12,8 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,13 +34,17 @@ public class UserServiceImpl implements UserService {
     public final UserRepository userRepository;
     public final TokenService tokenService;
     public PasswordEncoder passwordEncoder;
+    public final DocumentRepository documentRepository;
+    private final String imagePath =  new File("").getAbsolutePath() + "/files/profile/";
+
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, TokenService tokenService,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder, DocumentRepository documentRepository) {
         this.userRepository = userRepository;
         this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
+        this.documentRepository = documentRepository;
     }
 
     @Override
@@ -49,12 +64,18 @@ public class UserServiceImpl implements UserService {
             throw new UserDuplicateException("nickname duplicated", ErrorCode.USER_DUPLICATION_ERROR);
         }
 
+        Optional<Document> document = documentRepository.findById(signUpDto.getProfileImageId());
+        if(document.isEmpty()) {
+            throw new FileNotFoundException(ErrorCode.FILE_NOT_FOUND_ERROR, "파일을 찾을수 없습니다.");
+        }
+
         LOGGER.info("SERVICE signUp");
         User user = User.builder()
                 .userid(signUpDto.getUserid())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
                 .nickname(signUpDto.getNickname())
+                .profileImage(document.get())
                 .roles(Collections.singletonList("USER"))
                 .build();
 
@@ -130,6 +151,7 @@ public class UserServiceImpl implements UserService {
     signIn 메서드와 구분하여 만들었습니다.
      */
     @Override
+    @Transactional(readOnly = true)
     public SignInResponseDto reSignIn(String refreshToken) {
         SignInResponseDto signInResponseDto = new SignInResponseDto();
         if(refreshToken == null || !tokenService.validateToken(refreshToken)) {
@@ -154,6 +176,47 @@ public class UserServiceImpl implements UserService {
         setSuccessResult(signInResponseDto);
 
         return signInResponseDto;
+    }
+
+    @Override
+    @Transactional
+    public DocumentResponseDto userProfileImageUpLoad(MultipartFile file) {
+        if(file == null) {
+            throw new FileNotFoundException(ErrorCode.FILE_NOT_FOUND_ERROR, "파일이 올바르지 않습니다.");
+        }
+
+        String inputName = file.getOriginalFilename();
+        String format = getImageFormat(inputName);
+        if(!(format.equals("jpg") || format.equals("png"))) {
+            throw new FileFormatException(ErrorCode.FILE_FORMAT_ERROR, "파일 형식이 올바르지 않습니다.");
+        }
+
+        String saveName = System.currentTimeMillis() + "." + format;
+        Path savePath = Paths.get(imagePath + saveName);
+
+        try {
+            Files.write(savePath, file.getBytes());
+        }
+        catch (Exception e) {
+            throw new RuntimeException();
+        }
+
+        Document document = new Document();
+        document.setInputName(inputName);
+        document.setStoreName(saveName);
+
+        Document savedDocument = documentRepository.save(document);
+
+        DocumentResponseDto documentResponseDto = new DocumentResponseDto();
+        documentResponseDto.setId(savedDocument.getId());
+        documentResponseDto.setName(savedDocument.getInputName());
+
+        return documentResponseDto;
+    }
+
+    private String getImageFormat(String imageName) {
+        String s[] = imageName.split("[.]");
+        return s[s.length-1].toLowerCase();
     }
 
     private void setSuccessResult(SignUpResponseDto result) {
