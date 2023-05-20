@@ -74,13 +74,14 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<CommentInfoDto> searchListByUserId(Long userId) {
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (user.isEmpty()) {
+    public List<CommentInfoDto> searchListByUserId(String userId) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        if (optionalUser.isEmpty()) {
             throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
 
-        List<Comment> commentList = commentRepository.findByUserIdAndIsRemovedFalse(userId);
+        User user = optionalUser.get();
+        List<Comment> commentList = commentRepository.findByUserIdAndIsRemovedFalse(user.getId());
         return commentList.stream().map(CommentInfoDto::toDto).toList();
     }
 
