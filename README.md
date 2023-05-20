@@ -11,10 +11,3 @@ jdk 17
 
 # swagger
 http://localhost:8080/swagger-ui/index.html
-
-# git branch 전략
-개발자는 feature* 브랜치를 따와서 각자 작업한다.
-
-각 개발자들이 개발한 기능들은 통합하여 dev에서 테스트 한다.
-
-일정 단위의 통합 기능들을 모두 테스트 하고 이상 없으면 main으로 올린다.
