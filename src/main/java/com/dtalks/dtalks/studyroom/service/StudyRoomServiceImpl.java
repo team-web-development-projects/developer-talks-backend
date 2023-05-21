@@ -53,10 +53,9 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         List<StudyRoomUser> studyRoomUsers = new ArrayList<>();
         studyRoomUsers.add(studyRoomUser);
         studyRoom.setStudyRoomUsers(studyRoomUsers);
-        studyRoomRepository.save(studyRoom);
+        StudyRoom savedStudyroom = studyRoomRepository.save(studyRoom);
 
-        Optional<StudyRoom> studyRoom1 = studyRoomRepository.findById(studyRoom.getId());
-        StudyRoomResponseDto studyRoomResponseDto = StudyRoomResponseDto.toDto(studyRoom1.get());
+        StudyRoomResponseDto studyRoomResponseDto = StudyRoomResponseDto.toDto(savedStudyroom);
 
         return studyRoomResponseDto;
     }

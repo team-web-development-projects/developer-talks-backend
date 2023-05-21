@@ -49,6 +49,7 @@ public class StudyRoom extends BaseTimeEntity {
                 .title(studyRoomRequestDto.getTitle())
                 .content(studyRoomRequestDto.getContent())
                 .joinableCount(studyRoomRequestDto.getJoinableCount())
+                .skills(studyRoomRequestDto.getSkills())
                 .joinCount(1)
                 .autoJoin(studyRoomRequestDto.isAutoJoin())
                 .build();
