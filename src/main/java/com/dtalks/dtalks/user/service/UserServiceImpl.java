@@ -64,20 +64,19 @@ public class UserServiceImpl implements UserService {
             throw new UserDuplicateException("nickname duplicated", ErrorCode.USER_DUPLICATION_ERROR);
         }
 
-        Optional<Document> document = documentRepository.findById(signUpDto.getProfileImageId());
-        if(document.isEmpty()) {
-            throw new FileNotFoundException(ErrorCode.FILE_NOT_FOUND_ERROR, "파일을 찾을수 없습니다.");
-        }
-
         LOGGER.info("SERVICE signUp");
         User user = User.builder()
                 .userid(signUpDto.getUserid())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
                 .nickname(signUpDto.getNickname())
-                .profileImage(document.get())
                 .roles(Collections.singletonList("USER"))
                 .build();
+
+        Optional<Document> document = documentRepository.findById(signUpDto.getProfileImageId());
+        if(!document.isEmpty()) {
+            user.setProfileImage(document.get());
+        }
 
         User savedUser = userRepository.save(user);
         SignUpResponseDto signUpResponseDto = new SignUpResponseDto();
