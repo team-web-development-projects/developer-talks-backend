@@ -43,12 +43,12 @@ public class PostController {
 
 
     @Operation(summary = "특정 유저의 게시글 조회 (페이지 사용 - 기본 post id로 정렬)", parameters = {
-            @Parameter(name = "id", description = "조회할 유저의 id (db에 저장된 primary key)")
+            @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
     })
-    @GetMapping("/list/user/{id}")
-    public ResponseEntity<Page<PostDto>> searchPostsByUser(@PathVariable Long id,
+    @GetMapping("/list/user/{userId}")
+    public ResponseEntity<Page<PostDto>> searchPostsByUser(@PathVariable String userId,
                                                            @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(postService.searchPostsByUser(id, pageable));
+        return ResponseEntity.ok(postService.searchPostsByUser(userId, pageable));
     }
 
 

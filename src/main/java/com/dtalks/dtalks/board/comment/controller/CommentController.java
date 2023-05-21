@@ -33,9 +33,11 @@ public class CommentController {
         return ResponseEntity.ok(list);
     }
 
-    @Operation(summary = "특정 유저의 댓글 리스트 조회")
+    @Operation(summary = "특정 유저의 댓글 리스트 조회" , parameters = {
+            @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
+    })
     @GetMapping("/list/user/{userId}")
-    public ResponseEntity<List<CommentInfoDto>> searchUserIdCommentList(@PathVariable Long userId) {
+    public ResponseEntity<List<CommentInfoDto>> searchUserIdCommentList(@PathVariable String userId) {
         List<CommentInfoDto> list = commentService.searchListByUserId(userId);
         return ResponseEntity.ok(list);
     }
