@@ -50,12 +50,8 @@ public class UserController {
     @Operation(summary = "유저 정보")
     @GetMapping(value = "/info")
     public ResponseEntity<UserResponseDto> userInformation(@AuthenticationPrincipal User user) {
-        UserResponseDto userResponseDto = new UserResponseDto();
-        LOGGER.info("test" + user);
-        userResponseDto.setEmail(user.getEmail());
-        userResponseDto.setNickname(user.getNickname());
-        userResponseDto.setUserid(user.getUsername());
-        userResponseDto.setRegistrationId(user.getRegistrationId());
+        LOGGER.info("user info controller");
+        UserResponseDto userResponseDto = userService.userInfo();
         return ResponseEntity.ok(userResponseDto);
     }
 
