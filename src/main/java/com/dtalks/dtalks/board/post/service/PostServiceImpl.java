@@ -1,6 +1,10 @@
 package com.dtalks.dtalks.board.post.service;
 
+import com.dtalks.dtalks.board.post.entity.FavoritePost;
 import com.dtalks.dtalks.board.post.entity.Post;
+import com.dtalks.dtalks.board.post.entity.RecommendPost;
+import com.dtalks.dtalks.board.post.repository.FavoritePostRepository;
+import com.dtalks.dtalks.board.post.repository.RecommendPostRepository;
 import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
 import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
@@ -25,6 +29,8 @@ public class PostServiceImpl implements PostService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final FavoritePostRepository favoritePostRepository;
+    private final RecommendPostRepository recommendPostRepository;
 
     @Override
     @Transactional
@@ -113,6 +119,16 @@ public class PostServiceImpl implements PostService {
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
+        }
+
+        List<FavoritePost> favoritePostList = favoritePostRepository.findByPostId(post.getId());
+        for (FavoritePost favoritePost : favoritePostList) {
+            favoritePostRepository.delete(favoritePost);
+        }
+
+        List<RecommendPost> recommendPostList = recommendPostRepository.findByPostId(post.getId());
+        for (RecommendPost recommendPost : recommendPostList) {
+            recommendPostRepository.delete(recommendPost);
         }
 
         postRepository.delete(post);
