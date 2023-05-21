@@ -23,6 +23,7 @@ public class SignController {
         this.userService = userService;
     }
 
+    @Operation(description = "로그인")
     @PostMapping(value = "/sign-in")
     public SignInResponseDto signIn(@RequestBody SignInDto signInDto) throws RuntimeException {
         LOGGER.info("POST /sign-in");
@@ -31,6 +32,7 @@ public class SignController {
         return signInResponseDto;
     }
 
+    @Operation(description = "회원가입")
     @PostMapping(value = "/sign-up")
     public SignUpResponseDto signUp(@Valid @RequestBody SignUpDto signUpDto) {
         LOGGER.info("POST /sign-up");

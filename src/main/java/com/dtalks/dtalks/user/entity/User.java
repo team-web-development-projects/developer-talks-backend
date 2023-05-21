@@ -7,6 +7,7 @@ import com.dtalks.dtalks.base.entity.BaseTimeEntity;
 import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
+import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -52,6 +53,13 @@ public class User extends BaseTimeEntity implements UserDetails{
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<Skill> skills = new ArrayList<>();
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     private String status;
 
