@@ -1,10 +1,7 @@
 package com.dtalks.dtalks.qna.recommendation.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
-import com.dtalks.dtalks.exception.exception.PostNotFoundException;
-import com.dtalks.dtalks.exception.exception.RecommendNotFoundException;
-import com.dtalks.dtalks.exception.exception.RecommendationAlreadyExistException;
-import com.dtalks.dtalks.exception.exception.UserNotFoundException;
+import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.qna.recommendation.dto.RecommendQuestionDto;
@@ -30,19 +27,19 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     public Long recommendQuestion(RecommendQuestionDto recommend) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
 
         Optional<Question> optionalQuestion = questionRepository.findById(recommend.getQuestionId());
         if(optionalQuestion.isEmpty()){
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
 
         Question question = optionalQuestion.get();
         User user = optionalUser.get();
 
         if(recommendQuestionRepository.existsByUserAndQuestion(user,question)){
-            throw new RecommendationAlreadyExistException(ErrorCode.RECOMMENDATION_ALREADY_EXIST_ERROR, "이미 해당 질문글을 추천하였습니다. ");
+            throw new CustomException(ErrorCode.RECOMMENDATION_ALREADY_EXIST_ERROR, "이미 해당 질문글을 추천하였습니다. ");
         }
 
         RecommendQuestion recommendQuestion = RecommendQuestion.toEntity(user, question);
@@ -58,19 +55,19 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     public Long unRecommendQuestion(RecommendQuestionDto unRecommend) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다. ");
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다. ");
         }
 
         Optional<Question> optionalQuestion = questionRepository.findById(unRecommend.getQuestionId());
         if(optionalQuestion.isEmpty()){
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
 
         Question question = optionalQuestion.get();
         User user = optionalUser.get();
 
         if(!recommendQuestionRepository.existsByUserAndQuestion(user,question)){
-            throw new RecommendNotFoundException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
+            throw new CustomException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
         }
         RecommendQuestion recommendQuestion = RecommendQuestion.toEntity(user, question);
 

@@ -4,9 +4,7 @@ import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
-import com.dtalks.dtalks.exception.exception.FileFormatException;
-import com.dtalks.dtalks.exception.exception.FileNotFoundException;
-import com.dtalks.dtalks.exception.exception.UserDuplicateException;
+import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
@@ -56,13 +54,13 @@ public class UserServiceImpl implements UserService {
         User userCheck2 = userRepository.getByEmail(signUpDto.getEmail());
         User userCheck3 = userRepository.getByNickname(signUpDto.getNickname());
         if(userCheck != null) {
-            throw new UserDuplicateException("userid duplicated", ErrorCode.USER_DUPLICATION_ERROR);
+            throw new CustomException(ErrorCode.USER_DUPLICATION_ERROR, "userid duplicated");
         }
         if(userCheck2 != null) {
-            throw new UserDuplicateException("email duplicated", ErrorCode.USER_DUPLICATION_ERROR);
+            throw new CustomException(ErrorCode.USER_DUPLICATION_ERROR, "email duplicated");
         }
         if(userCheck3 != null) {
-            throw new UserDuplicateException("nickname duplicated", ErrorCode.USER_DUPLICATION_ERROR);
+            throw new CustomException(ErrorCode.USER_DUPLICATION_ERROR, "nickname duplicated");
         }
 
         LOGGER.info("SERVICE signUp");
@@ -184,13 +182,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public DocumentResponseDto userProfileImageUpLoad(MultipartFile file) {
         if(file == null) {
-            throw new FileNotFoundException(ErrorCode.FILE_NOT_FOUND_ERROR, "파일이 올바르지 않습니다.");
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "파일이 올바르지 않습니다.");
         }
 
         String inputName = file.getOriginalFilename();
         String format = getImageFormat(inputName);
         if(!(format.equals("jpg") || format.equals("png"))) {
-            throw new FileFormatException(ErrorCode.FILE_FORMAT_ERROR, "파일 형식이 올바르지 않습니다.");
+            throw new CustomException(ErrorCode.FILE_FORMAT_ERROR, "파일 형식이 올바르지 않습니다.");
         }
 
         String saveName = System.currentTimeMillis() + "." + format;

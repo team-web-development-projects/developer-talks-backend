@@ -37,7 +37,7 @@ public enum ErrorCode {
 
     private int status;
 
-    private String errorCode;
+    private String errorType;
 
     private String message;
 }

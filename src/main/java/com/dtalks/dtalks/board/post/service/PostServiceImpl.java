@@ -5,13 +5,11 @@ import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.entity.RecommendPost;
 import com.dtalks.dtalks.board.post.repository.FavoritePostRepository;
 import com.dtalks.dtalks.board.post.repository.RecommendPostRepository;
-import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
+import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
-import com.dtalks.dtalks.exception.exception.PostNotFoundException;
-import com.dtalks.dtalks.exception.exception.UserNotFoundException;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
@@ -37,7 +35,7 @@ public class PostServiceImpl implements PostService {
     public PostDto searchById(Long id) {
         Optional<Post> optionalPost = postRepository.findById(id);
         if (optionalPost.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
         Post post = optionalPost.get();
         post.setViewCount(post.getViewCount() + 1);
@@ -56,7 +54,7 @@ public class PostServiceImpl implements PostService {
     public Page<PostDto> searchPostsByUser(String userId, Pageable pageable) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
         if (optionalUser.isEmpty()) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
         User user = optionalUser.get();
         Page<Post> posts = postRepository.findByUserId(user.getId(), pageable);
@@ -82,7 +80,7 @@ public class PostServiceImpl implements PostService {
     public Long createPost(PostRequestDto postDto) {
         Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (user.isEmpty()) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
         Post post = Post.toEntity(postDto, user.get());
         postRepository.save(post);
@@ -94,13 +92,13 @@ public class PostServiceImpl implements PostService {
     public Long updatePost(PostRequestDto postDto, Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
         Post post = optionalPost.get();
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getCurrentUserId())) {
-            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
+            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
         }
 
         post.update(postDto.getTitle(), postDto.getContent());
@@ -112,13 +110,13 @@ public class PostServiceImpl implements PostService {
     public void deletePost(Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
-            throw new PostNotFoundException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
         Post post = optionalPost.get();
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getCurrentUserId())) {
-            throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
+            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
         }
 
         List<FavoritePost> favoritePostList = favoritePostRepository.findByPostId(post.getId());
