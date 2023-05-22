@@ -52,6 +52,16 @@ public class PostController {
     }
 
 
+    @Operation(summary = "특정 유저의 즐겨찾기 게시글 조회 (페이지 사용 - 기본 post id로 정렬)", parameters = {
+            @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
+    })
+    @GetMapping("/list/favorite/{userId}")
+    public ResponseEntity<Page<PostDto>> searchFavoritePostsByUser(@PathVariable String userId,
+                                                           @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(favoritePostService.searchFavoritePostsByUser(userId, pageable));
+    }
+
+
     @Operation(summary = "검색어로 게시글 검색", description = "keyword가 제목(title), 내용(content)에 포함되면 검색 게시글에 추가됨")
     @GetMapping("/search")
     public ResponseEntity<Page<PostDto>> searchPosts(@RequestParam String keyword,
