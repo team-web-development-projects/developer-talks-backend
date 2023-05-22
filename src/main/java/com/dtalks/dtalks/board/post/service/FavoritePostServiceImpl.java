@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.board.post.service;
 
+import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.entity.FavoritePost;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.repository.CustomPostRepository;
@@ -11,6 +12,8 @@ import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +83,17 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         favoritePostRepository.delete(favoritePost);
 
         customPostRepository.updateFavoriteCount(post, false);
+    }
+
+    @Override
+    public Page<PostDto> searchFavoritePostsByUser(String userId, Pageable pageable) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+        User user = optionalUser.get();
+        Page<Post> posts = customPostRepository.searchFavoritePost(user.getId(), pageable);
+        return posts.map(PostDto::toDto);
     }
 
     @Override
