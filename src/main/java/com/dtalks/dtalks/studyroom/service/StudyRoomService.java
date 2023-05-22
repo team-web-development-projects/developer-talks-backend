@@ -14,5 +14,7 @@ public interface StudyRoomService {
 
     public StudyRoomResponseDto updateStudyRoom(Long id, StudyRoomRequestDto studyRoomRequestDto);
 
+    public StudyRoomResponseDto joinStudyRoom(Long id);
+
     public void deleteStudyRoom(Long id);
 }
