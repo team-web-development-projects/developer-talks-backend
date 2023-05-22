@@ -7,6 +7,7 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.FileFormatException;
 import com.dtalks.dtalks.exception.exception.FileNotFoundException;
 import com.dtalks.dtalks.exception.exception.UserDuplicateException;
+import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
@@ -70,6 +71,8 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
                 .nickname(signUpDto.getNickname())
+                .skills(signUpDto.getSkills())
+                .description(signUpDto.getDescription())
                 .roles(Collections.singletonList("USER"))
                 .build();
 
@@ -211,6 +214,16 @@ public class UserServiceImpl implements UserService {
         documentResponseDto.setName(savedDocument.getInputName());
 
         return documentResponseDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto userInfo() {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+
+        UserResponseDto userResponseDto = UserResponseDto.toDto(user);
+
+        return userResponseDto;
     }
 
     private String getImageFormat(String imageName) {

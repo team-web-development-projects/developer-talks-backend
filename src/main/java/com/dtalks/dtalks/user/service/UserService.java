@@ -20,4 +20,6 @@ public interface UserService {
     DuplicateResponseDto nicknameDuplicated(String nickname);
 
     DocumentResponseDto userProfileImageUpLoad(MultipartFile file);
+
+    UserResponseDto userInfo();
 }
