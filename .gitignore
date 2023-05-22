@@ -39,10 +39,11 @@ out/
 ### 설정 파일 ###
 *.properties
 
-
 ### log ###
 logs/
 
-
 ### querydsl ###
 src/main/generated/
+
+### files ###
+files/
