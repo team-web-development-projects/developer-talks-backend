@@ -1,11 +1,13 @@
 package com.dtalks.dtalks.exception.exception;
 
 import com.dtalks.dtalks.exception.ErrorCode;
+import lombok.Getter;
 
-public class EmailException extends RuntimeException{
+@Getter
+public class CustomException extends RuntimeException {
     private ErrorCode errorCode;
 
-    public EmailException(ErrorCode errorCode, String message) {
+    public CustomException(ErrorCode errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
     }

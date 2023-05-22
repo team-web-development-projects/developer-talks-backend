@@ -1,9 +1,7 @@
 package com.dtalks.dtalks.studyroom.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
-import com.dtalks.dtalks.exception.exception.PermissionNotGrantedException;
-import com.dtalks.dtalks.exception.exception.StudyRoomNotFoundException;
-import com.dtalks.dtalks.exception.exception.UserNotFoundException;
+import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomRequestDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomResponseDto;
 import com.dtalks.dtalks.studyroom.entity.StudyRoom;
@@ -14,13 +12,11 @@ import com.dtalks.dtalks.studyroom.repository.StudyRoomUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
-import com.dtalks.dtalks.user.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +41,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
 
         if(user.isEmpty()) {
-            throw new UserNotFoundException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
 
         StudyRoom studyRoom = StudyRoom.toEntity(studyRoomRequestDto);
@@ -65,7 +61,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     public StudyRoomResponseDto findStudyRoomById(Long id) {
         Optional<StudyRoom> studyRoom = studyRoomRepository.findById(id);
         if(studyRoom.isEmpty()) {
-            throw new StudyRoomNotFoundException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
+            throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
         }
 
         return StudyRoomResponseDto.toDto(studyRoom.get());
@@ -83,7 +79,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     public StudyRoomResponseDto updateStudyRoom(Long id, StudyRoomRequestDto studyRoomRequestDto) {
         Optional<StudyRoom> studyRoom = studyRoomRepository.findById(id);
         if(studyRoom.isEmpty()) {
-            throw new StudyRoomNotFoundException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
+            throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
         }
 
         StudyRoom studyRoomResponse = studyRoom.get();
@@ -103,7 +99,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     public void deleteStudyRoom(Long id) {
         Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(id);
         if(optionalStudyRoom.isEmpty()) {
-            throw new StudyRoomNotFoundException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
+            throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
         }
         StudyRoom studyRoom = optionalStudyRoom.get();
         List<StudyRoomUser> studyRoomUsers = studyRoom.getStudyRoomUsers();
@@ -115,6 +111,6 @@ public class StudyRoomServiceImpl implements StudyRoomService{
                 }
             }
         }
-        throw new PermissionNotGrantedException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
+        throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
     }
 }
