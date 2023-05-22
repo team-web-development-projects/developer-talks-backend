@@ -18,6 +18,8 @@ public class StudyRoomResponseDto {
     private String content;
     private List<Skill> skills;
     private boolean autoJoin;
+    private int joinableCount;
+    private int joinCount;
     private List<StudyRoomUserDto> studyRoomUsers;
 
     @Builder
@@ -32,6 +34,8 @@ public class StudyRoomResponseDto {
                 .content(studyRoom.getContent())
                 .skills(studyRoom.getSkills())
                 .autoJoin(studyRoom.isAutoJoin())
+                .joinableCount(studyRoom.getJoinableCount())
+                .joinCount(studyRoom.getJoinCount())
                 .studyRoomUsers(studyRoomUserDtos)
                 .build();
     }
