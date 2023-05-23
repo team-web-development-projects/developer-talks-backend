@@ -1,6 +1,8 @@
 package com.dtalks.dtalks.user.entity;
 
 import com.dtalks.dtalks.base.entity.Document;
+import com.dtalks.dtalks.board.post.entity.FavoritePost;
+import com.dtalks.dtalks.board.post.entity.RecommendPost;
 import com.dtalks.dtalks.qna.answer.entity.Answer;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
@@ -70,6 +72,12 @@ public class User extends BaseTimeEntity implements UserDetails{
     private List<Post> postList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<FavoritePost> favoritePostList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<RecommendPost> recommendPostList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Comment> commentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
@@ -80,6 +88,9 @@ public class User extends BaseTimeEntity implements UserDetails{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyRoomUser> studyRoomUserList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<Activity> activityList = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
