@@ -224,6 +224,19 @@ public class UserServiceImpl implements UserService {
         return userResponseDto;
     }
 
+    @Override
+    @Transactional
+    public UserResponseDto updateUserDescription(String description) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+
+        user.setDescription(description);
+        User savedUser = userRepository.save(user);
+
+        UserResponseDto userResponseDto = UserResponseDto.toDto(savedUser);
+
+        return userResponseDto;
+    }
+
     private String getImageFormat(String imageName) {
         String s[] = imageName.split("[.]");
         return s[s.length-1].toLowerCase();

@@ -65,4 +65,11 @@ public class UserController {
 
         return ResponseEntity.ok(documentResponseDto);
     }
+
+    @Operation(summary = "유저 소개글 수정")
+    @PutMapping(value = "/profile/description")
+    public ResponseEntity<UserResponseDto> updateUserDescription(@RequestBody String description) {
+        LOGGER.info("updateUserDescription controller 호출됨");
+        return ResponseEntity.ok(userService.updateUserDescription(description));
+    }
 }

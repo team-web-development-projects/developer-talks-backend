@@ -22,4 +22,6 @@ public interface UserService {
     DocumentResponseDto userProfileImageUpLoad(MultipartFile file);
 
     UserResponseDto userInfo();
+
+    UserResponseDto updateUserDescription(String description);
 }
