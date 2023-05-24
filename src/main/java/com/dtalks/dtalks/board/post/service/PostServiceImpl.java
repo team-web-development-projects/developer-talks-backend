@@ -13,7 +13,7 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enumeration.ActivityType;
+import com.dtalks.dtalks.user.enums.ActivityType;
 import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

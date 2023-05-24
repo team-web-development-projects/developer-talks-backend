@@ -1,7 +1,7 @@
 package com.dtalks.dtalks.user.repository;
 
 import com.dtalks.dtalks.user.entity.Activity;
-import com.dtalks.dtalks.user.enumeration.ActivityType;
+import com.dtalks.dtalks.user.enums.ActivityType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

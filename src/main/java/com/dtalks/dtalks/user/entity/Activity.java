@@ -5,7 +5,7 @@ import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.qna.answer.entity.Answer;
 import com.dtalks.dtalks.qna.question.entity.Question;
-import com.dtalks.dtalks.user.enumeration.ActivityType;
+import com.dtalks.dtalks.user.enums.ActivityType;
 import jakarta.persistence.*;
 import lombok.*;
 

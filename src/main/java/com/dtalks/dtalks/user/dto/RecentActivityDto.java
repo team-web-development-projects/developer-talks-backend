@@ -1,6 +1,6 @@
 package com.dtalks.dtalks.user.dto;
 
-import com.dtalks.dtalks.user.enumeration.ActivityType;
+import com.dtalks.dtalks.user.enums.ActivityType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

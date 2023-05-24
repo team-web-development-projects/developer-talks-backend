@@ -1,4 +1,4 @@
-package com.dtalks.dtalks.user.enumeration;
+package com.dtalks.dtalks.user.enums;
 
 public enum ActivityType {
     POST,
