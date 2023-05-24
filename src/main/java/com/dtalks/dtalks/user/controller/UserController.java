@@ -7,6 +7,7 @@ import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserDetailsService;
 import com.dtalks.dtalks.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class UserController {
 
     @Operation(summary = "유저 소개글 수정")
     @PutMapping(value = "/profile/description")
-    public ResponseEntity<UserResponseDto> updateUserDescription(@RequestBody String description) {
+    public ResponseEntity<UserResponseDto> updateUserDescription(@RequestBody @Schema(example = "{description: string}") String description) {
         LOGGER.info("updateUserDescription controller 호출됨");
         return ResponseEntity.ok(userService.updateUserDescription(description));
     }
