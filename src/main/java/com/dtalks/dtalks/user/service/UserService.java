@@ -21,5 +21,7 @@ public interface UserService {
 
     UserResponseDto userInfo();
 
+    UserResponseDto updateUserDescription(String description);
+
     Page<RecentActivityDto> getRecentActivities(Pageable pageable);
 }

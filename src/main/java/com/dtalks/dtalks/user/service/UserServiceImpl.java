@@ -235,6 +235,17 @@ public class UserServiceImpl implements UserService {
         return userResponseDto;
     }
 
+    @Override
+    @Transactional
+    public UserResponseDto updateUserDescription(String description) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+
+        user.setDescription(description);
+        User savedUser = userRepository.save(user);
+
+        UserResponseDto userResponseDto = UserResponseDto.toDto(savedUser);
+
+        return userResponseDto;
 
     @Override
     @Transactional
@@ -273,6 +284,7 @@ public class UserServiceImpl implements UserService {
             }
             return RecentActivityDto.toDto(id, type, title, writer, p.getCreateDate());
         });
+
     }
 
     private String getImageFormat(String imageName) {
