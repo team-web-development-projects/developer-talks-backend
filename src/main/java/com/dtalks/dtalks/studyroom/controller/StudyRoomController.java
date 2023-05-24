@@ -66,4 +66,12 @@ public class StudyRoomController {
         studyRoomService.deleteStudyRoom(id);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "스터디룸 가입")
+    @PostMapping("/study-room/join/{id}")
+    public ResponseEntity<StudyRoomResponseDto> joinStudyRoom(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(studyRoomService.joinStudyRoom(id));
+    }
 }

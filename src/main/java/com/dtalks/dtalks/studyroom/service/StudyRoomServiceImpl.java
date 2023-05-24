@@ -113,4 +113,44 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         }
         throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
     }
+
+    @Override
+    @Transactional
+    public StudyRoomResponseDto joinStudyRoom(Long id) {
+        Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(id);
+        if(optionalStudyRoom.isEmpty()) {
+            throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
+        }
+
+        StudyRoom studyRoom = optionalStudyRoom.get();
+
+        if(studyRoom.getJoinCount() >= studyRoom.getJoinableCount()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "가입 정원이 가득찼습니다.");
+        }
+
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+
+        // 이미 가입했는지 확인
+        for(StudyRoomUser studyRoomUser: studyRoom.getStudyRoomUsers()) {
+            if(studyRoomUser.getUser().getUserid().equals(user.getUserid())) {
+                throw new CustomException(ErrorCode.VALIDATION_ERROR, "이미 가입중인 상태입니다.");
+            }
+        }
+        StudyRoomUser studyRoomUser = new StudyRoomUser();
+        studyRoomUser.setStudyRoomLevel(StudyRoomLevel.NORMAL);
+        studyRoomUser.setUser(user);
+        studyRoomUser.setStudyRoom(studyRoom);
+        if(studyRoom.isAutoJoin()) {
+            studyRoom.addJoinCount();
+            studyRoomUser.setStatus(true);
+        }
+        else {
+            studyRoomUser.setStatus(false);
+        }
+
+        studyRoom.addStudyRoomUser(studyRoomUser);
+
+        StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
+        return StudyRoomResponseDto.toDto(savedStudyRoom);
+    }
 }
