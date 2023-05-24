@@ -3,16 +3,23 @@ package com.dtalks.dtalks.user.service;
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
+import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
+import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActivityType;
+import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +29,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -36,14 +44,17 @@ public class UserServiceImpl implements UserService {
     public final DocumentRepository documentRepository;
     private final String imagePath =  new File("").getAbsolutePath() + "/files/profile/";
 
+    private final ActivityRepository activityRepository;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, TokenService tokenService,
-                           PasswordEncoder passwordEncoder, DocumentRepository documentRepository) {
+                           PasswordEncoder passwordEncoder, DocumentRepository documentRepository,
+                           ActivityRepository activityRepository) {
         this.userRepository = userRepository;
         this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
         this.documentRepository = documentRepository;
+        this.activityRepository = activityRepository;
     }
 
     @Override
@@ -222,6 +233,46 @@ public class UserServiceImpl implements UserService {
         UserResponseDto userResponseDto = UserResponseDto.toDto(user);
 
         return userResponseDto;
+    }
+
+
+    @Override
+    @Transactional
+    public Page<RecentActivityDto> getRecentActivities(Pageable pageable) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        if (optionalUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime goe = now.minusDays(30);
+
+        Page<Activity> page = activityRepository.findByUserIdAndCreateDateBetween(optionalUser.get().getId(), goe, now, pageable);
+        return page.map(p -> {
+            Long id = null;
+            ActivityType type = p.getType();
+            String title = "";
+            String writer = "";
+            switch (type) {
+                case POST, COMMENT:
+                    Post post = p.getPost();
+                    if (post != null) {
+                        id = post.getId();
+                        title = post.getTitle();
+                        writer = post.getUser().getNickname();
+                    }
+                    break;
+                case QUESTION, ANSWER, ANSWER_SELECTED, SELECT_ANSWER, CANCEL_SELECT_ANSWER:
+                    Question question = p.getQuestion();
+                    if (question != null) {
+                        id = question.getId();
+                        title = question.getTitle();
+                        writer = question.getUser().getNickname();
+                    }
+                    break;
+            }
+            return RecentActivityDto.toDto(id, type, title, writer, p.getCreateDate());
+        });
     }
 
     private String getImageFormat(String imageName) {
