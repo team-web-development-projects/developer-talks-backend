@@ -2,6 +2,7 @@ package com.dtalks.dtalks.user.controller;
 
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.user.dto.DuplicateResponseDto;
+import com.dtalks.dtalks.user.dto.RecentActivityDto;
 import com.dtalks.dtalks.user.dto.UserResponseDto;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserDetailsService;
@@ -12,6 +13,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -72,5 +77,10 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUserDescription(@RequestBody @Schema(example = "{description: string}") String description) {
         LOGGER.info("updateUserDescription controller 호출됨");
         return ResponseEntity.ok(userService.updateUserDescription(description));
+
+    @GetMapping(value = "/recent/activity")
+    public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@PageableDefault(size = 10, sort = "createDate",  direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(userService.getRecentActivities(pageable));
+
     }
 }

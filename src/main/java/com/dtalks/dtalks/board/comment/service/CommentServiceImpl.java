@@ -10,7 +10,10 @@ import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
+import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActivityType;
+import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,7 @@ public class CommentServiceImpl implements CommentService{
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final ActivityRepository activityRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -103,6 +107,16 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
+
+        // 댓글 활동을 사용자 기록에 추가
+        Activity activity = Activity.builder()
+                .post(post.get())
+                .comment(comment)
+                .type(ActivityType.COMMENT)
+                .user(user.get())
+                .build();
+
+        activityRepository.save(activity);
     }
 
     @Override
@@ -136,6 +150,15 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
+
+        Activity activity = Activity.builder()
+                .post(post.get())
+                .comment(comment)
+                .type(ActivityType.COMMENT)
+                .user(user.get())
+                .build();
+
+        activityRepository.save(activity);
     }
 
 
@@ -185,6 +208,12 @@ public class CommentServiceImpl implements CommentService{
         if (!comment.getUser().getUserid().equals(currentUserId)) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 댓글을 수정할 권한이 없습니다.");
         }
+
+        Optional<Activity> optionalActivity = activityRepository.findByCommentId(comment.getId());
+        if (optionalActivity.isEmpty()) {
+            throw new CustomException(ErrorCode.ACTIVITY_NOT_FOUND_ERROR, "해당 댓글 활동을 찾을 수 없습니다.");
+        }
+        activityRepository.delete(optionalActivity.get());
 
         /**
          * 삭제하려는 댓글의 자식 댓글이 있는 경우
