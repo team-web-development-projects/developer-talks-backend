@@ -246,6 +246,7 @@ public class UserServiceImpl implements UserService {
         UserResponseDto userResponseDto = UserResponseDto.toDto(savedUser);
 
         return userResponseDto;
+    }
 
     @Override
     @Transactional

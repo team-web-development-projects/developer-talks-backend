@@ -77,6 +77,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUserDescription(@RequestBody @Schema(example = "{description: string}") String description) {
         LOGGER.info("updateUserDescription controller 호출됨");
         return ResponseEntity.ok(userService.updateUserDescription(description));
+    }
 
     @GetMapping(value = "/recent/activity")
     public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@PageableDefault(size = 10, sort = "createDate",  direction = Sort.Direction.DESC) Pageable pageable) {
