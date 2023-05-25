@@ -9,4 +9,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Page<Question> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String keyword1, String keyword2 ,Pageable pageable);
     Page<Question> findAllByOrderByIdDesc(Pageable pageable);
 
+    Page<Question> findByUserId(Long id, Pageable pageable);
+
 }

@@ -35,9 +35,17 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.searchAllQuestion(pageable));
     }
 
+    @Operation(summary = "특정 유저의 질문글 조회")
+    @GetMapping("/list/user/{userId}")
+    public ResponseEntity<Page<QuestionResponseDto>> searchQuestionsByUser(@PathVariable String userId,
+                                                                           @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(questionService.searchQuestionsByUser(userId, pageable));
+    }
+
     @Operation(summary = "키워드로 질물글 조회(제목과 본문에 keyword 포함시 조회)")
     @GetMapping("/search")
-    public ResponseEntity<Page<QuestionResponseDto>> searchQuestions(@RequestParam String keyword, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable){
+
+    public ResponseEntity<Page<QuestionResponseDto>> searchQuestions(@RequestParam String keyword, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(questionService.searchQuestions(keyword, pageable));
     }
 
@@ -61,13 +69,13 @@ public class QuestionController {
 
     @Operation(summary = "질문글 추천")
     @PostMapping("/recommend")
-    public ResponseEntity<Long> recommendQuestion(@Valid @RequestBody RecommendQuestionDto recommendQuestionDto){
+    public ResponseEntity<Long> recommendQuestion(@Valid @RequestBody RecommendQuestionDto recommendQuestionDto) {
         return ResponseEntity.ok(recommendQuestionService.recommendQuestion(recommendQuestionDto));
     }
 
     @Operation(summary = "질문글 추천 취소")
     @DeleteMapping("/recommend")
-    public ResponseEntity<Long> unrecommendQuestion(@Valid @RequestBody RecommendQuestionDto unRecommendQuestionDto){
+    public ResponseEntity<Long> unrecommendQuestion(@Valid @RequestBody RecommendQuestionDto unRecommendQuestionDto) {
         return ResponseEntity.ok(recommendQuestionService.unRecommendQuestion(unRecommendQuestionDto));
     }
 }
