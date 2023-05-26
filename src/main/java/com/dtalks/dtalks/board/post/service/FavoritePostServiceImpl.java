@@ -89,7 +89,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
 
     @Override
     public Page<PostDto> searchFavoritePostsByUser(String userId, Pageable pageable) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
