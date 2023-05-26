@@ -35,14 +35,14 @@ public class PostController {
     }
 
 
-    @Operation(summary = "모든 게시글 조회 (페이지 사용)")
+    @Operation(summary = "모든 게시글 조회 (페이지 사용, size = 10, sort=\"id\" desc 적용)")
     @GetMapping("/all")
     public ResponseEntity<Page<PostDto>> searchAll(@PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(postService.searchAllPost(pageable));
     }
 
 
-    @Operation(summary = "특정 유저의 게시글 조회 (페이지 사용 - 기본 post id로 정렬)", parameters = {
+    @Operation(summary = "특정 유저의 게시글 조회 (페이지 사용, size = 10, sort=\"id\" desc 적용)", parameters = {
             @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
     })
     @GetMapping("/list/user/{userId}")
@@ -52,7 +52,7 @@ public class PostController {
     }
 
 
-    @Operation(summary = "특정 유저의 즐겨찾기 게시글 조회 (페이지 사용 - 기본 post id로 정렬)", parameters = {
+    @Operation(summary = "특정 유저의 즐겨찾기 게시글 조회 (페이지 사용, size = 10, sort=\"id\" desc 적용)", parameters = {
             @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
     })
     @GetMapping("/list/favorite/{userId}")
@@ -62,7 +62,7 @@ public class PostController {
     }
 
 
-    @Operation(summary = "검색어로 게시글 검색", description = "keyword가 제목(title), 내용(content)에 포함되면 검색 게시글에 추가됨")
+    @Operation(summary = "검색어로 게시글 검색 (페이지 사용, size = 10, sort=\"id\" desc 적용)", description = "keyword가 제목(title), 내용(content)에 포함되면 검색 게시글에 추가됨")
     @GetMapping("/search")
     public ResponseEntity<Page<PostDto>> searchPosts(@RequestParam String keyword,
                                                     @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
