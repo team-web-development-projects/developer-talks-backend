@@ -115,8 +115,8 @@ public class PostController {
             @Parameter(name = "id", description = "즐겨찾기할 게시글의 id")
     })
     @PostMapping("/favorite/{id}")
-    public void favorite(@PathVariable Long id) {
-        favoritePostService.favorite(id);
+    public ResponseEntity<Integer> favorite(@PathVariable Long id) {
+        return ResponseEntity.ok(favoritePostService.favorite(id));
     }
 
 
@@ -124,8 +124,8 @@ public class PostController {
             @Parameter(name = "id", description = "즐겨찾기를 취소할 게시글의 id")
     })
     @DeleteMapping("/favorite/{id}")
-    public void unFavorite(@PathVariable Long id) {
-        favoritePostService.unFavorite(id);
+    public ResponseEntity<Integer> unFavorite(@PathVariable Long id) {
+        return ResponseEntity.ok(favoritePostService.unFavorite(id));
     }
 
 
@@ -133,8 +133,8 @@ public class PostController {
             @Parameter(name = "id", description = "추천할 게시글의 id")
     })
     @PostMapping("/recommend/{id}")
-    public void recommend(@PathVariable Long id) {
-        recommendPostService.recommend(id);
+    public ResponseEntity<Integer> recommend(@PathVariable Long id) {
+        return ResponseEntity.ok(recommendPostService.recommend(id));
     }
 
 
@@ -142,7 +142,7 @@ public class PostController {
             @Parameter(name = "id", description = "추천을 취소할 게시글의 id")
     })
     @DeleteMapping("/recommend/{id}")
-    public void cancelRecommend(@PathVariable Long id) {
-        recommendPostService.cancelRecommend(id);
+    public ResponseEntity<Integer> cancelRecommend(@PathVariable Long id) {
+        return ResponseEntity.ok( recommendPostService.cancelRecommend(id));
     }
 }

@@ -6,8 +6,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface FavoritePostService {
 
-    void favorite(Long postId);
-    void unFavorite(Long postId);
+    Integer favorite(Long postId);
+    Integer unFavorite(Long postId);
 
     Page<PostDto> searchFavoritePostsByUser(String userId, Pageable pageable);
 

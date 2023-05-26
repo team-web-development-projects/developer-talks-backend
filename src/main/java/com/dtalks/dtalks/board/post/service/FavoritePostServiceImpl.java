@@ -30,7 +30,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
 
     @Override
     @Transactional
-    public void favorite(Long postId) {
+    public Integer favorite(Long postId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -55,12 +55,13 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         FavoritePost favoritePost = FavoritePost.toEntity(post, user);
         favoritePostRepository.save(favoritePost);
 
-        customPostRepository.updateFavoriteCount(post, true);
+        post.setFavoriteCount(post.getFavoriteCount() + 1);
+        return post.getFavoriteCount();
     }
 
     @Override
     @Transactional
-    public void unFavorite(Long postId) {
+    public Integer unFavorite(Long postId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -82,7 +83,8 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         FavoritePost favoritePost = optionalFavoritePost.get();
         favoritePostRepository.delete(favoritePost);
 
-        customPostRepository.updateFavoriteCount(post, false);
+        post.setFavoriteCount(post.getFavoriteCount() - 1);
+        return post.getFavoriteCount();
     }
 
     @Override

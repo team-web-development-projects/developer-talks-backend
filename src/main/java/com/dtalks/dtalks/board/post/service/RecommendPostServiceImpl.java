@@ -23,11 +23,10 @@ public class RecommendPostServiceImpl implements RecommendPostService {
     private final RecommendPostRepository recommendPostRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final CustomPostRepository customPostRepository;
 
     @Override
     @Transactional
-    public void recommend(Long postId) {
+    public Integer recommend(Long postId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -52,12 +51,13 @@ public class RecommendPostServiceImpl implements RecommendPostService {
         RecommendPost recommendPost = RecommendPost.toEntity(post, user);
         recommendPostRepository.save(recommendPost);
 
-        customPostRepository.updateRecommendCount(post, true);
+        post.setRecommendCount(post.getRecommendCount() + 1);
+        return post.getRecommendCount();
     }
 
     @Override
     @Transactional
-    public void cancelRecommend(Long postId) {
+    public Integer cancelRecommend(Long postId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -78,7 +78,8 @@ public class RecommendPostServiceImpl implements RecommendPostService {
         recommendPostRepository.delete(recommendPost);
 
         Post post = optionalPost.get();
-        customPostRepository.updateRecommendCount(post, false);
+        post.setRecommendCount(post.getRecommendCount() - 1);
+        return post.getRecommendCount();
     }
 
     @Override
