@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.studyroom.controller;
 
+import com.dtalks.dtalks.studyroom.dto.StudyRoomJoinResponseDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomRequestDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomResponseDto;
 import com.dtalks.dtalks.studyroom.service.StudyRoomService;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "studyRooms")
 @RestController
@@ -73,5 +76,17 @@ public class StudyRoomController {
             @PathVariable Long id
     ) {
         return ResponseEntity.ok(studyRoomService.joinStudyRoom(id));
+    }
+
+    @Operation(summary = "스터디룸 가입 신청 리스트")
+    @GetMapping("study-rooms/requests")
+    public ResponseEntity<List<StudyRoomJoinResponseDto>> requestStudyRoom() {
+        return ResponseEntity.ok(studyRoomService.studyRoomRequestList());
+    }
+
+    @Operation(summary = "스터디룸 가입 승인")
+    @PostMapping("study-room/accept/{studyRoomId}/{studyRoomUserId}")
+    public ResponseEntity<StudyRoomResponseDto> acceptStudyRoom(@PathVariable Long studyRoomId, @PathVariable Long studyRoomUserId) {
+        return ResponseEntity.ok(studyRoomService.acceptJoinStudyRoom(studyRoomId, studyRoomUserId));
     }
 }

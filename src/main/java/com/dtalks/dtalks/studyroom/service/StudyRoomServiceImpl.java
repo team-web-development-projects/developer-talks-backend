@@ -2,6 +2,7 @@ package com.dtalks.dtalks.studyroom.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.studyroom.dto.StudyRoomJoinResponseDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomRequestDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomResponseDto;
 import com.dtalks.dtalks.studyroom.entity.StudyRoom;
@@ -151,6 +152,64 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         studyRoom.addStudyRoomUser(studyRoomUser);
 
         StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
+        return StudyRoomResponseDto.toDto(savedStudyRoom);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudyRoomJoinResponseDto> studyRoomRequestList() {
+        User leader = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(leader);
+        List<StudyRoomJoinResponseDto> studyRoomJoinResponseDtos = new ArrayList<>();
+
+        for(StudyRoomUser studyRoomUser: studyRoomUsers) {
+            StudyRoomLevel level = studyRoomUser.getStudyRoomLevel();
+            if(level.equals(StudyRoomLevel.LEADER) || level.equals(StudyRoomLevel.SUB_LEADER)) {
+                List<StudyRoomUser> studyRoomUserRequests = studyRoomUserRepository.findAllByStudyRoom(studyRoomUser.getStudyRoom());
+                for(StudyRoomUser studyRoomUserRequest: studyRoomUserRequests) {
+                    if(!studyRoomUserRequest.isStatus()) {
+                        studyRoomJoinResponseDtos.add(StudyRoomJoinResponseDto.toDto(studyRoomUser.getStudyRoom(), studyRoomUserRequest, studyRoomUserRequest.getUser()));
+                    }
+                }
+            }
+        }
+        return studyRoomJoinResponseDtos;
+    }
+
+    @Override
+    @Transactional
+    public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(studyRoomId);
+        if(optionalStudyRoom.isEmpty()) {
+            throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸 입니다.");
+        }
+        StudyRoom studyRoom = optionalStudyRoom.get();
+        Optional<StudyRoomUser> optionalStudyRoomUser = studyRoomUserRepository.findByStudyRoomAndUser(studyRoom, user);
+        if(optionalStudyRoomUser.isEmpty()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 권한이 없습니다.");
+        }
+        StudyRoomUser studyRoomUser = optionalStudyRoomUser.get();
+        if(!(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER) || studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.SUB_LEADER))) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 권한이 없습니다.");
+        }
+
+        Optional<StudyRoomUser> optionalRequestStudyRoomUser = studyRoomUserRepository.findById(studyRoomUserId);
+        if(optionalRequestStudyRoomUser.isEmpty()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 가입신청 상태가 아닙니다.");
+        }
+
+        StudyRoomUser requestStudyRoomUser = optionalRequestStudyRoomUser.get();
+        if(requestStudyRoomUser.isStatus()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 이미 가입중입니다.");
+        }
+        if(studyRoom.getJoinCount() >= studyRoom.getJoinableCount()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "스터디룸 가입 정원이 가득 찼습니다.");
+        }
+        studyRoom.addJoinCount();
+        StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
+        requestStudyRoomUser.setStatus(true);
+        studyRoomUserRepository.save(requestStudyRoomUser);
         return StudyRoomResponseDto.toDto(savedStudyRoom);
     }
 }
