@@ -46,7 +46,7 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.searchQuestionsByUser(userId, pageable));
     }
 
-    @Operation(summary = "키워드로 질문글 조회(제목과 본문에 keyword 포함시 조회)")
+    @Operation(summary = "키워드로 질가글 조회(제목과 본문에 keyword 포함시 조회)")
     @GetMapping("/search")
     public ResponseEntity<Page<QuestionResponseDto>> searchQuestions(@RequestParam String keyword, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(questionService.searchQuestions(keyword, pageable));
@@ -79,14 +79,14 @@ public class QuestionController {
 
     @Operation(summary = "질문글 추천")
     @PostMapping("/recommend/{id}")
-    public void recommendQuestion(@PathVariable Long id) {
-        recommendQuestionService.recommendQuestion(id);
+    public ResponseEntity<Integer> recommendQuestion(@PathVariable Long id) {
+        return ResponseEntity.ok(recommendQuestionService.recommendQuestion(id));
     }
 
     @Operation(summary = "질문글 추천 취소")
     @DeleteMapping("/recommend/{id}")
-    public void unrecommendQuestion(@PathVariable Long id) {
-        recommendQuestionService.unRecommendQuestion(id);
+    public ResponseEntity<Integer> unrecommendQuestion(@PathVariable Long id) {
+        return ResponseEntity.ok(recommendQuestionService.unRecommendQuestion(id));
     }
 
     @Operation(summary = "질문글 스크랩")

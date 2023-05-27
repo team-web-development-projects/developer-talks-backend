@@ -23,7 +23,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     private final QuestionRepository questionRepository;
 
     @Override
-    public void recommendQuestion(Long questionId) {
+    public Integer recommendQuestion(Long questionId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -45,11 +45,12 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         question.updateLike(true);
         recommendQuestionRepository.save(recommendQuestion);
+        return question.getLikeCount();
     }
 
     @Override
     @Transactional
-    public void unRecommendQuestion(Long questionId) {
+    public Integer unRecommendQuestion(Long questionId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다. ");
@@ -69,6 +70,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         question.updateLike(false);
         recommendQuestionRepository.deleteByUserAndQuestion(user, question);
+        return question.getLikeCount();
     }
 
 }
