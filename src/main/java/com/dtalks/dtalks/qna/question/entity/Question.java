@@ -36,6 +36,10 @@ public class Question extends BaseTimeEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Integer viewCount;
     @ColumnDefault("0")
     @Column(nullable = false)
     private Integer likeCount;
@@ -50,6 +54,7 @@ public class Question extends BaseTimeEntity {
                 .user(user)
                 .title(questionDto.getTitle())
                 .content(questionDto.getContent())
+                .viewCount(0)
                 .likeCount(0)
                 .scrapCount(0)
                 .build();
@@ -58,6 +63,10 @@ public class Question extends BaseTimeEntity {
     public void update(String title, String content){
         this.title = title;
         this.content = content;
+    }
+
+    public void updateViewCount(){
+        this.viewCount++;
     }
 
     public void updateLike(boolean like){

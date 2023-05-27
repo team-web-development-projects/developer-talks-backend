@@ -27,11 +27,13 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional(readOnly = true)
     public QuestionResponseDto searchById(Long id) {
-        Optional<Question> question = questionRepository.findById(id);
-        if (question.isEmpty()) {
+        Optional<Question> optionalQuestion = questionRepository.findById(id);
+        if (optionalQuestion.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
-        return QuestionResponseDto.toDto(question.get());
+        Question question = optionalQuestion.get();
+        question.updateViewCount();
+        return QuestionResponseDto.toDto(question);
     }
 
     @Override
