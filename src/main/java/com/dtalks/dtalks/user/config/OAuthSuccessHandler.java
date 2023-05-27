@@ -38,7 +38,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         LOGGER.info("onAuthenticationSuccess 호출됨");
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        UserTokenDto userTokenDto = new UserTokenDto();
+        UserTokenDto userTokenDto = UserTokenDto.builder().build();
         userTokenDto.setEmail(oAuth2User.getAttribute("email"));
         userTokenDto.setNickname(oAuth2User.getAttribute("nickname"));
         userTokenDto.setUserid(oAuth2User.getAttribute("userid"));
@@ -47,17 +47,9 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         String targetUrl;
         if(!isActive) {
-            if(userTokenDto.getProvider().equals("google")) {
-                targetUrl = UriComponentsBuilder.fromUriString(firstUrl)
-                        .queryParam("email", userTokenDto.getEmail())
-                        .queryParam("accessToken", tokenService.createAccessToken(userTokenDto))
-                        .build().toString();
-            }
-            else {
-                targetUrl = UriComponentsBuilder.fromUriString(firstUrl)
-                        .queryParam("accessToken", tokenService.createAccessToken(userTokenDto))
-                        .build().toString();
-            }
+            targetUrl = UriComponentsBuilder.fromUriString(firstUrl)
+                    .queryParam("accessToken", tokenService.createAccessToken(userTokenDto))
+                    .build().toString();
         }
         else {
             String accessToken = tokenService.createAccessToken(userTokenDto);

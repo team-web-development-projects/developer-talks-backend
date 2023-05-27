@@ -111,11 +111,7 @@ public class UserServiceImpl implements UserService {
         LOGGER.info("SERVICE signIn");
         User user = userRepository.getByUserid(signInDto.getUserid());
 
-        UserTokenDto userTokenDto = new UserTokenDto();
-        userTokenDto.setEmail(user.getEmail());
-        userTokenDto.setNickname(user.getNickname());
-        userTokenDto.setUserid(user.getUserid());
-        userTokenDto.setProvider(user.getRegistrationId());
+        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
 
         if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
             throw new RuntimeException();
@@ -180,11 +176,8 @@ public class UserServiceImpl implements UserService {
             setFailResult(signInResponseDto);
             return signInResponseDto;
         }
-        UserTokenDto userTokenDto = new UserTokenDto();
-        userTokenDto.setEmail(user.getEmail());
-        userTokenDto.setUserid(user.getUserid());
-        userTokenDto.setNickname(user.getNickname());
-        userTokenDto.setProvider(user.getRegistrationId());
+        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+
         signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
         signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
         setSuccessResult(signInResponseDto);
@@ -301,24 +294,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto oAuthSignUp(SignUpDto signUpDto) {
-        User user = userRepository.getByEmail(signUpDto.getEmail());
-        Optional<Document> optionalImage = documentRepository.findById(signUpDto.getProfileImageId());
+    public SignInResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        Optional<Document> optionalImage = documentRepository.findById(oAuthSignUpDto.getProfileImageId());
 
         if(optionalImage.isEmpty()) {
             throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "해당하는 이미지를 찾을 수 없습니다.");
         }
 
-        user.setNickname(signUpDto.getNickname());
-        user.setEmail(signUpDto.getEmail());
-        user.setSkills(signUpDto.getSkills());
-        user.setDescription(signUpDto.getDescription());
+        user.setNickname(oAuthSignUpDto.getNickname());
+        user.setSkills(oAuthSignUpDto.getSkills());
+        user.setDescription(oAuthSignUpDto.getDescription());
         user.setProfileImage(optionalImage.get());
         user.setIsActive(true);
 
         User savedUser = userRepository.save(user);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        String accessToken = tokenService.createAccessToken(userTokenDto);
+        String refreshToken = tokenService.createRefreshToken(userTokenDto);
 
-        return UserResponseDto.toDto(savedUser);
+        SignInResponseDto signInResponseDto = new SignInResponseDto();
+        signInResponseDto.setAccessToken(accessToken);
+        signInResponseDto.setRefreshToken(refreshToken);
+
+        return signInResponseDto;
     }
 
     private String getImageFormat(String imageName) {
