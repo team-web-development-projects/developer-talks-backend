@@ -76,7 +76,7 @@ public class CommentServiceImpl implements CommentService{
     @Override
     @Transactional(readOnly = true)
     public List<CommentInfoDto> searchListByUserId(String userId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
