@@ -2,6 +2,7 @@ package com.dtalks.dtalks.qna.question.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.entity.ScrapQuestion;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
@@ -10,10 +11,15 @@ import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +34,7 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
 
     @Override
     @Transactional
-    public void addScrap(Long questionId) {
+    public Integer addScrap(Long questionId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -53,11 +59,12 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
         scrapQuestionRepository.save(scrapQuestion);
 
         question.updateScrap(true);
+        return question.getScrapCount();
     }
 
     @Override
     @Transactional
-    public void removeScrap(Long questionId) {
+    public Integer removeScrap(Long questionId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -80,5 +87,21 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
         scrapQuestionRepository.delete(scrapQuestion);
 
         question.updateScrap(false);
+        return question.getScrapCount();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<QuestionResponseDto> searchScrapQuestionsByUser(String userId, Pageable pageable) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        if (optionalUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+        Page<ScrapQuestion> scrapQuestions = scrapQuestionRepository.findByUserId(userId, pageable);
+        List<QuestionResponseDto> questionResponseDtos = scrapQuestions.getContent().stream()
+                .map(scrapQuestion -> QuestionResponseDto.toDto(scrapQuestion.getQuestion()))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(questionResponseDtos, pageable, scrapQuestions.getTotalElements());
     }
 }

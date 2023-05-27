@@ -30,7 +30,6 @@ public class Question extends BaseTimeEntity {
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Answer> answerList = new ArrayList<>();
 
-
     @Column(nullable = false)
     private String title;
 

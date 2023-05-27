@@ -46,8 +46,16 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.searchQuestionsByUser(userId, pageable));
     }
 
+    @Operation(summary = "특정 유저의 스크랩 질문글 조회")
+    @GetMapping("/list/scrap/{userId}")
+    public ResponseEntity<Page<QuestionResponseDto>> searchScrapQuestionsByUser(@PathVariable String userId,
+                                                                                @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(scrapQuestionService.searchScrapQuestionsByUser(userId, pageable));
+    }
+
     @Operation(summary = "키워드로 질가글 조회(제목과 본문에 keyword 포함시 조회)")
     @GetMapping("/search")
+
     public ResponseEntity<Page<QuestionResponseDto>> searchQuestions(@RequestParam String keyword, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(questionService.searchQuestions(keyword, pageable));
     }
@@ -91,13 +99,13 @@ public class QuestionController {
 
     @Operation(summary = "질문글 스크랩")
     @PostMapping("/scrap/{id}")
-    public void addScrap(@PathVariable Long id) {
-        scrapQuestionService.addScrap(id);
+    public ResponseEntity<Integer> addScrap(@PathVariable Long id) {
+        return ResponseEntity.ok(scrapQuestionService.addScrap(id));
     }
 
     @Operation(summary = "질문글 스크랩 취소")
     @DeleteMapping("/scrap/{id}")
-    public void removeScrap(@PathVariable Long id) {
-        scrapQuestionService.removeScrap(id);
+    public ResponseEntity<Integer> removeScrap(@PathVariable Long id) {
+        return ResponseEntity.ok(scrapQuestionService.removeScrap(id));
     }
 }
