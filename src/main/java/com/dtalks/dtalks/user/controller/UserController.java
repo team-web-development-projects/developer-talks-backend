@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.user.controller;
 
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
+import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.dto.DuplicateResponseDto;
 import com.dtalks.dtalks.user.dto.RecentActivityDto;
 import com.dtalks.dtalks.user.dto.UserResponseDto;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.List;
 
 @Tag(name = "users")
 @RestController
@@ -83,5 +85,11 @@ public class UserController {
     public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@PageableDefault(size = 10, sort = "createDate",  direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(userService.getRecentActivities(pageable));
 
+    }
+
+    @Operation(summary = "유저 기술스택 수정")
+    @PutMapping(value = "/profile/skills")
+    public ResponseEntity<UserResponseDto> updateUserSkills(@RequestBody @Schema(example = "{skills: [DJANGO, AWS]}")List <Skill> skills) {
+        return ResponseEntity.ok(userService.updateUserSkills(skills));
     }
 }
