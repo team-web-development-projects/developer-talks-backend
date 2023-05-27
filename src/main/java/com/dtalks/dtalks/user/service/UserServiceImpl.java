@@ -314,6 +314,7 @@ public class UserServiceImpl implements UserService {
         user.setSkills(signUpDto.getSkills());
         user.setDescription(signUpDto.getDescription());
         user.setProfileImage(optionalImage.get());
+        user.setIsActive(true);
 
         User savedUser = userRepository.save(user);
 
