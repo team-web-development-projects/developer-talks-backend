@@ -38,7 +38,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         LOGGER.info("onAuthenticationSuccess 호출됨");
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        UserTokenDto userTokenDto = new UserTokenDto();
+        UserTokenDto userTokenDto = UserTokenDto.builder().build();
         userTokenDto.setEmail(oAuth2User.getAttribute("email"));
         userTokenDto.setNickname(oAuth2User.getAttribute("nickname"));
         userTokenDto.setUserid(oAuth2User.getAttribute("userid"));
