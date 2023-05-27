@@ -7,6 +7,7 @@ import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.qna.question.entity.Question;
+import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
@@ -31,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -286,6 +288,15 @@ public class UserServiceImpl implements UserService {
             return RecentActivityDto.toDto(id, type, title, writer, p.getCreateDate());
         });
 
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto updateUserSkills(List<Skill> skills) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        user.setSkills(skills);
+        User savedUser = userRepository.save(user);
+        return UserResponseDto.toDto(savedUser);
     }
 
     private String getImageFormat(String imageName) {
