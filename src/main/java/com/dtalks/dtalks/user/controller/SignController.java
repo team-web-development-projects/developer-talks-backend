@@ -47,4 +47,10 @@ public class SignController {
 
         return ResponseEntity.ok(signInResponseDto);
     }
+
+    @Operation(summary = "oauth 추가정보 입력")
+    @PutMapping(value = "oauth/sign-up")
+    public ResponseEntity<UserResponseDto> oAuthSignUp(@Valid @RequestBody SignUpDto signUpDto) {
+        return ResponseEntity.ok(userService.oAuthSignUp(signUpDto));
+    }
 }

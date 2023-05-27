@@ -29,4 +29,6 @@ public interface UserService {
     UserResponseDto updateUserSkills(List<Skill> skills);
 
     Page<RecentActivityDto> getRecentActivities(Pageable pageable);
+
+    UserResponseDto oAuthSignUp(SignUpDto signUpDto);
 }

@@ -212,7 +212,7 @@ public class UserServiceImpl implements UserService {
             Files.write(savePath, file.getBytes());
         }
         catch (Exception e) {
-            throw new RuntimeException();
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.toString());
         }
 
         Document document = new Document();
@@ -297,6 +297,26 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         user.setSkills(skills);
         User savedUser = userRepository.save(user);
+        return UserResponseDto.toDto(savedUser);
+    }
+
+    @Override
+    public UserResponseDto oAuthSignUp(SignUpDto signUpDto) {
+        User user = userRepository.getByEmail(signUpDto.getEmail());
+        Optional<Document> optionalImage = documentRepository.findById(signUpDto.getProfileImageId());
+
+        if(optionalImage.isEmpty()) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "해당하는 이미지를 찾을 수 없습니다.");
+        }
+
+        user.setNickname(signUpDto.getNickname());
+        user.setEmail(signUpDto.getEmail());
+        user.setSkills(signUpDto.getSkills());
+        user.setDescription(signUpDto.getDescription());
+        user.setProfileImage(optionalImage.get());
+
+        User savedUser = userRepository.save(user);
+
         return UserResponseDto.toDto(savedUser);
     }
 
