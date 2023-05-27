@@ -3,6 +3,7 @@ package com.dtalks.dtalks.qna.question.controller;
 import com.dtalks.dtalks.qna.question.service.QuestionService;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
+import com.dtalks.dtalks.qna.question.service.ScrapQuestionService;
 import com.dtalks.dtalks.qna.recommendation.dto.RecommendQuestionDto;
 import com.dtalks.dtalks.qna.recommendation.service.RecommendQuestionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,8 @@ public class QuestionController {
 
     private final RecommendQuestionService recommendQuestionService;
 
+    private final ScrapQuestionService scrapQuestionService;
+
     @Operation(summary = "특정 질문글 id로 조회")
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponseDto> searchById(@PathVariable Long id) {
@@ -38,7 +41,7 @@ public class QuestionController {
     @Operation(summary = "특정 유저의 질문글 조회")
     @GetMapping("/list/user/{userId}")
     public ResponseEntity<Page<QuestionResponseDto>> searchQuestionsByUser(@PathVariable String userId,
-                                                                           @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
+                                                                           @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(questionService.searchQuestionsByUser(userId, pageable));
     }
 
@@ -77,5 +80,17 @@ public class QuestionController {
     @DeleteMapping("/recommend")
     public ResponseEntity<Long> unrecommendQuestion(@Valid @RequestBody RecommendQuestionDto unRecommendQuestionDto) {
         return ResponseEntity.ok(recommendQuestionService.unRecommendQuestion(unRecommendQuestionDto));
+    }
+
+    @Operation(summary = "질문글 스크랩")
+    @PostMapping("/scrap/{id}")
+    public void addScrap(@PathVariable Long id) {
+        scrapQuestionService.addScrap(id);
+    }
+
+    @Operation(summary = "질문글 스크랩 취소")
+    @DeleteMapping("/scrap/{id}")
+    public void removeScrap(@PathVariable Long id) {
+        scrapQuestionService.removeScrap(id);
     }
 }

@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,13 @@ public class Question extends BaseTimeEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+    @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer likeCount;
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Integer scrapCount;
 
     @Builder
     public static  Question toEntity(QuestionDto questionDto, User user) {
@@ -43,6 +51,7 @@ public class Question extends BaseTimeEntity {
                 .title(questionDto.getTitle())
                 .content(questionDto.getContent())
                 .likeCount(0)
+                .scrapCount(0)
                 .build();
     }
 
@@ -57,6 +66,14 @@ public class Question extends BaseTimeEntity {
         }
         else{
             this.likeCount--;
+        }
+    }
+
+    public void updateScrap(boolean scrap) {
+        if (scrap) {
+            this.scrapCount++;
+        } else {
+            this.scrapCount--;
         }
     }
 }
