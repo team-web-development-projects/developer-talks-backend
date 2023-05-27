@@ -4,7 +4,6 @@ import com.dtalks.dtalks.qna.question.service.QuestionService;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
 import com.dtalks.dtalks.qna.question.service.ScrapQuestionService;
-import com.dtalks.dtalks.qna.recommendation.dto.RecommendQuestionDto;
 import com.dtalks.dtalks.qna.recommendation.service.RecommendQuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -71,15 +70,15 @@ public class QuestionController {
     }
 
     @Operation(summary = "질문글 추천")
-    @PostMapping("/recommend")
-    public ResponseEntity<Long> recommendQuestion(@Valid @RequestBody RecommendQuestionDto recommendQuestionDto) {
-        return ResponseEntity.ok(recommendQuestionService.recommendQuestion(recommendQuestionDto));
+    @PostMapping("/recommend/{id}")
+    public void recommendQuestion(@PathVariable Long id) {
+        recommendQuestionService.recommendQuestion(id);
     }
 
     @Operation(summary = "질문글 추천 취소")
-    @DeleteMapping("/recommend")
-    public ResponseEntity<Long> unrecommendQuestion(@Valid @RequestBody RecommendQuestionDto unRecommendQuestionDto) {
-        return ResponseEntity.ok(recommendQuestionService.unRecommendQuestion(unRecommendQuestionDto));
+    @DeleteMapping("/recommend/{id}")
+    public void unrecommendQuestion(@PathVariable Long id) {
+        recommendQuestionService.unRecommendQuestion(id);
     }
 
     @Operation(summary = "질문글 스크랩")
