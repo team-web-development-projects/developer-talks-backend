@@ -47,17 +47,9 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         String targetUrl;
         if(!isActive) {
-            if(userTokenDto.getProvider().equals("google")) {
-                targetUrl = UriComponentsBuilder.fromUriString(firstUrl)
-                        .queryParam("email", userTokenDto.getEmail())
-                        .queryParam("accessToken", tokenService.createAccessToken(userTokenDto))
-                        .build().toString();
-            }
-            else {
-                targetUrl = UriComponentsBuilder.fromUriString(firstUrl)
-                        .queryParam("accessToken", tokenService.createAccessToken(userTokenDto))
-                        .build().toString();
-            }
+            targetUrl = UriComponentsBuilder.fromUriString(firstUrl)
+                    .queryParam("accessToken", tokenService.createAccessToken(userTokenDto))
+                    .build().toString();
         }
         else {
             String accessToken = tokenService.createAccessToken(userTokenDto);

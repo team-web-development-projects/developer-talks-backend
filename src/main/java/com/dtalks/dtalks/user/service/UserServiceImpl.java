@@ -301,18 +301,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto oAuthSignUp(SignUpDto signUpDto) {
-        User user = userRepository.getByEmail(signUpDto.getEmail());
-        Optional<Document> optionalImage = documentRepository.findById(signUpDto.getProfileImageId());
+    public UserResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        Optional<Document> optionalImage = documentRepository.findById(oAuthSignUpDto.getProfileImageId());
 
         if(optionalImage.isEmpty()) {
             throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "해당하는 이미지를 찾을 수 없습니다.");
         }
 
-        user.setNickname(signUpDto.getNickname());
-        user.setEmail(signUpDto.getEmail());
-        user.setSkills(signUpDto.getSkills());
-        user.setDescription(signUpDto.getDescription());
+        user.setNickname(oAuthSignUpDto.getNickname());
+        user.setSkills(oAuthSignUpDto.getSkills());
+        user.setDescription(oAuthSignUpDto.getDescription());
         user.setProfileImage(optionalImage.get());
         user.setIsActive(true);
 

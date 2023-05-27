@@ -30,5 +30,5 @@ public interface UserService {
 
     Page<RecentActivityDto> getRecentActivities(Pageable pageable);
 
-    UserResponseDto oAuthSignUp(SignUpDto signUpDto);
+    UserResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto);
 }

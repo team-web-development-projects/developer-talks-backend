@@ -50,7 +50,7 @@ public class SignController {
 
     @Operation(summary = "oauth 추가정보 입력")
     @PutMapping(value = "oauth/sign-up")
-    public ResponseEntity<UserResponseDto> oAuthSignUp(@Valid @RequestBody SignUpDto signUpDto) {
-        return ResponseEntity.ok(userService.oAuthSignUp(signUpDto));
+    public ResponseEntity<UserResponseDto> oAuthSignUp(@Valid @RequestBody OAuthSignUpDto oAuthSignUpDto) {
+        return ResponseEntity.ok(userService.oAuthSignUp(oAuthSignUpDto));
     }
 }
