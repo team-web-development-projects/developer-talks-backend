@@ -14,14 +14,5 @@ public class UserDto {
     private String userid;
     private String nickname;
     private String registrationId;
-
-    public User toUser() {
-        return User.builder()
-                .email(email)
-                .userid(userid)
-                .nickname(nickname)
-                .registrationId(registrationId)
-                .roles(Collections.singletonList("USER"))
-                .build();
-    }
+    private boolean isActive;
 }

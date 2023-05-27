@@ -44,10 +44,11 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
         UserDto userDto = OAuthAttributes.extract(registrationId, attributes);
+        userDto.setActive(false);
         userDto.setRegistrationId(registrationId);
-        saveOrUpdate(userDto);
+        User savedUser = saveOrUpdate(userDto);
 
-        Map<String, Object> customAttribute =customAttribute(attributes, userNameAttributeName, userDto, registrationId);
+        Map<String, Object> customAttribute = customAttribute(attributes, userNameAttributeName, savedUser);
 
         return new DefaultOAuth2User(
                 Collections.singletonList(new SimpleGrantedAuthority("USER")),
@@ -56,24 +57,24 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
         );
     }
 
-    private Map customAttribute(Map attributes, String userNameAttributeName, UserDto userDto, String registrationId) {
+    private Map customAttribute(Map attributes, String userNameAttributeName, User user) {
         Map<String, Object> customAttribute = new LinkedHashMap<>();
         customAttribute.put(userNameAttributeName, attributes.get(userNameAttributeName));
-        customAttribute.put("email", userDto.getEmail());
-        customAttribute.put("userid", userDto.getEmail());
-        customAttribute.put("registrationId", registrationId);
-        customAttribute.put("nickname", userDto.getNickname());
+        customAttribute.put("email", user.getEmail());
+        customAttribute.put("userid", user.getEmail());
+        customAttribute.put("registrationId", user.getRegistrationId());
+        customAttribute.put("nickname", user.getNickname());
+        customAttribute.put("isActive", user.getIsActive());
         return customAttribute;
     }
 
     private User saveOrUpdate(UserDto userDto) {
         User user = userRepository.getByEmail(userDto.getEmail());
         if(user == null) {
-            user = userDto.toUser();
+            user = User.toUser(userDto);
         }
         else {
             user.setEmail(userDto.getEmail());
-            user.setNickname(userDto.getNickname());
             user.setUserid(userDto.getEmail());
         }
         return userRepository.save(user);

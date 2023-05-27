@@ -10,6 +10,7 @@ import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
 import com.dtalks.dtalks.studyroom.enums.Skill;
+import com.dtalks.dtalks.user.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +64,9 @@ public class User extends BaseTimeEntity implements UserDetails{
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(nullable = false)
+    private Boolean isActive;
 
     private String status;
 
@@ -124,5 +129,16 @@ public class User extends BaseTimeEntity implements UserDetails{
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public static User toUser(UserDto userDto) {
+        return User.builder()
+                .email(userDto.getEmail())
+                .userid(userDto.getUserid())
+                .nickname(userDto.getNickname())
+                .registrationId(userDto.getRegistrationId())
+                .roles(Collections.singletonList("USER"))
+                .isActive(userDto.isActive())
+                .build();
     }
 }

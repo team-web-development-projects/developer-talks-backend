@@ -83,6 +83,7 @@ public class UserServiceImpl implements UserService {
                 .skills(signUpDto.getSkills())
                 .description(signUpDto.getDescription())
                 .roles(Collections.singletonList("USER"))
+                .isActive(true)
                 .build();
 
         Optional<Document> document = documentRepository.findById(signUpDto.getProfileImageId());
