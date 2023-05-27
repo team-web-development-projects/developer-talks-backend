@@ -15,6 +15,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/questions")
@@ -44,15 +46,21 @@ public class QuestionController {
         return ResponseEntity.ok(questionService.searchQuestionsByUser(userId, pageable));
     }
 
-    @Operation(summary = "키워드로 질물글 조회(제목과 본문에 keyword 포함시 조회)")
+    @Operation(summary = "키워드로 질문글 조회(제목과 본문에 keyword 포함시 조회)")
     @GetMapping("/search")
-
     public ResponseEntity<Page<QuestionResponseDto>> searchQuestions(@RequestParam String keyword, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(questionService.searchQuestions(keyword, pageable));
     }
 
+    @Operation(summary = "추천수 best 5 질문글 조회")
+    @GetMapping("/best")
+    public ResponseEntity<List<QuestionResponseDto>> search5BestQuestions() {
+        return ResponseEntity.ok(questionService.search5BestQuestions());
+    }
+
     @Operation(summary = "질문글 작성")
     @PostMapping
+
     public ResponseEntity<Long> createQuestion(@Valid @RequestBody QuestionDto questionDto) {
         return ResponseEntity.ok(questionService.createQuestion(questionDto));
     }

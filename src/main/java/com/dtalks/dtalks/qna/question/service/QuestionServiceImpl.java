@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,6 +65,12 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
         return questionPage.map(QuestionResponseDto::toDto);
+    }
+
+    @Override
+    public List<QuestionResponseDto> search5BestQuestions() {
+        List<Question> top5Questions = questionRepository.findTop5ByOrderByLikeCountDesc();
+        return top5Questions.stream().map(QuestionResponseDto::toDto).toList();
     }
 
     @Override
