@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,11 +28,13 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional(readOnly = true)
     public QuestionResponseDto searchById(Long id) {
-        Optional<Question> question = questionRepository.findById(id);
-        if (question.isEmpty()) {
+        Optional<Question> optionalQuestion = questionRepository.findById(id);
+        if (optionalQuestion.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
-        return QuestionResponseDto.toDto(question.get());
+        Question question = optionalQuestion.get();
+        question.updateViewCount();
+        return QuestionResponseDto.toDto(question);
     }
 
     @Override
@@ -43,12 +46,31 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<QuestionResponseDto> searchQuestionsByUser(String userId, Pageable pageable) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
+        if (optionalUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+        User user = optionalUser.get();
+        Page<Question> questions = questionRepository.findByUserId(user.getId(), pageable);
+        return questions.map(QuestionResponseDto::toDto);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<QuestionResponseDto> searchQuestions(String keyword, Pageable pageable) {
         Page<Question> questionPage = questionRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
         if (questionPage.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
         return questionPage.map(QuestionResponseDto::toDto);
+    }
+
+    @Override
+    public List<QuestionResponseDto> search5BestQuestions() {
+        List<Question> top5Questions = questionRepository.findTop5ByOrderByLikeCountDesc();
+        return top5Questions.stream().map(QuestionResponseDto::toDto).toList();
     }
 
     @Override
@@ -66,7 +88,6 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public Long updateQuestion(Long questionId, QuestionDto questionDto) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if (optionalQuestion.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");

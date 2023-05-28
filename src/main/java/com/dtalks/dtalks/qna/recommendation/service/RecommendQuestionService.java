@@ -1,9 +1,7 @@
 package com.dtalks.dtalks.qna.recommendation.service;
 
-import com.dtalks.dtalks.qna.recommendation.dto.RecommendQuestionDto;
-
 public interface RecommendQuestionService {
-    Long recommendQuestion(RecommendQuestionDto recommend);
+    Integer recommendQuestion(Long questionId);
 
-    Long unRecommendQuestion(RecommendQuestionDto unRecommend);
+    Integer unRecommendQuestion(Long questionId);
 }
