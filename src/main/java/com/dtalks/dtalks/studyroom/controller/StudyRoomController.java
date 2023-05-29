@@ -59,7 +59,7 @@ public class StudyRoomController {
     @Operation(summary = "스터디룸 업데이트")
     @PutMapping("/study-room/{id}")
     public ResponseEntity<StudyRoomResponseDto> updateStudyRoom(@PathVariable Long id,
-                                                                StudyRoomRequestDto studyRoomRequestDto) {
+                                                                @Valid @RequestBody StudyRoomRequestDto studyRoomRequestDto) {
         return ResponseEntity.ok(studyRoomService.updateStudyRoom(id, studyRoomRequestDto));
     }
 
