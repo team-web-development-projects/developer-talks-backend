@@ -309,7 +309,7 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(true);
 
         User savedUser = userRepository.save(user);
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         String accessToken = tokenService.createAccessToken(userTokenDto);
         String refreshToken = tokenService.createRefreshToken(userTokenDto);
 
