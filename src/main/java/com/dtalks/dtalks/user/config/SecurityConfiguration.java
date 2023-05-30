@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
                         ,"/token/refresh").permitAll()
                 .requestMatchers("**exception**").permitAll()
+                .requestMatchers("/users/recent/activity/**", "/users/private/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/post/**", "/comment/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/questions/**", "/answers/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users/profile/image").permitAll()
