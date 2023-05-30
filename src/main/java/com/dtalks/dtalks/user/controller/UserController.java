@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -72,6 +73,12 @@ public class UserController {
         DocumentResponseDto documentResponseDto = userService.userProfileImageUpLoad(file);
 
         return ResponseEntity.ok(documentResponseDto);
+    }
+
+    @Operation(summary = "프로필 이미지 조회")
+    @GetMapping(value = "/profile/image")
+    public ResponseEntity<Resource> getUserProfileImage() {
+        return userService.getUserProfileImage();
     }
 
     @Operation(summary = "유저 소개글 수정")

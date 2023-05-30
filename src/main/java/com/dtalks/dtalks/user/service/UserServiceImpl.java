@@ -19,14 +19,19 @@ import com.dtalks.dtalks.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -219,6 +224,32 @@ public class UserServiceImpl implements UserService {
         documentResponseDto.setName(savedDocument.getInputName());
 
         return documentResponseDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<Resource> getUserProfileImage() {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        String storeName = user.getProfileImage().getStoreName();
+        Path path = Paths.get(imagePath + storeName);
+        try {
+            Resource resource = new UrlResource(path.toUri());
+            String format = getImageFormat(storeName);
+            if(format.equals("jpg")) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(resource);
+            }
+            else if(format.equals("png")) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_PNG)
+                        .body(resource);
+            }
+            throw new CustomException(ErrorCode.FILE_FORMAT_ERROR, "파일 포멧이 올바르지 않습니다.");
+        }
+        catch (MalformedURLException e) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
+        }
     }
 
     @Override
