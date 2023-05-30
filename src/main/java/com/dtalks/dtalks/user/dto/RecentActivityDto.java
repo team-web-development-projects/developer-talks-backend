@@ -28,16 +28,16 @@ public class RecentActivityDto {
     private String writer;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime activityTime;
+    private LocalDateTime createDate;
 
     @Builder
-    public static RecentActivityDto toDto(Long id, ActivityType type, String title, String writer, LocalDateTime activityTime) {
+    public static RecentActivityDto toDto(Long id, ActivityType type, String title, String writer, LocalDateTime createDate) {
         return RecentActivityDto.builder()
                 .id(id)
                 .type(type)
                 .title(title)
                 .writer(writer)
-                .activityTime(activityTime)
+                .createDate(createDate)
                 .build();
     }
 }
