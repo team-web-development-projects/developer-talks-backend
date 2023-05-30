@@ -91,6 +91,7 @@ public class UserServiceImpl implements UserService {
                 .description(signUpDto.getDescription())
                 .roles(Collections.singletonList("USER"))
                 .isActive(true)
+                .isPrivate(false)
                 .build();
 
         Optional<Document> document = documentRepository.findById(signUpDto.getProfileImageId());
@@ -277,16 +278,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Page<RecentActivityDto> getRecentActivities(Pageable pageable) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+    public Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByNickname(nickname));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+
+        User user = optionalUser.get();
+        if (user.getIsPrivate()) {
+            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "비공개 설정으로 사용자의 최근활동 조회가 불가능합니다.");
         }
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime goe = now.minusDays(30);
 
-        Page<Activity> page = activityRepository.findByUserIdAndCreateDateBetween(optionalUser.get().getId(), goe, now, pageable);
+        Page<Activity> page = activityRepository.findByUserIdAndCreateDateBetween(user.getId(), goe, now, pageable);
         return page.map(p -> {
             Long id = null;
             ActivityType type = p.getType();
@@ -317,6 +323,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void updatePrivate(String id, boolean status) {
+        Optional<User> currentUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        if (currentUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+
+        Optional<User> findUser = Optional.ofNullable(userRepository.getByUserid(id));
+        if (findUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+
+        User user = findUser.get();
+        if (user.getId() != currentUser.get().getId()) {
+            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 사용자의 설정을 변경할 권한이 없습니다.");
+        }
+        user.setIsPrivate(status);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Boolean getPrivateStatus(String id) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(id));
+        if (optionalUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+        User user = optionalUser.get();
+        return user.getIsPrivate();
+    }
+
+    @Override
+    @Transactional
     public UserResponseDto updateUserSkills(List<Skill> skills) {
         User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         user.setSkills(skills);
@@ -338,6 +375,7 @@ public class UserServiceImpl implements UserService {
         user.setDescription(oAuthSignUpDto.getDescription());
         user.setProfileImage(optionalImage.get());
         user.setIsActive(true);
+        user.setIsPrivate(false);
 
         User savedUser = userRepository.save(user);
         UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);

@@ -9,6 +9,7 @@ import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserDetailsService;
 import com.dtalks.dtalks.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -88,10 +89,31 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUserDescription(description));
     }
 
-    @GetMapping(value = "/recent/activity")
-    public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@PageableDefault(size = 10, sort = "createDate",  direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(userService.getRecentActivities(pageable));
+    @GetMapping(value = "/recent/activity/{nickname}")
+    @Operation(summary = "특정 유저의 최근활동 조회 (페이지 사용, size = 10, sort=\"createDate\" desc 적용)", parameters = {
+            @Parameter(name = "nickname", description = "조회할 유저의 닉네임")
+    })
+    public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@PathVariable String nickname,
+                                                                       @PageableDefault(size = 10, sort = "createDate",  direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(userService.getRecentActivities(nickname, pageable));
 
+    }
+
+    @Operation(summary = "특정 유저의 비공개 여부 조회", parameters = {
+            @Parameter(name = "id", description = "조회할 유저의 로그인 아이디"),
+    })
+    @GetMapping(value = "/private/{id}")
+    public ResponseEntity<Boolean> getPrivateStatus(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getPrivateStatus(id));
+    }
+
+    @Operation(summary = "특정 유저의 비공개 여부 설정", parameters = {
+            @Parameter(name = "id", description = "조회할 유저의 로그인 아이디"),
+            @Parameter(name = "status", description = "비공개 설정 true/false")
+    })
+    @PutMapping(value = "/setting/private/{id}/{status}")
+    public void updatePrivate(@PathVariable String id, @PathVariable boolean status) {
+        userService.updatePrivate(id, status);
     }
 
     @Operation(summary = "유저 기술스택 수정")

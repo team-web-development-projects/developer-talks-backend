@@ -70,6 +70,9 @@ public class User extends BaseTimeEntity implements UserDetails{
 
     private String status;
 
+    @Column(nullable = false)
+    private Boolean isPrivate;
+
     @OneToOne
     private Document profileImage;
 
@@ -139,6 +142,7 @@ public class User extends BaseTimeEntity implements UserDetails{
                 .registrationId(userDto.getRegistrationId())
                 .roles(Collections.singletonList("USER"))
                 .isActive(userDto.isActive())
+                .isPrivate(false)
                 .build();
     }
 }
