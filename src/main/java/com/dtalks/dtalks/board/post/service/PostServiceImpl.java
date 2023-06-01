@@ -144,12 +144,10 @@ public class PostServiceImpl implements PostService {
         // 게시글이면 삭제, 댓글이면 연관관계들만 끊고 기록에는 남아있도록. 프론트에서 활동 클릭시 없는 게시글이라고 뜨게 하면 됨
         List<Activity> postList = activityRepository.findByPostId(post.getId());
         for (Activity activity : postList) {
-            if (activity.getType().equals(ActivityType.POST)) {
-                activityRepository.delete(activity);
-            } else {
-                activity.setPost(null);
+            if (activity.getType().equals(ActivityType.COMMENT)) {
                 activity.setComment(null);
             }
+            activity.setPost(null);
         }
 
         postRepository.delete(post);

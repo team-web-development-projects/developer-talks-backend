@@ -213,7 +213,8 @@ public class CommentServiceImpl implements CommentService{
         if (optionalActivity.isEmpty()) {
             throw new CustomException(ErrorCode.ACTIVITY_NOT_FOUND_ERROR, "해당 댓글 활동을 찾을 수 없습니다.");
         }
-        activityRepository.delete(optionalActivity.get());
+        Activity activity = optionalActivity.get();
+        activity.setComment(null);
 
         /**
          * 삭제하려는 댓글의 자식 댓글이 있는 경우
