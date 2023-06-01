@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.board.comment.service;
 
 import com.dtalks.dtalks.board.comment.dto.CommentInfoDto;
+import com.dtalks.dtalks.board.comment.dto.UserCommentDto;
 import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.comment.dto.CommentRequestDto;
 import com.dtalks.dtalks.board.comment.repository.CommentRepository;
@@ -75,7 +76,7 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<CommentInfoDto> searchListByUserId(String userId) {
+    public List<UserCommentDto> searchListByUserId(String userId) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
@@ -83,7 +84,10 @@ public class CommentServiceImpl implements CommentService{
 
         User user = optionalUser.get();
         List<Comment> commentList = commentRepository.findByUserIdAndIsRemovedFalse(user.getId());
-        return commentList.stream().map(CommentInfoDto::toDto).toList();
+        return commentList.stream().map(c -> {
+            Post post = c.getPost();
+            return UserCommentDto.toDto(c, post.getId(), post.getTitle());
+        }).toList();
     }
 
     @Override
