@@ -380,14 +380,13 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         Optional<Document> optionalImage = documentRepository.findById(oAuthSignUpDto.getProfileImageId());
 
-        if(optionalImage.isEmpty()) {
-            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "해당하는 이미지를 찾을 수 없습니다.");
+        if(!optionalImage.isEmpty()) {
+            user.setProfileImage(optionalImage.get());
         }
 
         user.setNickname(oAuthSignUpDto.getNickname());
         user.setSkills(oAuthSignUpDto.getSkills());
         user.setDescription(oAuthSignUpDto.getDescription());
-        user.setProfileImage(optionalImage.get());
         user.setIsActive(true);
         user.setIsPrivate(false);
 
