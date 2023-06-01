@@ -161,11 +161,25 @@ public class UserServiceImpl implements UserService {
         return duplicateResponseDto;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public DuplicateResponseDto emailDuplicated(String email) {
+        User user = userRepository.getByEmail(email);
+        DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
+        if(user == null) {
+            duplicateResponseDto.setDuplicated(false);
+        }
+        else {
+            duplicateResponseDto.setDuplicated(true);
+        }
+        return duplicateResponseDto;
+    }
+
     /*
     reSignIn은 토큰 재발급 서비스 입니다.
     oauth 로그인과, 일반 로그인 모두 토큰 재발급을 가능하게 하기 위해
     signIn 메서드와 구분하여 만들었습니다.
-     */
+    */
     @Override
     @Transactional(readOnly = true)
     public SignInResponseDto reSignIn(String refreshToken) {
@@ -366,14 +380,13 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         Optional<Document> optionalImage = documentRepository.findById(oAuthSignUpDto.getProfileImageId());
 
-        if(optionalImage.isEmpty()) {
-            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "해당하는 이미지를 찾을 수 없습니다.");
+        if(!optionalImage.isEmpty()) {
+            user.setProfileImage(optionalImage.get());
         }
 
         user.setNickname(oAuthSignUpDto.getNickname());
         user.setSkills(oAuthSignUpDto.getSkills());
         user.setDescription(oAuthSignUpDto.getDescription());
-        user.setProfileImage(optionalImage.get());
         user.setIsActive(true);
         user.setIsPrivate(false);
 
@@ -385,6 +398,7 @@ public class UserServiceImpl implements UserService {
         SignInResponseDto signInResponseDto = new SignInResponseDto();
         signInResponseDto.setAccessToken(accessToken);
         signInResponseDto.setRefreshToken(refreshToken);
+        setSuccessResult(signInResponseDto);
 
         return signInResponseDto;
     }

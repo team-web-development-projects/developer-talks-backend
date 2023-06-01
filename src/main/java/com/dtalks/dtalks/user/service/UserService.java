@@ -22,6 +22,8 @@ public interface UserService {
 
     DuplicateResponseDto nicknameDuplicated(String nickname);
 
+    DuplicateResponseDto emailDuplicated(String email);
+
     DocumentResponseDto userProfileImageUpLoad(MultipartFile file);
 
     ResponseEntity<Resource> getUserProfileImage();
