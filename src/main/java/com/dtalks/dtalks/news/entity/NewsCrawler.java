@@ -15,16 +15,17 @@ public class NewsCrawler {
     public List<News> crawlNews() throws IOException {
         List<News> newsList = new ArrayList<>();
 
-        String url = "";//크롤링할 사이트
-        Document document = Jsoup.connect("https://www.bloter.net/news/articleList.html?sc_sub_section_code=S2N15&view_type=sm").get();
-        Elements element = document.select("#section-list > ul");// 뉴스 요소 css
+        String pageUrl = "https://www.bloter.net/news/articleList.html?sc_sub_section_code=S2N15&view_type=sm";//크롤링할 사이트
+        Document document = Jsoup.connect(pageUrl).get();
+        Elements elements = document.select("#section-list > ul > li");// 뉴스 요소 css
 
-        for (Element element1 : element) {
-            String title = element1.select("#section-list > ul > li:nth-child(1) > div > h2").text();
-            String content = element1.select("#section-list > ul > li:nth-child(1) > div > p").text();
-            String writer = element1.select("#section-list > ul > li:nth-child(1) > div > span > em:nth-child(2)").text();
-            String image = element1.select("#section-list > ul > li:nth-child(1) > a > img").attr("src");
-            String date = element1.select("#section-list > ul > li:nth-child(1) > div > span > em:nth-child(3)").text();
+        for (Element element : elements) {
+            String title = element.select("h2.titles").text();
+            String content = element.select("p.lead.line-6x2").text();
+            String writer = element.select("em:nth-child(2)").text();
+            String image = element.select("img").attr("src");
+            String date = element.select("em:nth-child(3)").text();
+            String url = "https://www.bloter.net/" + element.select("a.thumb").attr("href");
 
             News news = new News(title, content, writer, date, image, url);
             newsList.add(news);

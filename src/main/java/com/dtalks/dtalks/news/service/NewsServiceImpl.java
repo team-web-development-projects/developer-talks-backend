@@ -23,7 +23,6 @@ public class NewsServiceImpl implements NewsService {
             return newsList;
         } catch (IOException e) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "뉴스가 존재하지 않습니다. ");
-
         }
     }
 }
