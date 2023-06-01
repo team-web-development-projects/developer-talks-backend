@@ -59,6 +59,10 @@ public class StudyRoom extends BaseTimeEntity {
         joinCount += 1;
     }
 
+    public void subJoinCount() {
+        joinCount -= 1;
+    }
+
     public void addStudyRoomUser(StudyRoomUser studyRoomUser) {
         studyRoomUsers.add(studyRoomUser);
     }

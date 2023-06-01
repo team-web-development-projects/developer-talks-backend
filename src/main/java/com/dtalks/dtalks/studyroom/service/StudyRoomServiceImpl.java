@@ -217,14 +217,18 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     @Transactional
     public void deleteStudyRoomUser(Long id) {
         User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
-        List<StudyRoomUser> studyRoomUsers = studyRoomRepository.findById(id).get().getStudyRoomUsers();
+        StudyRoom studyRoom = studyRoomRepository.findById(id).get();
+        List<StudyRoomUser> studyRoomUsers = studyRoom.getStudyRoomUsers();
         for(StudyRoomUser studyRoomUser: studyRoomUsers) {
             if(user.getUserid().equals(studyRoomUser.getUser().getUserid())) {
                 if(isLeader(studyRoomUser)) {
                     throw new CustomException(ErrorCode.VALIDATION_ERROR, "방장은 탈퇴할 수 없습니다.");
                 }
                 else {
+                    studyRoom.subJoinCount();
                     studyRoomUsers.remove(studyRoomUser);
+                    studyRoom.setStudyRoomUsers(studyRoomUsers);
+                    studyRoomRepository.save(studyRoom);
                 }
             }
         }
