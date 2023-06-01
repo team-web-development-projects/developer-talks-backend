@@ -212,4 +212,28 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         studyRoomUserRepository.save(requestStudyRoomUser);
         return StudyRoomResponseDto.toDto(savedStudyRoom);
     }
+
+    @Override
+    @Transactional
+    public void deleteStudyRoomUser(Long id) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        List<StudyRoomUser> studyRoomUsers = studyRoomRepository.findById(id).get().getStudyRoomUsers();
+        for(StudyRoomUser studyRoomUser: studyRoomUsers) {
+            if(user.getUserid().equals(studyRoomUser.getUser().getUserid())) {
+                if(isLeader(studyRoomUser)) {
+                    throw new CustomException(ErrorCode.VALIDATION_ERROR, "방장은 탈퇴할 수 없습니다.");
+                }
+                else {
+                    studyRoomUsers.remove(studyRoomUser);
+                }
+            }
+        }
+        throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당 유저는 스터디룸 가입자가 아닙니다.");
+    }
+
+    public boolean isLeader(StudyRoomUser studyRoomUser) {
+        if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER))
+            return true;
+        return false;
+    }
 }

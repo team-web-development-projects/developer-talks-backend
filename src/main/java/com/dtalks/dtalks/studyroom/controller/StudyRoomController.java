@@ -89,4 +89,11 @@ public class StudyRoomController {
     public ResponseEntity<StudyRoomResponseDto> acceptStudyRoom(@PathVariable Long studyRoomId, @PathVariable Long studyRoomUserId) {
         return ResponseEntity.ok(studyRoomService.acceptJoinStudyRoom(studyRoomId, studyRoomUserId));
     }
+
+    @Operation(summary = "스터디룸 탈퇴")
+    @DeleteMapping("study-room/exit/{studyRoomId}")
+    public ResponseEntity exitStudyRoom(@PathVariable Long studyRoomId) {
+        studyRoomService.deleteStudyRoomUser(studyRoomId);
+        return ResponseEntity.ok().build();
+    }
 }

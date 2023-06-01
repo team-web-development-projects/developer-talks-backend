@@ -54,8 +54,15 @@ public class UserController {
     @GetMapping(value = "/check/nickname/{nickname}")
     public ResponseEntity<DuplicateResponseDto> nicknameDuplicatedCheck(@PathVariable String nickname) {
         DuplicateResponseDto duplicateResponseDto = userService.nicknameDuplicated(nickname);
-        return  ResponseEntity.ok(duplicateResponseDto);
+        return ResponseEntity.ok(duplicateResponseDto);
     }
+
+    @Operation(summary = "email 중복체크")
+    @GetMapping(value = "/check/email/{email}")
+    public ResponseEntity<DuplicateResponseDto> emailDuplicatedCheck(@PathVariable String email) {
+        return ResponseEntity.ok(userService.emailDuplicated(email));
+    }
+
 
     @Operation(summary = "유저 정보")
     @GetMapping(value = "/info")

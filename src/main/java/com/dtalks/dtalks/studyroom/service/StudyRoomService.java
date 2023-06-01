@@ -24,4 +24,6 @@ public interface StudyRoomService {
     public List<StudyRoomJoinResponseDto> studyRoomRequestList();
 
     public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId);
+
+    public void deleteStudyRoomUser(Long id);
 }
