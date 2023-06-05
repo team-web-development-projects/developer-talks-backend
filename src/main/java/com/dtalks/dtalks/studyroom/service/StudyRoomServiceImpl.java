@@ -280,7 +280,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<StudyRoomResponseDto> JoinedStudyRoomList(Pageable pageable) {
         User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(user);
