@@ -22,4 +22,6 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByPostIdAndType(Long postId, ActivityType type);
 
     Page<Activity> findByUserIdAndCreateDateBetween(Long userId, LocalDateTime goe, LocalDateTime loe, Pageable pageable);
+
+    void deleteByCreateDateLessThan(LocalDateTime deleteDate);
 }

@@ -2,6 +2,7 @@ package com.dtalks.dtalks.board.comment.controller;
 
 import com.dtalks.dtalks.board.comment.dto.CommentInfoDto;
 import com.dtalks.dtalks.board.comment.dto.CommentRequestDto;
+import com.dtalks.dtalks.board.comment.dto.UserCommentDto;
 import com.dtalks.dtalks.board.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,8 +38,8 @@ public class CommentController {
             @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
     })
     @GetMapping("/list/user/{userId}")
-    public ResponseEntity<List<CommentInfoDto>> searchUserIdCommentList(@PathVariable String userId) {
-        List<CommentInfoDto> list = commentService.searchListByUserId(userId);
+    public ResponseEntity<List<UserCommentDto>> searchUserIdCommentList(@PathVariable String userId) {
+        List<UserCommentDto> list = commentService.searchListByUserId(userId);
         return ResponseEntity.ok(list);
     }
 
