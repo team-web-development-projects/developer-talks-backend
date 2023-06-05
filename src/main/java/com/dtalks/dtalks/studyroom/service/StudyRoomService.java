@@ -26,4 +26,6 @@ public interface StudyRoomService {
     public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId);
 
     public void deleteStudyRoomUser(Long id);
+
+    public StudyRoomResponseDto expelStudyRoomUser(Long studyRoomId, String nickname);
 }

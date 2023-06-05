@@ -98,4 +98,10 @@ public class StudyRoomController {
         studyRoomService.deleteStudyRoomUser(studyRoomId);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "스터디룸원 추방")
+    @DeleteMapping("study-room/expel/{studyRoomId}/{nickname}")
+    public ResponseEntity<StudyRoomResponseDto> expelStudyRoomUser(Long studyRoomId, String nickname) {
+        return ResponseEntity.ok(studyRoomService.expelStudyRoomUser(studyRoomId, nickname));
+    }
 }
