@@ -28,4 +28,6 @@ public interface StudyRoomService {
     public void deleteStudyRoomUser(Long id);
 
     public StudyRoomResponseDto expelStudyRoomUser(Long studyRoomId, String nickname);
+
+    public Page<StudyRoomResponseDto> JoinedStudyRoomList(Pageable pageable);
 }

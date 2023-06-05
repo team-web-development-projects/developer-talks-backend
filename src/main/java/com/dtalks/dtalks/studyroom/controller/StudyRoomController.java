@@ -81,7 +81,7 @@ public class StudyRoomController {
     @Operation(summary = "스터디룸 가입 신청 리스트")
     @GetMapping("study-rooms/requests")
     public ResponseEntity<Page<StudyRoomJoinResponseDto>> requestStudyRoom(
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC, page = 0) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10, page = 0) @ParameterObject Pageable pageable
     ) {
         return ResponseEntity.ok(studyRoomService.studyRoomRequestList(pageable));
     }
@@ -103,5 +103,13 @@ public class StudyRoomController {
     @DeleteMapping("study-room/expel/{studyRoomId}/{nickname}")
     public ResponseEntity<StudyRoomResponseDto> expelStudyRoomUser(Long studyRoomId, String nickname) {
         return ResponseEntity.ok(studyRoomService.expelStudyRoomUser(studyRoomId, nickname));
+    }
+
+    @Operation(summary = "가입중인 스터디룸 조회")
+    @GetMapping("study-rooms/user")
+    public ResponseEntity<Page<StudyRoomResponseDto>> joinedStudyRoom(
+            @PageableDefault(size = 10, page = 0) @ParameterObject Pageable pageable
+    ) {
+        return ResponseEntity.ok(studyRoomService.JoinedStudyRoomList(pageable));
     }
 }

@@ -279,6 +279,22 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         return StudyRoomResponseDto.toDto(studyRoom);
     }
 
+    @Override
+    @Transactional
+    public Page<StudyRoomResponseDto> JoinedStudyRoomList(Pageable pageable) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(user);
+        List<StudyRoomResponseDto> studyRoomResponseDtos = new ArrayList<>();
+        for(StudyRoomUser studyRoomUser: studyRoomUsers) {
+            studyRoomResponseDtos.add(StudyRoomResponseDto.toDto(studyRoomUser.getStudyRoom()));
+        }
+
+        int start = (int)pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), studyRoomResponseDtos.size());
+
+        return new PageImpl<>(studyRoomResponseDtos.subList(start, end), pageable, studyRoomResponseDtos.size());
+    }
+
     public boolean isLeader(StudyRoomUser studyRoomUser) {
         if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER))
             return true;
