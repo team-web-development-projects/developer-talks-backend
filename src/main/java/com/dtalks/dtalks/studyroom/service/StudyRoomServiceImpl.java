@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,6 +105,9 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         }
         StudyRoom studyRoom = optionalStudyRoom.get();
         List<StudyRoomUser> studyRoomUsers = studyRoom.getStudyRoomUsers();
+        if(studyRoomUsers.size() > 1) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "본인 이외의 스터디원이 남아있으면 삭제가 불가능합니다.");
+        }
         for(StudyRoomUser studyRoomUser: studyRoomUsers) {
             if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER)) {
                 if(studyRoomUser.getUser().getUserid().equals(SecurityUtil.getCurrentUserId())) {
@@ -157,7 +161,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<StudyRoomJoinResponseDto> studyRoomRequestList() {
+    public Page<StudyRoomJoinResponseDto> studyRoomRequestList(Pageable pageable) {
         User leader = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(leader);
         List<StudyRoomJoinResponseDto> studyRoomJoinResponseDtos = new ArrayList<>();
@@ -173,7 +177,9 @@ public class StudyRoomServiceImpl implements StudyRoomService{
                 }
             }
         }
-        return studyRoomJoinResponseDtos;
+        int start = (int)pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), studyRoomJoinResponseDtos.size());
+        return new PageImpl<>(studyRoomJoinResponseDtos.subList(start, end), pageable, studyRoomJoinResponseDtos.size());
     }
 
     @Override
@@ -233,6 +239,60 @@ public class StudyRoomServiceImpl implements StudyRoomService{
             }
         }
         throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당 유저는 스터디룸 가입자가 아닙니다.");
+    }
+
+    @Override
+    @Transactional
+    public StudyRoomResponseDto expelStudyRoomUser(Long studyRoomId, String nickname) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(studyRoomId);
+        if(optionalStudyRoom.isEmpty()) {
+            throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸 입니다.");
+        }
+
+        StudyRoom studyRoom = optionalStudyRoom.get();
+        Optional<StudyRoomUser> optionalStudyRoomUser = studyRoomUserRepository.findByStudyRoomAndUser(studyRoom, user);
+        if(optionalStudyRoomUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "당신은 스터디룸 가입자가 아닙니다.");
+        }
+
+        StudyRoomUser studyRoomUser = optionalStudyRoomUser.get();
+        if(!isLeader(studyRoomUser)) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "당신은 스터디룸 방장이 아닙니다.");
+        }
+
+        User expeledUser = userRepository.getByNickname(nickname);
+
+        if(user.getNickname().equals(expeledUser.getNickname())) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "자기 자신을 강퇴할 수 없습니다.");
+        }
+
+        Optional<StudyRoomUser> optionalExpelStudyRoomUser = studyRoomUserRepository.findByStudyRoomAndUser(studyRoom, expeledUser);
+        if(optionalExpelStudyRoomUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "강퇴할 유저는 스터디룸 가입자가 아닙니다.");
+        }
+
+        StudyRoomUser expelStudyRoomUser = optionalExpelStudyRoomUser.get();
+        studyRoom.getStudyRoomUsers().remove(expelStudyRoomUser);
+        studyRoomUserRepository.delete(expelStudyRoomUser);
+        studyRoom.subJoinCount();
+        return StudyRoomResponseDto.toDto(studyRoom);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<StudyRoomResponseDto> JoinedStudyRoomList(Pageable pageable) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(user);
+        List<StudyRoomResponseDto> studyRoomResponseDtos = new ArrayList<>();
+        for(StudyRoomUser studyRoomUser: studyRoomUsers) {
+            studyRoomResponseDtos.add(StudyRoomResponseDto.toDto(studyRoomUser.getStudyRoom()));
+        }
+
+        int start = (int)pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), studyRoomResponseDtos.size());
+
+        return new PageImpl<>(studyRoomResponseDtos.subList(start, end), pageable, studyRoomResponseDtos.size());
     }
 
     public boolean isLeader(StudyRoomUser studyRoomUser) {

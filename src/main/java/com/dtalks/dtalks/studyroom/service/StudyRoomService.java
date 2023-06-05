@@ -21,9 +21,13 @@ public interface StudyRoomService {
 
     public void deleteStudyRoom(Long id);
 
-    public List<StudyRoomJoinResponseDto> studyRoomRequestList();
+    public Page<StudyRoomJoinResponseDto> studyRoomRequestList(Pageable pageable);
 
     public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId);
 
     public void deleteStudyRoomUser(Long id);
+
+    public StudyRoomResponseDto expelStudyRoomUser(Long studyRoomId, String nickname);
+
+    public Page<StudyRoomResponseDto> JoinedStudyRoomList(Pageable pageable);
 }
