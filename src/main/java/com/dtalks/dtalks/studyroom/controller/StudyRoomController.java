@@ -80,8 +80,10 @@ public class StudyRoomController {
 
     @Operation(summary = "스터디룸 가입 신청 리스트")
     @GetMapping("study-rooms/requests")
-    public ResponseEntity<List<StudyRoomJoinResponseDto>> requestStudyRoom() {
-        return ResponseEntity.ok(studyRoomService.studyRoomRequestList());
+    public ResponseEntity<Page<StudyRoomJoinResponseDto>> requestStudyRoom(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC, page = 0) @ParameterObject Pageable pageable
+    ) {
+        return ResponseEntity.ok(studyRoomService.studyRoomRequestList(pageable));
     }
 
     @Operation(summary = "스터디룸 가입 승인")

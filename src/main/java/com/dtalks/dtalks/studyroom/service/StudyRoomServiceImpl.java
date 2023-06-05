@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,6 +105,9 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         }
         StudyRoom studyRoom = optionalStudyRoom.get();
         List<StudyRoomUser> studyRoomUsers = studyRoom.getStudyRoomUsers();
+        if(studyRoomUsers.size() > 1) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "본인 이외의 스터디원이 남아있으면 삭제가 불가능합니다.");
+        }
         for(StudyRoomUser studyRoomUser: studyRoomUsers) {
             if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER)) {
                 if(studyRoomUser.getUser().getUserid().equals(SecurityUtil.getCurrentUserId())) {
@@ -157,7 +161,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<StudyRoomJoinResponseDto> studyRoomRequestList() {
+    public Page<StudyRoomJoinResponseDto> studyRoomRequestList(Pageable pageable) {
         User leader = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
         List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(leader);
         List<StudyRoomJoinResponseDto> studyRoomJoinResponseDtos = new ArrayList<>();
@@ -173,7 +177,9 @@ public class StudyRoomServiceImpl implements StudyRoomService{
                 }
             }
         }
-        return studyRoomJoinResponseDtos;
+        int start = (int)pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), studyRoomJoinResponseDtos.size());
+        return new PageImpl<>(studyRoomJoinResponseDtos.subList(start, end), pageable, studyRoomJoinResponseDtos.size());
     }
 
     @Override

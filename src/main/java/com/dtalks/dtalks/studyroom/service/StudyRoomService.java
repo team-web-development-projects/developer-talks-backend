@@ -21,7 +21,7 @@ public interface StudyRoomService {
 
     public void deleteStudyRoom(Long id);
 
-    public List<StudyRoomJoinResponseDto> studyRoomRequestList();
+    public Page<StudyRoomJoinResponseDto> studyRoomRequestList(Pageable pageable);
 
     public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId);
 
