@@ -207,6 +207,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public SignInResponseDto updateNickname(String nickname) {
+        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        user.setNickname(nickname);
+
+        User savedUser = userRepository.save(user);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        SignInResponseDto signInResponseDto = new SignInResponseDto();
+
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        setSuccessResult(signInResponseDto);
+        return signInResponseDto;
+    }
+
+    @Override
+    @Transactional
     public DocumentResponseDto userProfileImageUpLoad(MultipartFile file) {
         if(file == null) {
             throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "파일이 올바르지 않습니다.");

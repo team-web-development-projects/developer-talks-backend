@@ -4,6 +4,7 @@ import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.dto.DuplicateResponseDto;
 import com.dtalks.dtalks.user.dto.RecentActivityDto;
+import com.dtalks.dtalks.user.dto.SignInResponseDto;
 import com.dtalks.dtalks.user.dto.UserResponseDto;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserDetailsService;
@@ -127,5 +128,11 @@ public class UserController {
     @PutMapping(value = "/profile/skills")
     public ResponseEntity<UserResponseDto> updateUserSkills(@RequestBody @Schema(example = "{skills: [DJANGO, AWS]}")List <Skill> skills) {
         return ResponseEntity.ok(userService.updateUserSkills(skills));
+    }
+
+    @Operation(summary = "유저 닉네임 변경")
+    @PutMapping(value = "/profile/nickname")
+    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody @Schema(example = "{nickname: \"string\"}") String nickname) {
+        return ResponseEntity.ok(userService.updateNickname(nickname));
     }
 }
