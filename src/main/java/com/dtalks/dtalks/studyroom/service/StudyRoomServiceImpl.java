@@ -234,7 +234,8 @@ public class StudyRoomServiceImpl implements StudyRoomService{
                     studyRoom.subJoinCount();
                     studyRoomUsers.remove(studyRoomUser);
                     studyRoom.setStudyRoomUsers(studyRoomUsers);
-                    studyRoomRepository.save(studyRoom);
+                    studyRoomUserRepository.delete(studyRoomUser);
+                    return;
                 }
             }
         }
