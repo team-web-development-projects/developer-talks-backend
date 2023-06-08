@@ -37,7 +37,7 @@ public interface UserService {
     UserResponseDto updateUserSkills(List<Skill> skills);
 
     Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable);
-    void updatePrivate(String id, boolean status);
+    void updatePrivate(boolean status);
     Boolean getPrivateStatus(String id);
 
     SignInResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto);
