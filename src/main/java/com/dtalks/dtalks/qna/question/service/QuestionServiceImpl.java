@@ -68,6 +68,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional
     public List<QuestionResponseDto> search5BestQuestions() {
         List<Question> top5Questions = questionRepository.findTop5ByOrderByLikeCountDesc();
         return top5Questions.stream().map(QuestionResponseDto::toDto).toList();
@@ -102,6 +103,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional
     public void deleteQuestion(Long id) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {

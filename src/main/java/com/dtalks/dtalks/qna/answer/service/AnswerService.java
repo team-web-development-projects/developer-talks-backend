@@ -15,8 +15,6 @@ public interface AnswerService {
 
     Long updateAnswer(Long answerId, AnswerDto answerDto);
     void deleteAnswer(Long id);
-
     void selectAnswer(Long id);
-    void cancelSelect(Long id);
 
 }
