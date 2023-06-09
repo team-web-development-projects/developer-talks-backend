@@ -116,12 +116,11 @@ public class UserController {
     }
 
     @Operation(summary = "특정 유저의 비공개 여부 설정", parameters = {
-            @Parameter(name = "id", description = "조회할 유저의 로그인 아이디"),
             @Parameter(name = "status", description = "비공개 설정 true/false")
     })
-    @PutMapping(value = "/setting/private/{id}/{status}")
-    public void updatePrivate(@PathVariable String id, @PathVariable boolean status) {
-        userService.updatePrivate(id, status);
+    @PutMapping(value = "/setting/private/{status}")
+    public void updatePrivate(@PathVariable boolean status) {
+        userService.updatePrivate(status);
     }
 
     @Operation(summary = "유저 기술스택 수정")

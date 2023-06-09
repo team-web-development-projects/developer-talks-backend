@@ -353,21 +353,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updatePrivate(String id, boolean status) {
-        Optional<User> currentUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (currentUser.isEmpty()) {
+    public void updatePrivate(boolean status) {
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
+        if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
-
-        Optional<User> findUser = Optional.ofNullable(userRepository.getByUserid(id));
-        if (findUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
-        User user = findUser.get();
-        if (user.getId() != currentUser.get().getId()) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 사용자의 설정을 변경할 권한이 없습니다.");
-        }
+        User user = optionalUser.get();
         user.setIsPrivate(status);
     }
 
