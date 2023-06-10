@@ -105,6 +105,9 @@ public class AnswerServiceImpl implements AnswerService {
         if (!userId.equals(SecurityUtil.getCurrentUserId())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 답변을 삭제할 수 있는 권한이 없습니다.");
         }
+        if (answer.isSelected()) {
+            throw new CustomException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "채택된 답변은 삭제할 수 없습니다. ");
+        }
         answerRepository.delete(answer);
     }
 
@@ -133,34 +136,6 @@ public class AnswerServiceImpl implements AnswerService {
         }
 
         answer.setSelected(true);
-        answerRepository.save(answer);
-    }
-
-    @Override
-    @Transactional
-    public void cancelSelect(Long id) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
-        }
-        Optional<Answer> optionalAnswer = answerRepository.findById(id);
-        if (optionalAnswer.isEmpty()) {
-            throw new CustomException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
-        }
-
-        Answer answer = optionalAnswer.get();
-        User currentUser = optionalUser.get();
-        User user = answer.getQuestion().getUser();
-
-        if (!user.equals(currentUser)) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "질문글 작성자만 채택을 취소할 수 있습니다. ");
-        }
-
-        if (!answer.isSelected()) {
-            throw new CustomException(ErrorCode.SELECTED_ANSWER_NOT_FOUND_ERROR, "해당 답변은 채택되어 있지 않습니다. ");
-        }
-
-        answer.setSelected(false);
         answerRepository.save(answer);
     }
 }

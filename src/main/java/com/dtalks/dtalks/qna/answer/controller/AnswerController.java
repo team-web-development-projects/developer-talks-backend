@@ -58,10 +58,4 @@ public class AnswerController {
     public void selectAnswer(@PathVariable Long id) {
         answerService.selectAnswer(id);
     }
-
-    @Operation(summary = "답변 채택 취소")
-    @DeleteMapping("{id}/select")
-    public void cancelSelect(@PathVariable Long id) {
-        answerService.cancelSelect(id);
-    }
 }
