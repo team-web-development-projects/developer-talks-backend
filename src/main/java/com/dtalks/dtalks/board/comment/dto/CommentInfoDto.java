@@ -37,6 +37,9 @@ public class CommentInfoDto {
     @Schema(description = "부모댓글의 id. 자식 댓글일 경우 부모 댓글 필요.")
     Long parentId;
 
+    @Schema(description = "부모댓글 작성자의 닉네임")
+    String parentNickname;
+
     @Schema(description = "자식 댓글 리스트. 자신이 부모 댓글일 경우 자식 댓글 리스트 필요")
     List<CommentInfoDto> childrenList = new ArrayList<>();
 

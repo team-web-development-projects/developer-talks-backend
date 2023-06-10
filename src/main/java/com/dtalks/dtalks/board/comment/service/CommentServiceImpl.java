@@ -42,7 +42,13 @@ public class CommentServiceImpl implements CommentService{
             throw new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다.");
         }
         Comment comment = optionalComment.get();
-        return CommentInfoDto.toDto(comment);
+        CommentInfoDto commentInfoDto = CommentInfoDto.toDto(comment);
+        Comment parent = comment.getParent();
+        if (parent != null) {
+            commentInfoDto.setParentId(parent.getId());
+            commentInfoDto.setParentNickname(parent.getUser().getNickname());
+        }
+        return commentInfoDto;
     }
 
     @Override
@@ -62,6 +68,7 @@ public class CommentServiceImpl implements CommentService{
             Comment parent = c.getParent();
             if (parent != null) {
                 dto.setParentId(parent.getId());
+                dto.setParentNickname(parent.getUser().getNickname());
             }
             map.put(dto.getId(), dto);
             if (parent != null) {
