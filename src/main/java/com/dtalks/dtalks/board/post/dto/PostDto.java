@@ -29,6 +29,9 @@ public class PostDto {
     @NotBlank
     private String nickname;
 
+    @Schema(description = "게시글의 댓글수")
+    private Integer commentCount;
+
     @Schema(description = "게시글 조회수")
     private Integer viewCount;
 
@@ -51,6 +54,7 @@ public class PostDto {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .nickname(post.getUser().getNickname())
+                .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())
                 .favoriteCount(post.getFavoriteCount())
                 .recommendCount(post.getRecommendCount())

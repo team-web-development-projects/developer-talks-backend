@@ -37,6 +37,10 @@ public class Post extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(nullable = false)
+    private Integer commentCount;
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer viewCount;
 
     @ColumnDefault("0")
@@ -56,6 +60,7 @@ public class Post extends BaseTimeEntity {
                 .viewCount(0)
                 .favoriteCount(0)
                 .recommendCount(0)
+                .commentCount(0)
                 .build();
     }
 
@@ -64,4 +69,11 @@ public class Post extends BaseTimeEntity {
         this.content = content;
     }
 
+    public void plusCommentCount() {
+        this.commentCount++;
+    }
+
+    public void minusCommentCount() {
+        this.commentCount--;
+    }
 }

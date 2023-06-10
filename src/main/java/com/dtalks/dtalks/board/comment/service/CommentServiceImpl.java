@@ -98,23 +98,26 @@ public class CommentServiceImpl implements CommentService{
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
 
-        Optional<Post> post = postRepository.findById(postId);
-        if (post.isEmpty()) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
+
+        Post post = optionalPost.get();
+        post.plusCommentCount();
 
         Comment comment = Comment.builder()
                 .content(dto.getContent())
                 .isSecret(dto.isSecret())
                 .user(user.get())
-                .post(post.get())
+                .post(post)
                 .build();
 
         commentRepository.save(comment);
 
         // 댓글 활동을 사용자 기록에 추가
         Activity activity = Activity.builder()
-                .post(post.get())
+                .post(post)
                 .comment(comment)
                 .type(ActivityType.COMMENT)
                 .user(user.get())
@@ -131,8 +134,8 @@ public class CommentServiceImpl implements CommentService{
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
 
-        Optional<Post> post = postRepository.findById(postId);
-        if (post.isEmpty()) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
@@ -145,18 +148,21 @@ public class CommentServiceImpl implements CommentService{
             throw new ValidationException("부모 댓글과 자식 댓글의 게시글 번호가 일치하지 않습니다.");
         }
 
+        Post post = optionalPost.get();
+        post.plusCommentCount();
+
         Comment comment = Comment.builder()
                 .content(dto.getContent())
                 .isSecret(dto.isSecret())
                 .user(user.get())
-                .post(post.get())
+                .post(post)
                 .parent(parentComment.get())
                 .build();
 
         commentRepository.save(comment);
 
         Activity activity = Activity.builder()
-                .post(post.get())
+                .post(post)
                 .comment(comment)
                 .type(ActivityType.COMMENT)
                 .user(user.get())
@@ -219,6 +225,9 @@ public class CommentServiceImpl implements CommentService{
         }
         Activity activity = optionalActivity.get();
         activity.setComment(null);
+
+        Post post = comment.getPost();
+        post.minusCommentCount();
 
         /**
          * 삭제하려는 댓글의 자식 댓글이 있는 경우
