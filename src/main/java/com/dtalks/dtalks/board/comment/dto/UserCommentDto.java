@@ -1,10 +1,12 @@
 package com.dtalks.dtalks.board.comment.dto;
 
 import com.dtalks.dtalks.board.comment.entity.Comment;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,9 @@ public class UserCommentDto {
     @Schema(description = "비밀글 여부")
     boolean isSecret;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createDate;
+
     @Builder
     public static UserCommentDto toDto(Comment comment, Long postId, String title) {
         return UserCommentDto.builder()
@@ -38,6 +43,7 @@ public class UserCommentDto {
                 .postTitle(title)
                 .content(comment.getContent())
                 .isSecret(comment.isSecret())
+                .createDate(comment.getCreateDate())
                 .build();
     }
 }
