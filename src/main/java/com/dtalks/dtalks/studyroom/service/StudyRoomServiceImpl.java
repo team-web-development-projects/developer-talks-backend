@@ -40,15 +40,11 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     @Transactional
     public StudyRoomResponseDto createStudyRoom(StudyRoomRequestDto studyRoomRequestDto) {
         LOGGER.info("createStudyRoom service 호출됨");
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-
-        if(user.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
+        User user = SecurityUtil.getUser();
         StudyRoom studyRoom = StudyRoom.toEntity(studyRoomRequestDto);
-        StudyRoomUser studyRoomUser = StudyRoomUser.toEntity(user.get(), studyRoom, StudyRoomLevel.LEADER, true);
+        StudyRoomUser studyRoomUser = StudyRoomUser.toEntity(user, studyRoom, StudyRoomLevel.LEADER, true);
         List<StudyRoomUser> studyRoomUsers = new ArrayList<>();
+
         studyRoomUsers.add(studyRoomUser);
         studyRoom.setStudyRoomUsers(studyRoomUsers);
         StudyRoom savedStudyroom = studyRoomRepository.save(studyRoom);
@@ -110,7 +106,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         }
         for(StudyRoomUser studyRoomUser: studyRoomUsers) {
             if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER)) {
-                if(studyRoomUser.getUser().getUserid().equals(SecurityUtil.getCurrentUserId())) {
+                if(studyRoomUser.getUser().getUserid().equals(SecurityUtil.getUser().getUserid())) {
                     studyRoomRepository.delete(studyRoom);
                     return;
                 }
@@ -133,7 +129,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "가입 정원이 가득찼습니다.");
         }
 
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
 
         // 이미 가입했는지 확인
         for(StudyRoomUser studyRoomUser: studyRoom.getStudyRoomUsers()) {
@@ -162,7 +158,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     @Override
     @Transactional(readOnly = true)
     public Page<StudyRoomJoinResponseDto> studyRoomRequestList(Pageable pageable) {
-        User leader = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User leader = SecurityUtil.getUser();
         List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(leader);
         List<StudyRoomJoinResponseDto> studyRoomJoinResponseDtos = new ArrayList<>();
 
@@ -185,7 +181,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     @Override
     @Transactional
     public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
         Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(studyRoomId);
         if(optionalStudyRoom.isEmpty()) {
             throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸 입니다.");
@@ -222,7 +218,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     @Override
     @Transactional
     public void deleteStudyRoomUser(Long id) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
         StudyRoom studyRoom = studyRoomRepository.findById(id).get();
         List<StudyRoomUser> studyRoomUsers = studyRoom.getStudyRoomUsers();
         for(StudyRoomUser studyRoomUser: studyRoomUsers) {
@@ -245,7 +241,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     @Override
     @Transactional
     public StudyRoomResponseDto expelStudyRoomUser(Long studyRoomId, String nickname) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
         Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(studyRoomId);
         if(optionalStudyRoom.isEmpty()) {
             throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸 입니다.");
@@ -283,9 +279,10 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     @Override
     @Transactional(readOnly = true)
     public Page<StudyRoomResponseDto> JoinedStudyRoomList(Pageable pageable) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
         List<StudyRoomUser> studyRoomUsers = studyRoomUserRepository.findAllByUser(user);
         List<StudyRoomResponseDto> studyRoomResponseDtos = new ArrayList<>();
+
         for(StudyRoomUser studyRoomUser: studyRoomUsers) {
             studyRoomResponseDtos.add(StudyRoomResponseDto.toDto(studyRoomUser.getStudyRoom()));
         }

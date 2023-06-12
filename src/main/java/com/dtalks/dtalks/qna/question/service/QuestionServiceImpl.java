@@ -77,11 +77,8 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public Long createQuestion(QuestionDto questionDto) {
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (user.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다. ");
-        }
-        Question question = Question.toEntity(questionDto, user.get());
+        User user = SecurityUtil.getUser();
+        Question question = Question.toEntity(questionDto, user);
         questionRepository.save(question);
         return question.getId();
     }
@@ -95,7 +92,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
         Question question = optionalQuestion.get();
         String userId = question.getUser().getUserid();
-        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
+        if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다. ");
         }
         question.update(questionDto.getTitle(), questionDto.getContent());
@@ -114,7 +111,7 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "답변이 달린 질문은 삭제할 수 없습니다. ");
         }
         String userId = question.getUser().getUserid();
-        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
+        if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다. ");
         }
         questionRepository.delete(question);

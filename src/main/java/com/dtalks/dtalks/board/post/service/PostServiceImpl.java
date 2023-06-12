@@ -82,17 +82,14 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Long createPost(PostRequestDto postDto) {
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (user.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-        Post post = Post.toEntity(postDto, user.get());
+        User user = SecurityUtil.getUser();
+        Post post = Post.toEntity(postDto, user);
         postRepository.save(post);
 
         Activity activity = Activity.builder()
                 .post(post)
                 .type(ActivityType.POST)
-                .user(user.get())
+                .user(user)
                 .build();
 
         activityRepository.save(activity);
@@ -109,7 +106,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = optionalPost.get();
         String userId = post.getUser().getUserid();
-        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
+        if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
         }
 
@@ -127,7 +124,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = optionalPost.get();
         String userId = post.getUser().getUserid();
-        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
+        if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
         }
 

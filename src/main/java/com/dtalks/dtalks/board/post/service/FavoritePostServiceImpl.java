@@ -31,18 +31,13 @@ public class FavoritePostServiceImpl implements FavoritePostService {
     @Override
     @Transactional
     public Integer favorite(Long postId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
         Post post = optionalPost.get();
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
 
         if (user == post.getUser()) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "작성한 글에는 즐겨찾기가 불가능합니다.");
@@ -62,17 +57,12 @@ public class FavoritePostServiceImpl implements FavoritePostService {
     @Override
     @Transactional
     public Integer unFavorite(Long postId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
         Post post = optionalPost.get();
 
         Optional<FavoritePost> optionalFavoritePost = favoritePostRepository.findByPostIdAndUserId(postId, user.getId());
@@ -100,12 +90,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
 
     @Override
     public boolean checkFavorite(Long postId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
         return favoritePostRepository.existsByPostIdAndUserId(postId, user.getId());
     }
 }
