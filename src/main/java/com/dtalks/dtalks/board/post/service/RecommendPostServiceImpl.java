@@ -27,18 +27,13 @@ public class RecommendPostServiceImpl implements RecommendPostService {
     @Override
     @Transactional
     public Integer recommend(Long postId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
         Post post = optionalPost.get();
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
 
         if (user == post.getUser()) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "작성한 글에는 추천이 불가능합니다.");
@@ -58,17 +53,12 @@ public class RecommendPostServiceImpl implements RecommendPostService {
     @Override
     @Transactional
     public Integer cancelRecommend(Long postId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
         Optional<RecommendPost> optionalRecommendPost = recommendPostRepository.findByPostIdAndUserId(postId, user.getId());
         if (optionalRecommendPost.isEmpty()) {
             throw new CustomException(ErrorCode.FAVORITE_POST_NOT_FOUND_ERROR, "해당 게시글은 추천 상태가 아닙니다.");
@@ -84,12 +74,7 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
     @Override
     public boolean checkRecommend(Long postId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
         return recommendPostRepository.existsByPostIdAndUserId(postId, user.getId());
     }
 }

@@ -52,10 +52,6 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional(readOnly = true)
     public List<AnswerResponseDto> getAnswersByUserId(Long userId){
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다. ");
-        }
         return answerRepository.findByUserId(userId).stream()
                 .map(AnswerResponseDto::toDto)
                 .collect(Collectors.toList());
@@ -64,15 +60,12 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional
     public Long createAnswer(AnswerDto answerDto,  Long questionId) {
-        Optional<User> user = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (user.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
-        }
+        User user = SecurityUtil.getUser();
         Optional<Question> question = questionRepository.findById(questionId);
         if(question.isEmpty()){
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문이 존재하지 않습니다. ");
         }
-        Answer answer = Answer.toEntity(answerDto, question.get(), user.get());
+        Answer answer = Answer.toEntity(answerDto, question.get(), user);
         answerRepository.save(answer);
         return answer.getId();
     }
@@ -86,7 +79,7 @@ public class AnswerServiceImpl implements AnswerService {
         }
         Answer answer = optionalAnswer.get();
         String userId = answer.getUser().getUserid();
-        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
+        if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 답변을 수정할 수 있는 권한이 없습니다.");
         }
         answer.update(answerDto.getContent());
@@ -102,7 +95,7 @@ public class AnswerServiceImpl implements AnswerService {
         }
         Answer answer = optionalAnswer.get();
         String userId = answer.getUser().getUserid();
-        if (!userId.equals(SecurityUtil.getCurrentUserId())) {
+        if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 답변을 삭제할 수 있는 권한이 없습니다.");
         }
         if (answer.isSelected()) {
@@ -114,17 +107,13 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional
     public void selectAnswer(Long id) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 유저가 존재하지 않습니다.");
-        }
         Optional<Answer> optionalAnswer = answerRepository.findById(id);
         if (optionalAnswer.isEmpty()) {
             throw new CustomException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
         }
 
         Answer answer = optionalAnswer.get();
-        User currentUser = optionalUser.get();
+        User currentUser = SecurityUtil.getUser();
         User selectUser = answer.getQuestion().getUser();
 
         if (!selectUser.equals(currentUser)) {

@@ -35,17 +35,12 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
     @Override
     @Transactional
     public Integer addScrap(Long questionId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if (optionalQuestion.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 질문글입니다.");
         }
 
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
         Question question = optionalQuestion.get();
 
         if (user == question.getUser()) {
@@ -65,17 +60,12 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
     @Override
     @Transactional
     public Integer removeScrap(Long questionId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if (optionalQuestion.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 질문글입니다.");
         }
 
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
         Question question = optionalQuestion.get();
 
         Optional<ScrapQuestion> optionalScrapQuestion = scrapQuestionRepository.findByQuestionIdAndUserId(question.getId(), user.getId());
@@ -93,10 +83,6 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
     @Override
     @Transactional(readOnly = true)
     public Page<QuestionResponseDto> searchScrapQuestionsByUser(String userId, Pageable pageable) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
         Page<ScrapQuestion> scrapQuestions = scrapQuestionRepository.findByUserId(userId, pageable);
         List<QuestionResponseDto> questionResponseDtos = scrapQuestions.getContent().stream()
                 .map(scrapQuestion -> QuestionResponseDto.toDto(scrapQuestion.getQuestion()))

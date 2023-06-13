@@ -10,21 +10,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @NoArgsConstructor
 public class SecurityUtil {
 
-    // SecurityContext 에 유저 정보가 저장되는 시점
     // Request 가 들어올 때 JwtFilter 의 doFilter 에서 저장
-    public static String getCurrentUserId() {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || authentication.getName() == null) {
-            throw new RuntimeException("Security Context 에 인증 정보가 없습니다.");
+    public static User getUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "유저를 찾을 수 없습니다.");
         }
-
-        return authentication.getName();
-    }
-
-    public static void checkUserPermission(User user) {
-        if(!user.getUserid().equals(getCurrentUserId())) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "권한이 없습니다.");
-        }
+        return user;
     }
 }
