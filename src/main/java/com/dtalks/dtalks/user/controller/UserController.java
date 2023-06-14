@@ -2,10 +2,7 @@ package com.dtalks.dtalks.user.controller;
 
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.studyroom.enums.Skill;
-import com.dtalks.dtalks.user.dto.DuplicateResponseDto;
-import com.dtalks.dtalks.user.dto.RecentActivityDto;
-import com.dtalks.dtalks.user.dto.SignInResponseDto;
-import com.dtalks.dtalks.user.dto.UserResponseDto;
+import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserDetailsService;
 import com.dtalks.dtalks.user.service.UserService;
@@ -90,11 +87,11 @@ public class UserController {
         return userService.getUserProfileImage();
     }
 
-    @Operation(summary = "유저 소개글 수정")
-    @PutMapping(value = "/profile/description")
-    public ResponseEntity<UserResponseDto> updateUserDescription(@RequestBody @Schema(example = "{description: string}") String description) {
+    @Operation(summary = "유저 소개글, 기술스택 수정")
+    @PutMapping(value = "/profile")
+    public ResponseEntity<UserResponseDto> updateUserProfile(@RequestBody UserProfileRequestDto userProfileRequestDto) {
         LOGGER.info("updateUserDescription controller 호출됨");
-        return ResponseEntity.ok(userService.updateUserDescription(description));
+        return ResponseEntity.ok(userService.updateUserProfile(userProfileRequestDto));
     }
 
     @GetMapping(value = "/recent/activity/{nickname}")
@@ -121,12 +118,6 @@ public class UserController {
     @PutMapping(value = "/setting/private/{status}")
     public void updatePrivate(@PathVariable boolean status) {
         userService.updatePrivate(status);
-    }
-
-    @Operation(summary = "유저 기술스택 수정")
-    @PutMapping(value = "/profile/skills")
-    public ResponseEntity<UserResponseDto> updateUserSkills(@RequestBody @Schema(example = "{skills: [DJANGO, AWS]}")List <Skill> skills) {
-        return ResponseEntity.ok(userService.updateUserSkills(skills));
     }
 
     @Operation(summary = "유저 닉네임 변경")

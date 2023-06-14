@@ -295,10 +295,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto updateUserDescription(String description) {
+    public UserResponseDto updateUserProfile(UserProfileRequestDto userProfileRequestDto) {
         User user = SecurityUtil.getUser();
 
-        user.setDescription(description);
+        user.setDescription(userProfileRequestDto.getDescription());
+        user.setSkills(userProfileRequestDto.getSkills());
         User savedUser = userRepository.save(user);
 
         UserResponseDto userResponseDto = UserResponseDto.toDto(savedUser);
@@ -369,16 +370,9 @@ public class UserServiceImpl implements UserService {
         return user.getIsPrivate();
     }
 
-    @Override
-    @Transactional
-    public UserResponseDto updateUserSkills(List<Skill> skills) {
-        User user = SecurityUtil.getUser();
-        user.setSkills(skills);
-        User savedUser = userRepository.save(user);
-        return UserResponseDto.toDto(savedUser);
-    }
 
     @Override
+    @Transactional
     public SignInResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto) {
         User user = SecurityUtil.getUser();
         Optional<Document> optionalImage = documentRepository.findById(oAuthSignUpDto.getProfileImageId());
