@@ -11,7 +11,10 @@ import com.dtalks.dtalks.studyroom.enums.StudyRoomLevel;
 import com.dtalks.dtalks.studyroom.repository.StudyRoomRepository;
 import com.dtalks.dtalks.studyroom.repository.StudyRoomUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
+import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActivityType;
+import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -35,6 +38,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     private final StudyRoomRepository studyRoomRepository;
     private final StudyRoomUserRepository studyRoomUserRepository;
     private final UserRepository userRepository;
+    private final ActivityRepository activityRepository;
 
     @Override
     @Transactional
@@ -180,7 +184,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
 
     @Override
     @Transactional
-    public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId) {
+    public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId, boolean status) {
         User user = SecurityUtil.getUser();
         Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(studyRoomId);
         if(optionalStudyRoom.isEmpty()) {
@@ -205,13 +209,28 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         if(requestStudyRoomUser.isStatus()) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 이미 가입중입니다.");
         }
-        if(studyRoom.getJoinCount() >= studyRoom.getJoinableCount()) {
+
+        User requestUser = requestStudyRoomUser.getUser();
+        Activity activity = new Activity();
+        activity.setUser(requestUser);
+        if(!status) {
+            studyRoom.getStudyRoomUsers().remove(requestStudyRoomUser);
+            requestUser.getStudyRoomUserList().remove(requestStudyRoomUser);
+            studyRoomUserRepository.delete(requestStudyRoomUser);
+            activity.setType(ActivityType.STUDYROOM_DENY);
+            activityRepository.save(activity);
+            return StudyRoomResponseDto.toDto(studyRoom);
+        }
+
+        if (studyRoom.getJoinCount() >= studyRoom.getJoinableCount()) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "스터디룸 가입 정원이 가득 찼습니다.");
         }
         studyRoom.addJoinCount();
-        StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
         requestStudyRoomUser.setStatus(true);
+        activity.setType(ActivityType.STUDYROOM_ACCEPT);
+        StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
         studyRoomUserRepository.save(requestStudyRoomUser);
+        activityRepository.save(activity);
         return StudyRoomResponseDto.toDto(savedStudyRoom);
     }
 

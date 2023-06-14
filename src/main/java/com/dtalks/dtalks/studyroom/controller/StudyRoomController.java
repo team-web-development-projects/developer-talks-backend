@@ -57,7 +57,7 @@ public class StudyRoomController {
         return ResponseEntity.ok(studyRoomService.findAll(pageable));
     }
 
-    @Operation(summary = "스터디룸 업데이트")
+    @Operation(summary = "스터디룸 수정")
     @PutMapping("/{id}")
     public ResponseEntity<StudyRoomResponseDto> updateStudyRoom(@PathVariable Long id,
                                                                 @Valid @RequestBody StudyRoomRequestDto studyRoomRequestDto) {
@@ -71,7 +71,7 @@ public class StudyRoomController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "스터디룸 가입")
+    @Operation(summary = "스터디룸 가입 신청")
     @PostMapping("/join/{id}")
     public ResponseEntity<StudyRoomResponseDto> joinStudyRoom(
             @PathVariable Long id
@@ -87,10 +87,11 @@ public class StudyRoomController {
         return ResponseEntity.ok(studyRoomService.studyRoomRequestList(pageable));
     }
 
-    @Operation(summary = "스터디룸 가입 승인")
+    @Operation(summary = "스터디룸 가입 승인/거부")
     @PostMapping("/accept/{studyRoomId}/{studyRoomUserId}")
-    public ResponseEntity<StudyRoomResponseDto> acceptStudyRoom(@PathVariable Long studyRoomId, @PathVariable Long studyRoomUserId) {
-        return ResponseEntity.ok(studyRoomService.acceptJoinStudyRoom(studyRoomId, studyRoomUserId));
+    public ResponseEntity<StudyRoomResponseDto> acceptStudyRoom(@PathVariable Long studyRoomId, @PathVariable Long studyRoomUserId,
+                                                                @RequestParam boolean status) {
+        return ResponseEntity.ok(studyRoomService.acceptJoinStudyRoom(studyRoomId, studyRoomUserId, status));
     }
 
     @Operation(summary = "스터디룸 탈퇴")
@@ -106,7 +107,7 @@ public class StudyRoomController {
         return ResponseEntity.ok(studyRoomService.expelStudyRoomUser(studyRoomId, nickname));
     }
 
-    @Operation(summary = "가입중인 스터디룸 조회")
+    @Operation(summary = "가입중/가입신청중인 스터디룸 조회")
     @GetMapping("/users")
     public ResponseEntity<Page<StudyRoomResponseDto>> joinedStudyRoom(
             @PageableDefault(size = 10, page = 0) @ParameterObject Pageable pageable

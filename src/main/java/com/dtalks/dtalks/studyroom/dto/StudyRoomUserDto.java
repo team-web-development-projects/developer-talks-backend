@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 @Builder
 public class StudyRoomUserDto {
+
+    private Long id;
     private StudyRoomLevel studyRoomLevel;
     private boolean status;
 
@@ -16,6 +18,7 @@ public class StudyRoomUserDto {
     @Builder
     public static StudyRoomUserDto toDto(StudyRoomUser studyRoomUser) {
         return StudyRoomUserDto.builder()
+                .id(studyRoomUser.getId())
                 .studyRoomLevel(studyRoomUser.getStudyRoomLevel())
                 .status(studyRoomUser.isStatus())
                 .nickname(studyRoomUser.getUser().getNickname())
