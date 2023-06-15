@@ -52,6 +52,8 @@ public class CommentInfoDto {
                 .nickname(comment.getUser().getNickname())
                 .isSecret(comment.isSecret())
                 .isRemoved(comment.isRemoved())
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
+                .parentNickname(comment.getParent() != null ? comment.getParent().getUser().getNickname() : null)
                 .childrenList(new ArrayList<>())
                 .build();
     }

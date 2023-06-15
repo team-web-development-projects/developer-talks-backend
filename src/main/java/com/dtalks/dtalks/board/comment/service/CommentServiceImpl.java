@@ -59,13 +59,9 @@ public class CommentServiceImpl implements CommentService{
 
         commentList.stream().forEach(c -> {
             CommentInfoDto dto = CommentInfoDto.toDto(c);
-            Comment parent = c.getParent();
-            if (parent != null) {
-                dto.setParentId(parent.getId());
-            }
             map.put(dto.getId(), dto);
-            if (parent != null) {
-                map.get(parent.getId()).getChildrenList().add(dto);
+            if (dto.getParentId() != null) {
+                map.get(dto.getParentId()).getChildrenList().add(dto);
             } else {
                 commentInfoDtoList.add(dto);
             }
