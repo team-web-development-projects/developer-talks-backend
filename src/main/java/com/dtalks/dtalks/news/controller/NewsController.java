@@ -16,7 +16,7 @@ import java.util.List;
 public class NewsController {
     private final NewsService newsService;
 
-    @Operation(summary = "News 클로링 해오는 api", description = "BLOTER 사이트의 IT 기업 new 기사(제목, 내용, 작성자, 날짜, 이미지 주소, 링크) 반환")
+    @Operation(summary = "최신 20개 뉴스 불러오는 api", description = "BLOTER 사이트의 IT 기업 new 기사(제목, 내용, 작성자, 날짜, 이미지 주소, 링크) 반환")
     @GetMapping("/news")
     public ResponseEntity<List<News>> getNews() {
         List<News> newsList = newsService.getNews();

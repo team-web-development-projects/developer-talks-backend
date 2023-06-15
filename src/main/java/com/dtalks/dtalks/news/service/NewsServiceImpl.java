@@ -18,12 +18,12 @@ public class NewsServiceImpl implements NewsService {
     private final NewsRepository newsRepository;
     @Override
     public List<News> getNews() {
-        try {
-            List<News> newsList = newsCrawler.crawlNews();
-            return newsList;
-        } catch (IOException e) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "뉴스가 존재하지 않습니다. ");
+        List<News> newsList = newsRepository.findTop20ByOrderByDateDesc();
+        if (newsList.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "최신 뉴스가 존재하지 않습니다. ");
         }
+
+        return newsList;
     }
 
     @Override
