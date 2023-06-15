@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.springframework.core.io.Resource;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,6 +26,8 @@ public class PostDto {
 
     @NotBlank
     private String content;
+
+    private List<byte[]> files;
 
     @Schema(description = "게시글을 작성한 사용자의 닉네임")
     @NotBlank

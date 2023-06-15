@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -79,15 +80,18 @@ public class PostController {
 
     @Operation(summary = "게시글 생성")
     @PostMapping
-    public ResponseEntity<Long> createPost(@Valid @RequestBody PostRequestDto postDto) {
-        return ResponseEntity.ok(postService.createPost(postDto));
+    public ResponseEntity<Long> createPost(@Valid @RequestPart PostRequestDto postDto,
+                                           @RequestPart (required = false) List<MultipartFile> files) {
+        return ResponseEntity.ok(postService.createPost(postDto, files));
     }
 
 
     @Operation(summary = "게시글 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updatePost(@Valid @RequestBody PostRequestDto postDto, @PathVariable Long id) {
-        return ResponseEntity.ok(postService.updatePost(postDto, id));
+    public ResponseEntity<Long> updatePost(@Valid @RequestPart PostRequestDto postDto,
+                                           @RequestPart (required = false) List<MultipartFile> files,
+                                           @PathVariable Long id) {
+        return ResponseEntity.ok(postService.updatePost(postDto, files, id));
     }
 
 
