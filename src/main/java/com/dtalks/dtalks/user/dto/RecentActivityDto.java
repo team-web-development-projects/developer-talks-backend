@@ -18,6 +18,9 @@ public class RecentActivityDto {
     @Schema(description = "게시글, 댓글 타입에는 게시글의 id, 질문, 답변 관련에는 질문글의 id")
     private Long id;
 
+    @Schema(description = "댓글, 답변의 id")
+    private Long subId;
+
     @Schema(description = "활동 타입")
     private ActivityType type;
 
@@ -31,9 +34,10 @@ public class RecentActivityDto {
     private LocalDateTime createDate;
 
     @Builder
-    public static RecentActivityDto toDto(Long id, ActivityType type, String title, String writer, LocalDateTime createDate) {
+    public static RecentActivityDto toDto(Long id, Long subId, ActivityType type, String title, String writer, LocalDateTime createDate) {
         return RecentActivityDto.builder()
                 .id(id)
+                .subId(subId)
                 .type(type)
                 .title(title)
                 .writer(writer)
