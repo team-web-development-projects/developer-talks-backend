@@ -1,9 +1,14 @@
 package com.dtalks.dtalks.board.post.service;
 
+import com.dtalks.dtalks.base.entity.Document;
+import com.dtalks.dtalks.base.repository.DocumentRepository;
+import com.dtalks.dtalks.board.post.dto.FileNameVO;
 import com.dtalks.dtalks.board.post.entity.FavoritePost;
 import com.dtalks.dtalks.board.post.entity.Post;
+import com.dtalks.dtalks.board.post.entity.PostImage;
 import com.dtalks.dtalks.board.post.entity.RecommendPost;
 import com.dtalks.dtalks.board.post.repository.FavoritePostRepository;
+import com.dtalks.dtalks.board.post.repository.PostImageRepository;
 import com.dtalks.dtalks.board.post.repository.RecommendPostRepository;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.board.post.dto.PostDto;
@@ -21,7 +26,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -34,6 +45,10 @@ public class PostServiceImpl implements PostService {
     private final RecommendPostRepository recommendPostRepository;
     private final ActivityRepository activityRepository;
 
+    private final PostImageRepository imageRepository;
+    private final DocumentRepository documentRepository;
+    private final String imagePath =  new File("").getAbsolutePath() + "/files/post/";
+
     @Override
     @Transactional
     public PostDto searchById(Long id) {
@@ -43,7 +58,27 @@ public class PostServiceImpl implements PostService {
         }
         Post post = optionalPost.get();
         post.setViewCount(post.getViewCount() + 1);
-        return PostDto.toDto(post);
+
+        List<PostImage> imageList = imageRepository.findByPostId(id);
+        List<byte[]> files = new ArrayList<>();
+        if (imageList != null) {
+            for (PostImage image : imageList) {
+                String storeName = image.getDocument().getStoreName();
+                try {
+                    File file = new File(imagePath + storeName);
+                    byte[] imageByteArray = FileCopyUtils.copyToByteArray(file);
+                    files.add(imageByteArray);
+                } catch (FileNotFoundException e) {
+                    throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        PostDto postDto = PostDto.toDto(post);
+        postDto.setFiles(files);
+        return postDto;
     }
 
     @Override
@@ -81,10 +116,35 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long createPost(PostRequestDto postDto) {
+    public Long createPost(PostRequestDto postDto, List<MultipartFile> files) {
         User user = SecurityUtil.getUser();
         Post post = Post.toEntity(postDto, user);
         postRepository.save(post);
+
+        if (files != null){
+            for (MultipartFile file : files) {
+                FileNameVO fileName = fileHandle(file, post.getId());
+
+                Document document = Document.builder()
+                        .inputName(fileName.getInputName())
+                        .storeName(fileName.getStoreName())
+                        .path(fileName.getSavePath().toString())
+                        .build();
+                documentRepository.save(document);
+
+                PostImage postImage = PostImage.builder()
+                        .post(post)
+                        .document(document)
+                        .build();
+                imageRepository.save(postImage);
+
+                try {
+                    Files.write(fileName.getSavePath(), file.getBytes());
+                } catch (Exception e) {
+                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.toString());
+                }
+            }
+        }
 
         Activity activity = Activity.builder()
                 .post(post)
@@ -98,7 +158,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long updatePost(PostRequestDto postDto, Long postId) {
+    public Long updatePost(PostRequestDto postDto,  List<MultipartFile> files, Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
@@ -111,6 +171,77 @@ public class PostServiceImpl implements PostService {
         }
 
         post.update(postDto.getTitle(), postDto.getContent());
+
+        List<PostImage> dbFiles = imageRepository.findByPostId(postId);
+        List<MultipartFile> newDBFiles = new ArrayList<>();
+        if (dbFiles == null) {
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    newDBFiles.add(file);
+                }
+            }
+        } else {
+            if (files == null) {
+                for (PostImage image : dbFiles) {
+                    imageRepository.delete(image);
+                }
+            } else {
+                List<String> dbInputNameList = new ArrayList<>();
+                for (PostImage dbFile : dbFiles) {
+                    Optional<Document> document = documentRepository.findById(dbFile.getDocument().getId());
+                    if (document.isEmpty()) {
+                        throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
+                    }
+                    String inputName = document.get().getInputName();
+                    boolean isDeleted = true;
+                    for (MultipartFile file : files) {
+                        if (file.getOriginalFilename().equals(inputName)) {
+                            isDeleted = false;
+                            break;
+                        }
+                    }
+                    if (isDeleted) {
+                        imageRepository.delete(dbFile);
+                        File file = new File(imagePath + dbFile.getDocument().getStoreName());
+                        file.delete();
+                    } else {
+                        dbInputNameList.add(inputName);
+                    }
+                }
+
+                for (MultipartFile file : files) {
+                    String originalFilename = file.getOriginalFilename();
+                    if (!dbInputNameList.contains(originalFilename)) {
+                        newDBFiles.add(file);
+                    }
+                }
+            }
+        }
+
+        if (!newDBFiles.isEmpty()) {
+            for (MultipartFile file : newDBFiles) {
+                FileNameVO fileName = fileHandle(file, postId);
+                Document document = Document.builder()
+                        .inputName(fileName.getInputName())
+                        .storeName(fileName.getStoreName())
+                        .path(fileName.getSavePath().toString())
+                        .build();
+                documentRepository.save(document);
+
+                PostImage postImage = PostImage.builder()
+                        .post(post)
+                        .document(document)
+                        .build();
+                imageRepository.save(postImage);
+
+                try {
+                    Files.write(fileName.getSavePath(), file.getBytes());
+                } catch (Exception e) {
+                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.toString());
+                }
+            }
+        }
+
         return postId;
     }
 
@@ -147,7 +278,34 @@ public class PostServiceImpl implements PostService {
             activity.setPost(null);
         }
 
+        List<PostImage> imageList = imageRepository.findByPostId(postId);
+        for (PostImage image : imageList) {
+            File file = new File(imagePath + image.getDocument().getStoreName());
+            file.delete();
+        }
+
         postRepository.delete(post);
+    }
+
+    private FileNameVO fileHandle(MultipartFile file, Long postId) {
+        String format, tag, inputName, storeName;
+
+        inputName = file.getOriginalFilename();
+        format = getImageFormat(inputName);
+        if (!(format.equals(".jpg") || format.equals(".png"))) {
+            throw new CustomException(ErrorCode.FILE_FORMAT_ERROR, "파일 형식이 올바르지 않습니다.");
+        }
+
+        tag = "post_" + postId;
+        storeName = tag + System.nanoTime() + format;
+        Path savePath = Paths.get(imagePath + storeName);
+
+        return new FileNameVO(inputName, storeName, savePath);
+    }
+
+    private String getImageFormat(String imageName) {
+        String s[] = imageName.split("[.]");
+        return "." + s[s.length-1].toLowerCase();
     }
 
 }

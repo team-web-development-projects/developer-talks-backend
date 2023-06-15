@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.springframework.core.io.Resource;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,9 +27,14 @@ public class PostDto {
     @NotBlank
     private String content;
 
+    private List<byte[]> files;
+
     @Schema(description = "게시글을 작성한 사용자의 닉네임")
     @NotBlank
     private String nickname;
+
+    @Schema(description = "게시글의 댓글수")
+    private Integer commentCount;
 
     @Schema(description = "게시글 조회수")
     private Integer viewCount;
@@ -51,6 +58,7 @@ public class PostDto {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .nickname(post.getUser().getNickname())
+                .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())
                 .favoriteCount(post.getFavoriteCount())
                 .recommendCount(post.getRecommendCount())

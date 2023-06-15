@@ -59,13 +59,9 @@ public class CommentServiceImpl implements CommentService{
 
         commentList.stream().forEach(c -> {
             CommentInfoDto dto = CommentInfoDto.toDto(c);
-            Comment parent = c.getParent();
-            if (parent != null) {
-                dto.setParentId(parent.getId());
-            }
             map.put(dto.getId(), dto);
-            if (parent != null) {
-                map.get(parent.getId()).getChildrenList().add(dto);
+            if (dto.getParentId() != null) {
+                map.get(dto.getParentId()).getChildrenList().add(dto);
             } else {
                 commentInfoDtoList.add(dto);
             }
@@ -94,23 +90,26 @@ public class CommentServiceImpl implements CommentService{
     @Transactional
     public void saveComment(Long postId, CommentRequestDto dto) {
         User user = SecurityUtil.getUser();
-        Optional<Post> post = postRepository.findById(postId);
-        if (post.isEmpty()) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
+
+        Post post = optionalPost.get();
+        post.plusCommentCount();
 
         Comment comment = Comment.builder()
                 .content(dto.getContent())
                 .isSecret(dto.isSecret())
                 .user(user)
-                .post(post.get())
+                .post(post)
                 .build();
 
         commentRepository.save(comment);
 
         // 댓글 활동을 사용자 기록에 추가
         Activity activity = Activity.builder()
-                .post(post.get())
+                .post(post)
                 .comment(comment)
                 .type(ActivityType.COMMENT)
                 .user(user)
@@ -123,8 +122,8 @@ public class CommentServiceImpl implements CommentService{
     @Transactional
     public void saveReComment(Long postId, Long parentId, CommentRequestDto dto) {
         User user = SecurityUtil.getUser();
-        Optional<Post> post = postRepository.findById(postId);
-        if (post.isEmpty()) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
@@ -137,18 +136,21 @@ public class CommentServiceImpl implements CommentService{
             throw new ValidationException("부모 댓글과 자식 댓글의 게시글 번호가 일치하지 않습니다.");
         }
 
+        Post post = optionalPost.get();
+        post.plusCommentCount();
+
         Comment comment = Comment.builder()
                 .content(dto.getContent())
                 .isSecret(dto.isSecret())
                 .user(user)
-                .post(post.get())
+                .post(post)
                 .parent(parentComment.get())
                 .build();
 
         commentRepository.save(comment);
 
         Activity activity = Activity.builder()
-                .post(post.get())
+                .post(post)
                 .comment(comment)
                 .type(ActivityType.COMMENT)
                 .user(user)
@@ -204,6 +206,9 @@ public class CommentServiceImpl implements CommentService{
         }
         Activity activity = optionalActivity.get();
         activity.setComment(null);
+
+        Post post = comment.getPost();
+        post.minusCommentCount();
 
         /**
          * 삭제하려는 댓글의 자식 댓글이 있는 경우

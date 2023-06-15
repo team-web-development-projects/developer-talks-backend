@@ -32,8 +32,15 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    List<PostImage> imageList = new ArrayList<>();
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Comment> commentList = new ArrayList<>();
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Integer commentCount;
 
     @ColumnDefault("0")
     @Column(nullable = false)
@@ -56,6 +63,7 @@ public class Post extends BaseTimeEntity {
                 .viewCount(0)
                 .favoriteCount(0)
                 .recommendCount(0)
+                .commentCount(0)
                 .build();
     }
 
@@ -64,4 +72,11 @@ public class Post extends BaseTimeEntity {
         this.content = content;
     }
 
+    public void plusCommentCount() {
+        this.commentCount++;
+    }
+
+    public void minusCommentCount() {
+        this.commentCount--;
+    }
 }
