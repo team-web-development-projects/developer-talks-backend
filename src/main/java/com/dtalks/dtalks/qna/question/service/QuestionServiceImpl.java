@@ -7,7 +7,10 @@ import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
+import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActivityType;
+import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +27,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
+    private final ActivityRepository activityRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -80,6 +84,15 @@ public class QuestionServiceImpl implements QuestionService {
         User user = SecurityUtil.getUser();
         Question question = Question.toEntity(questionDto, user);
         questionRepository.save(question);
+
+        Activity activity = Activity.builder()
+                .question(question)
+                .type(ActivityType.QUESTION)
+                .user(user)
+                .build();
+
+        activityRepository.save(activity);
+
         return question.getId();
     }
 
@@ -114,6 +127,13 @@ public class QuestionServiceImpl implements QuestionService {
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다. ");
         }
+
+        // 삭제된 답변의 활동 기록은 남아있고 그 기록에 question이 연결되어있음
+        List<Activity> activityList = activityRepository.findByQuestionId(id);
+        for (Activity activity : activityList) {
+            activity.setQuestion(null);
+        }
+
         questionRepository.delete(question);
     }
 

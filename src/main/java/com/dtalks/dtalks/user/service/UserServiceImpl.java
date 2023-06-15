@@ -326,6 +326,7 @@ public class UserServiceImpl implements UserService {
         Page<Activity> page = activityRepository.findByUserIdAndCreateDateBetween(user.getId(), goe, now, pageable);
         return page.map(p -> {
             Long id = null;
+            Long subId = null;
             ActivityType type = p.getType();
             String title = "";
             String writer = "";
@@ -337,17 +338,23 @@ public class UserServiceImpl implements UserService {
                         title = post.getTitle();
                         writer = post.getUser().getNickname();
                     }
+                    if (type.equals(ActivityType.COMMENT) && p.getComment() != null) {
+                        subId = p.getComment().getId();
+                    }
                     break;
-                case QUESTION, ANSWER, ANSWER_SELECTED, SELECT_ANSWER, CANCEL_SELECT_ANSWER:
+                case QUESTION, ANSWER, ANSWER_SELECTED, SELECT_ANSWER:
                     Question question = p.getQuestion();
                     if (question != null) {
                         id = question.getId();
                         title = question.getTitle();
                         writer = question.getUser().getNickname();
                     }
+                    if (p.getAnswer() != null) {
+                        subId = p.getAnswer().getId();
+                    }
                     break;
             }
-            return RecentActivityDto.toDto(id, type, title, writer, p.getCreateDate());
+            return RecentActivityDto.toDto(id, subId, type, title, writer, p.getCreateDate());
         });
 
     }

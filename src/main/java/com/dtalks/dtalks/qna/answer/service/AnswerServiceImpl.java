@@ -1,5 +1,7 @@
 package com.dtalks.dtalks.qna.answer.service;
 
+import com.dtalks.dtalks.alarm.dto.AlarmRequestDto;
+import com.dtalks.dtalks.alarm.enums.AlarmType;
 import com.dtalks.dtalks.exception.exception.*;
 import com.dtalks.dtalks.qna.answer.dto.AnswerDto;
 import com.dtalks.dtalks.qna.answer.dto.AnswerResponseDto;
@@ -9,7 +11,10 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
+import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActivityType;
+import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ public class AnswerServiceImpl implements AnswerService {
     private final UserRepository userRepository;
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
+    private final ActivityRepository activityRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -61,12 +67,22 @@ public class AnswerServiceImpl implements AnswerService {
     @Transactional
     public Long createAnswer(AnswerDto answerDto,  Long questionId) {
         User user = SecurityUtil.getUser();
-        Optional<Question> question = questionRepository.findById(questionId);
-        if(question.isEmpty()){
+        Optional<Question> optionalQuestion = questionRepository.findById(questionId);
+        if(optionalQuestion.isEmpty()){
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문이 존재하지 않습니다. ");
         }
-        Answer answer = Answer.toEntity(answerDto, question.get(), user);
+        Question question = optionalQuestion.get();
+        Answer answer = Answer.toEntity(answerDto, question, user);
         answerRepository.save(answer);
+
+        Activity activity = Activity.builder()
+                .question(question)
+                .answer(answer)
+                .type(ActivityType.ANSWER)
+                .user(user)
+                .build();
+
+        activityRepository.save(activity);
         return answer.getId();
     }
 
@@ -101,6 +117,11 @@ public class AnswerServiceImpl implements AnswerService {
         if (answer.isSelected()) {
             throw new CustomException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "채택된 답변은 삭제할 수 없습니다. ");
         }
+
+        Optional<Activity> optionalActivity = activityRepository.findByAnswerIdAndType(id, ActivityType.ANSWER);
+        Activity activity = optionalActivity.get();
+        activity.setAnswer(null);
+
         answerRepository.delete(answer);
     }
 
@@ -125,6 +146,24 @@ public class AnswerServiceImpl implements AnswerService {
         }
 
         answer.setSelected(true);
+
+        Activity answer_selected = Activity.builder()
+                .question(answer.getQuestion())
+                .answer(answer)
+                .type(ActivityType.ANSWER_SELECTED)
+                .user(currentUser)
+                .build();
+
+        Activity select_answer = Activity.builder()
+                .question(answer.getQuestion())
+                .answer(answer)
+                .type(ActivityType.SELECT_ANSWER)
+                .user(selectUser)
+                .build();
+
+        activityRepository.save(answer_selected);
+        activityRepository.save(select_answer);
+
         answerRepository.save(answer);
     }
 }
