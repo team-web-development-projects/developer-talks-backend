@@ -32,9 +32,7 @@ public interface UserService {
 
     UserResponseDto userInfo();
 
-    UserResponseDto updateUserDescription(String description);
-
-    UserResponseDto updateUserSkills(List<Skill> skills);
+    UserResponseDto updateUserProfile(UserProfileRequestDto userProfileRequestDto);
 
     Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable);
     void updatePrivate(boolean status);

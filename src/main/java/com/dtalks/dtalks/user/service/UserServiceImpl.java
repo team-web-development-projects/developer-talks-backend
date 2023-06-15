@@ -208,7 +208,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public SignInResponseDto updateNickname(String nickname) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
         user.setNickname(nickname);
 
         User savedUser = userRepository.save(user);
@@ -260,7 +260,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public ResponseEntity<Resource> getUserProfileImage() {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
         String storeName = user.getProfileImage().getStoreName();
         Path path = Paths.get(imagePath + storeName);
         try {
@@ -286,7 +286,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto userInfo() {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
 
         UserResponseDto userResponseDto = UserResponseDto.toDto(user);
 
@@ -295,10 +295,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto updateUserDescription(String description) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+    public UserResponseDto updateUserProfile(UserProfileRequestDto userProfileRequestDto) {
+        User user = SecurityUtil.getUser();
 
-        user.setDescription(description);
+        user.setDescription(userProfileRequestDto.getDescription());
+        user.setSkills(userProfileRequestDto.getSkills());
         User savedUser = userRepository.save(user);
 
         UserResponseDto userResponseDto = UserResponseDto.toDto(savedUser);
@@ -354,11 +355,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updatePrivate(boolean status) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
         user.setIsPrivate(status);
     }
 
@@ -373,18 +370,11 @@ public class UserServiceImpl implements UserService {
         return user.getIsPrivate();
     }
 
-    @Override
-    @Transactional
-    public UserResponseDto updateUserSkills(List<Skill> skills) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
-        user.setSkills(skills);
-        User savedUser = userRepository.save(user);
-        return UserResponseDto.toDto(savedUser);
-    }
 
     @Override
+    @Transactional
     public SignInResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto) {
-        User user = userRepository.getByUserid(SecurityUtil.getCurrentUserId());
+        User user = SecurityUtil.getUser();
         Optional<Document> optionalImage = documentRepository.findById(oAuthSignUpDto.getProfileImageId());
 
         if(!optionalImage.isEmpty()) {

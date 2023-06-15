@@ -24,18 +24,13 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
     @Override
     public Integer recommendQuestion(Long questionId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if(optionalQuestion.isEmpty()){
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
 
         Question question = optionalQuestion.get();
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
 
         if(recommendQuestionRepository.existsByUserAndQuestion(user,question)){
             throw new CustomException(ErrorCode.RECOMMENDATION_ALREADY_EXIST_ERROR, "이미 해당 질문글을 추천하였습니다. ");
@@ -51,18 +46,13 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     @Override
     @Transactional
     public Integer unRecommendQuestion(Long questionId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(SecurityUtil.getCurrentUserId()));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다. ");
-        }
-
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if(optionalQuestion.isEmpty()){
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
 
         Question question = optionalQuestion.get();
-        User user = optionalUser.get();
+        User user = SecurityUtil.getUser();
 
         if(!recommendQuestionRepository.existsByUserAndQuestion(user,question)){
             throw new CustomException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
