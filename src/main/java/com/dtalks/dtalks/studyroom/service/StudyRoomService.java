@@ -23,7 +23,7 @@ public interface StudyRoomService {
 
     public Page<StudyRoomJoinResponseDto> studyRoomRequestList(Pageable pageable);
 
-    public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId);
+    public StudyRoomResponseDto acceptJoinStudyRoom(Long studyRoomId, Long studyRoomUserId, boolean status);
 
     public void deleteStudyRoomUser(Long id);
 
