@@ -60,8 +60,8 @@ public class StudyRoomServiceImpl implements StudyRoomService{
 
     @Override
     @Transactional(readOnly = true)
-    public StudyRoomResponseDto findStudyRoomById(Long id) {
-        Optional<StudyRoom> studyRoom = studyRoomRepository.findById(id);
+    public StudyRoomResponseDto findStudyRoomById(Long studyRoomId) {
+        Optional<StudyRoom> studyRoom = studyRoomRepository.findById(studyRoomId);
         if(studyRoom.isEmpty()) {
             throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸입니다.");
         }
@@ -310,6 +310,52 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         int end = Math.min((start + pageable.getPageSize()), studyRoomResponseDtos.size());
 
         return new PageImpl<>(studyRoomResponseDtos.subList(start, end), pageable, studyRoomResponseDtos.size());
+    }
+
+    @Override
+    @Transactional
+    public StudyRoomResponseDto changeAuthority(Long studyRoomId, Long studyRoomUserId, StudyRoomLevel studyRoomLevel) {
+        User user = SecurityUtil.getUser();
+
+        Optional<StudyRoom> optionalStudyRoom = studyRoomRepository.findById(studyRoomId);
+        if(optionalStudyRoom.isEmpty()) {
+            throw new CustomException(ErrorCode.STUDYROOM_NOT_FOUND_ERROR, "존재하지 않는 스터디룸 입니다.");
+        }
+
+        StudyRoom studyRoom = optionalStudyRoom.get();
+
+        Optional<StudyRoomUser> optionalOwnerStudyRoomUser = studyRoomUserRepository.findByStudyRoomAndUser(studyRoom, user);
+        if(optionalOwnerStudyRoomUser.isEmpty()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "요청자는 스터디룸 가입자가 아닙니다.");
+        }
+
+        StudyRoomUser ownerStudyRoomUser = optionalOwnerStudyRoomUser.get();
+        if(!ownerStudyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER)) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "요청자는 리더가 아닙니다.");
+        }
+
+        Optional<StudyRoomUser> optionalStudyRoomUser = studyRoomUserRepository.findById(studyRoomUserId);
+        if(optionalStudyRoomUser.isEmpty()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 스터디룸 가입 상태가 아닙니다.");
+        }
+
+        StudyRoomUser studyRoomUser = optionalStudyRoomUser.get();
+        if(!studyRoomUser.isStatus()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 스터디룸 가입 상태가 아닙니다.");
+        }
+
+        if(studyRoomLevel.equals(StudyRoomLevel.LEADER)) {
+            ownerStudyRoomUser.setStudyRoomLevel(StudyRoomLevel.NORMAL);
+            studyRoomUser.setStudyRoomLevel(StudyRoomLevel.LEADER);
+        }
+        else {
+            studyRoomUser.setStudyRoomLevel(studyRoomLevel);
+        }
+
+        studyRoomUserRepository.save(ownerStudyRoomUser);
+        studyRoomUserRepository.save(studyRoomUser);
+
+        return StudyRoomResponseDto.toDto(studyRoomRepository.findById(studyRoomId).get());
     }
 
     public boolean isLeader(StudyRoomUser studyRoomUser) {
