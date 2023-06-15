@@ -3,6 +3,7 @@ package com.dtalks.dtalks.studyroom.controller;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomJoinResponseDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomRequestDto;
 import com.dtalks.dtalks.studyroom.dto.StudyRoomResponseDto;
+import com.dtalks.dtalks.studyroom.enums.StudyRoomLevel;
 import com.dtalks.dtalks.studyroom.service.StudyRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,11 +43,11 @@ public class StudyRoomController {
         return ResponseEntity.ok(studyRoomResponseDto);
     }
 
-    @Operation(summary = "id를 이용한 스터디룸 조회")
-    @GetMapping("/{id}")
-    public ResponseEntity<StudyRoomResponseDto> findStudyRoomById(@PathVariable Long id) {
+    @Operation(summary = "스터디룸 조회")
+    @GetMapping("/{studyRoomId}")
+    public ResponseEntity<StudyRoomResponseDto> findStudyRoomById(@PathVariable Long studyRoomId) {
         LOGGER.info("findStudyRoomById controller 호출됨");
-        return ResponseEntity.ok(studyRoomService.findStudyRoomById(id));
+        return ResponseEntity.ok(studyRoomService.findStudyRoomById(studyRoomId));
     }
 
     @Operation(summary = "스터디룸 리스트 조회")
@@ -113,5 +114,14 @@ public class StudyRoomController {
             @PageableDefault(size = 10, page = 0) @ParameterObject Pageable pageable
     ) {
         return ResponseEntity.ok(studyRoomService.JoinedStudyRoomList(pageable));
+    }
+
+    @Operation(summary = "스터디룸원 권한 변경")
+    @PutMapping("/authority/{studyRoomId}/{studyRoomUserId}")
+    public ResponseEntity<StudyRoomResponseDto> changeAuthority(
+            @PathVariable Long studyRoomId, @PathVariable Long studyRoomUserId,
+            @RequestParam StudyRoomLevel studyRoomLevel
+            ) {
+        return ResponseEntity.ok(studyRoomService.changeAuthority(studyRoomId, studyRoomUserId, studyRoomLevel));
     }
 }
