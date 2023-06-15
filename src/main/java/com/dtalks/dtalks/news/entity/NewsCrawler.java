@@ -1,5 +1,7 @@
 package com.dtalks.dtalks.news.entity;
 
+import com.dtalks.dtalks.news.repository.NewsRepository;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,9 +11,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class NewsCrawler {
+    private static final int MAX_LENGTH = 100;
+    private final NewsRepository newsRepository;
     public List<News> crawlNews() throws IOException {
         List<News> newsList = new ArrayList<>();
 
@@ -27,7 +33,20 @@ public class NewsCrawler {
             String date = element.select("em:nth-child(3)").text();
             String url = "https://www.bloter.net/" + element.select("a.thumb").attr("href");
 
-            News news = new News(title, content, writer, date, image, url);
+            //DB에 같은 뉴스 있으면 skip
+            Optional<News> optionalNews = Optional.ofNullable(newsRepository.findByUrl(url));
+            if (optionalNews.isPresent()) {
+                continue;
+            }
+            //title, content 문자열 자르기
+            if (title.length() > MAX_LENGTH) {
+                title = title.substring(0, MAX_LENGTH);
+            }
+            if (content.length() > MAX_LENGTH) {
+                content = content.substring(0, MAX_LENGTH);
+            }
+
+            News news = News.toEntity(title, content, writer, image, date, url);
             newsList.add(news);
         }
         return newsList;
