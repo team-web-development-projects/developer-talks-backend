@@ -254,6 +254,35 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public DocumentResponseDto changeUserProfileImage(MultipartFile multipartFile) {
+        FileValidation.imageValidation(multipartFile.getOriginalFilename());
+        User user = SecurityUtil.getUser();
+        Document document = user.getProfileImage();
+        String path = S3Uploader.createFilePath(multipartFile.getOriginalFilename(), imagePath);
+        String url = s3Uploader.fileUpload(multipartFile, path);
+
+        if(document == null) {
+            Document doc = Document.builder()
+                    .inputName(multipartFile.getOriginalFilename())
+                    .url(url)
+                    .path(path)
+                    .build();
+            Document savedDocument = documentRepository.save(doc);
+            user.setProfileImage(savedDocument);
+            userRepository.save(user);
+            return DocumentResponseDto.toDto(savedDocument);
+        }
+
+        s3Uploader.deleteFile(document.getPath());
+        document.setInputName(multipartFile.getOriginalFilename());
+        document.setUrl(url);
+        document.setPath(path);
+
+        Document savedDocument = documentRepository.save(document);
+        return DocumentResponseDto.toDto(savedDocument);
+    }
+
+    @Override
     @Transactional
     public Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable) {
         Optional<User> optionalUser = Optional.ofNullable(userRepository.getByNickname(nickname));

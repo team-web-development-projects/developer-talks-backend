@@ -19,4 +19,7 @@ public class Document {
 
     @Column(nullable = false)
     private String inputName;
+
+    @Column(nullable = false)
+    private String path;
 }
