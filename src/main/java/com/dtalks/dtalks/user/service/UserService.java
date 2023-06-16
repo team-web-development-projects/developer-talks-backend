@@ -28,7 +28,7 @@ public interface UserService {
 
     DocumentResponseDto userProfileImageUpLoad(MultipartFile file);
 
-    ResponseEntity<Resource> getUserProfileImage();
+    DocumentResponseDto getUserProfileImage();
 
     UserResponseDto userInfo();
 

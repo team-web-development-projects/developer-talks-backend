@@ -76,15 +76,13 @@ public class UserController {
     , produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DocumentResponseDto> profileImageUpLoad(@RequestPart("file") MultipartFile file) {
         LOGGER.info("profileImageUpLoad controller 호출됨");
-        DocumentResponseDto documentResponseDto = userService.userProfileImageUpLoad(file);
-
-        return ResponseEntity.ok(documentResponseDto);
+        return ResponseEntity.ok(userService.userProfileImageUpLoad(file));
     }
 
     @Operation(summary = "프로필 이미지 조회")
     @GetMapping(value = "/profile/image")
-    public ResponseEntity<Resource> getUserProfileImage() {
-        return userService.getUserProfileImage();
+    public ResponseEntity<DocumentResponseDto> getUserProfileImage() {
+        return ResponseEntity.ok(userService.getUserProfileImage());
     }
 
     @Operation(summary = "유저 소개글, 기술스택 수정")

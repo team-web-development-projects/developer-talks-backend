@@ -14,11 +14,9 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String path;
+    @Column(nullable = false)
+    private String url;
 
     @Column(nullable = false)
     private String inputName;
-
-    @Column(nullable = false)
-    private String storeName;
 }

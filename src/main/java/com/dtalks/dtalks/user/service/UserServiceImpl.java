@@ -1,13 +1,14 @@
 package com.dtalks.dtalks.user.service;
 
+import com.dtalks.dtalks.base.component.S3Uploader;
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
+import com.dtalks.dtalks.base.validation.FileValidation;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.qna.question.entity.Question;
-import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
@@ -16,53 +17,33 @@ import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActivityType;
 import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    public final UserRepository userRepository;
-    public final TokenService tokenService;
-    public PasswordEncoder passwordEncoder;
-    public final DocumentRepository documentRepository;
-    private final String imagePath =  new File("").getAbsolutePath() + "/files/profile/";
-
+    private final UserRepository userRepository;
+    private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
+    private final DocumentRepository documentRepository;
     private final ActivityRepository activityRepository;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, TokenService tokenService,
-                           PasswordEncoder passwordEncoder, DocumentRepository documentRepository,
-                           ActivityRepository activityRepository) {
-        this.userRepository = userRepository;
-        this.tokenService = tokenService;
-        this.passwordEncoder = passwordEncoder;
-        this.documentRepository = documentRepository;
-        this.activityRepository = activityRepository;
-    }
+    private final S3Uploader s3Uploader;
+    private final String imagePath =  "profiles";
 
     @Override
     @Transactional
@@ -224,63 +205,28 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public DocumentResponseDto userProfileImageUpLoad(MultipartFile file) {
-        if(file == null) {
-            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "파일이 올바르지 않습니다.");
-        }
+        FileValidation.imageValidation(file.getOriginalFilename());
+        String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
+        String url = s3Uploader.fileUpload(file, path);
 
-        String inputName = file.getOriginalFilename();
-        String format = getImageFormat(inputName);
-        if(!(format.equals("jpg") || format.equals("png"))) {
-            throw new CustomException(ErrorCode.FILE_FORMAT_ERROR, "파일 형식이 올바르지 않습니다.");
-        }
-
-        String saveName = System.currentTimeMillis() + "." + format;
-        Path savePath = Paths.get(imagePath + saveName);
-
-        try {
-            Files.write(savePath, file.getBytes());
-        }
-        catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.toString());
-        }
-
-        Document document = new Document();
-        document.setInputName(inputName);
-        document.setStoreName(saveName);
+        Document document = Document.builder()
+                .inputName(file.getOriginalFilename())
+                .url(url).build();
 
         Document savedDocument = documentRepository.save(document);
-
-        DocumentResponseDto documentResponseDto = new DocumentResponseDto();
-        documentResponseDto.setId(savedDocument.getId());
-        documentResponseDto.setName(savedDocument.getInputName());
-
-        return documentResponseDto;
+        return DocumentResponseDto.toDto(savedDocument);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> getUserProfileImage() {
+    public DocumentResponseDto getUserProfileImage() {
         User user = SecurityUtil.getUser();
-        String storeName = user.getProfileImage().getStoreName();
-        Path path = Paths.get(imagePath + storeName);
-        try {
-            Resource resource = new UrlResource(path.toUri());
-            String format = getImageFormat(storeName);
-            if(format.equals("jpg")) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            }
-            else if(format.equals("png")) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_PNG)
-                        .body(resource);
-            }
-            throw new CustomException(ErrorCode.FILE_FORMAT_ERROR, "파일 포멧이 올바르지 않습니다.");
+        Document document = user.getProfileImage();
+        if(document == null) {
+            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "프로필 이미지가 존재하지 않습니다.");
         }
-        catch (MalformedURLException e) {
-            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
-        }
+
+        return DocumentResponseDto.toDto(document);
     }
 
     @Override
@@ -405,11 +351,6 @@ public class UserServiceImpl implements UserService {
         setSuccessResult(signInResponseDto);
 
         return signInResponseDto;
-    }
-
-    private String getImageFormat(String imageName) {
-        String s[] = imageName.split("[.]");
-        return s[s.length-1].toLowerCase();
     }
 
     private void setSuccessResult(SignUpResponseDto result) {
