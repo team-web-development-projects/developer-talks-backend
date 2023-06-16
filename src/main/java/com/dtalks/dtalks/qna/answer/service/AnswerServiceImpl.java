@@ -1,7 +1,5 @@
 package com.dtalks.dtalks.qna.answer.service;
 
-import com.dtalks.dtalks.alarm.dto.AlarmRequestDto;
-import com.dtalks.dtalks.alarm.enums.AlarmType;
 import com.dtalks.dtalks.exception.exception.*;
 import com.dtalks.dtalks.qna.answer.dto.AnswerDto;
 import com.dtalks.dtalks.qna.answer.dto.AnswerResponseDto;

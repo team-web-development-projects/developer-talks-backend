@@ -1,8 +1,9 @@
 package com.dtalks.dtalks.board.post.service;
 
+import com.dtalks.dtalks.base.component.S3Uploader;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
-import com.dtalks.dtalks.board.post.dto.FileNameVO;
+import com.dtalks.dtalks.base.validation.FileValidation;
 import com.dtalks.dtalks.board.post.entity.FavoritePost;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.entity.PostImage;
@@ -26,13 +27,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -47,7 +44,8 @@ public class PostServiceImpl implements PostService {
 
     private final PostImageRepository imageRepository;
     private final DocumentRepository documentRepository;
-    private final String imagePath =  new File("").getAbsolutePath() + "/files/post/";
+    private final S3Uploader s3Uploader;
+    private final String imagePath =  new File("").getAbsolutePath() + "posts";
 
     @Override
     @Transactional
@@ -60,24 +58,15 @@ public class PostServiceImpl implements PostService {
         post.setViewCount(post.getViewCount() + 1);
 
         List<PostImage> imageList = imageRepository.findByPostId(id);
-        List<byte[]> files = new ArrayList<>();
+        List<String> urls = new ArrayList<>();
         if (imageList != null) {
             for (PostImage image : imageList) {
-                String storeName = image.getDocument().getStoreName();
-                try {
-                    File file = new File(imagePath + storeName);
-                    byte[] imageByteArray = FileCopyUtils.copyToByteArray(file);
-                    files.add(imageByteArray);
-                } catch (FileNotFoundException e) {
-                    throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                urls.add(image.getDocument().getUrl());
             }
 
         }
         PostDto postDto = PostDto.toDto(post);
-        postDto.setFiles(files);
+        postDto.setUrls(urls);
         return postDto;
     }
 
@@ -123,12 +112,12 @@ public class PostServiceImpl implements PostService {
 
         if (files != null){
             for (MultipartFile file : files) {
-                FileNameVO fileName = fileHandle(file, post.getId());
+                FileValidation.imageValidation(file.getOriginalFilename());
+                String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
 
                 Document document = Document.builder()
-                        .inputName(fileName.getInputName())
-                        .storeName(fileName.getStoreName())
-                        .path(fileName.getSavePath().toString())
+                        .inputName(file.getOriginalFilename())
+                        .url(s3Uploader.fileUpload(file, path))
                         .build();
                 documentRepository.save(document);
 
@@ -137,12 +126,6 @@ public class PostServiceImpl implements PostService {
                         .document(document)
                         .build();
                 imageRepository.save(postImage);
-
-                try {
-                    Files.write(fileName.getSavePath(), file.getBytes());
-                } catch (Exception e) {
-                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.toString());
-                }
             }
         }
 
@@ -202,8 +185,7 @@ public class PostServiceImpl implements PostService {
                     }
                     if (isDeleted) {
                         imageRepository.delete(dbFile);
-                        File file = new File(imagePath + dbFile.getDocument().getStoreName());
-                        file.delete();
+                        s3Uploader.deleteFile(dbFile.getDocument().getUrl());
                     } else {
                         dbInputNameList.add(inputName);
                     }
@@ -220,11 +202,12 @@ public class PostServiceImpl implements PostService {
 
         if (!newDBFiles.isEmpty()) {
             for (MultipartFile file : newDBFiles) {
-                FileNameVO fileName = fileHandle(file, postId);
+                FileValidation.imageValidation(file.getOriginalFilename());
+                String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
+
                 Document document = Document.builder()
-                        .inputName(fileName.getInputName())
-                        .storeName(fileName.getStoreName())
-                        .path(fileName.getSavePath().toString())
+                        .inputName(file.getOriginalFilename())
+                        .url(path)
                         .build();
                 documentRepository.save(document);
 
@@ -233,12 +216,6 @@ public class PostServiceImpl implements PostService {
                         .document(document)
                         .build();
                 imageRepository.save(postImage);
-
-                try {
-                    Files.write(fileName.getSavePath(), file.getBytes());
-                } catch (Exception e) {
-                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.toString());
-                }
             }
         }
 
@@ -280,32 +257,9 @@ public class PostServiceImpl implements PostService {
 
         List<PostImage> imageList = imageRepository.findByPostId(postId);
         for (PostImage image : imageList) {
-            File file = new File(imagePath + image.getDocument().getStoreName());
-            file.delete();
+            s3Uploader.deleteFile(image.getDocument().getUrl());
         }
 
         postRepository.delete(post);
     }
-
-    private FileNameVO fileHandle(MultipartFile file, Long postId) {
-        String format, tag, inputName, storeName;
-
-        inputName = file.getOriginalFilename();
-        format = getImageFormat(inputName);
-        if (!(format.equals(".jpg") || format.equals(".png"))) {
-            throw new CustomException(ErrorCode.FILE_FORMAT_ERROR, "파일 형식이 올바르지 않습니다.");
-        }
-
-        tag = "post_" + postId;
-        storeName = tag + System.nanoTime() + format;
-        Path savePath = Paths.get(imagePath + storeName);
-
-        return new FileNameVO(inputName, storeName, savePath);
-    }
-
-    private String getImageFormat(String imageName) {
-        String s[] = imageName.split("[.]");
-        return "." + s[s.length-1].toLowerCase();
-    }
-
 }
