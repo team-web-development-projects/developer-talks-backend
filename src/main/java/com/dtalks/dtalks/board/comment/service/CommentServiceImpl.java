@@ -1,5 +1,9 @@
 package com.dtalks.dtalks.board.comment.service;
 
+import com.dtalks.dtalks.alarm.entity.Alarm;
+import com.dtalks.dtalks.alarm.enums.AlarmStatus;
+import com.dtalks.dtalks.alarm.enums.AlarmType;
+import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.board.comment.dto.CommentInfoDto;
 import com.dtalks.dtalks.board.comment.dto.UserCommentDto;
 import com.dtalks.dtalks.board.comment.entity.Comment;
@@ -33,6 +37,7 @@ public class CommentServiceImpl implements CommentService{
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final ActivityRepository activityRepository;
+    private final AlarmRepository alarmRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -116,6 +121,14 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         activityRepository.save(activity);
+
+        Alarm alarm = Alarm.builder()
+                .receiver(post.getUser())
+                .type(AlarmType.COMMENT)
+                .alarmStatus(AlarmStatus.WAIT)
+                .url("/post/" + postId)
+                .build();
+        alarmRepository.save(alarm);
     }
 
     @Override
@@ -157,6 +170,23 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         activityRepository.save(activity);
+
+        Alarm alarm = Alarm.builder()
+                .receiver(post.getUser())
+                .type(AlarmType.COMMENT)
+                .alarmStatus(AlarmStatus.WAIT)
+                .url("/post/" + postId)
+                .build();
+        alarmRepository.save(alarm);
+
+        alarm = Alarm.builder()
+                .receiver(parentComment.get().getUser())
+                .type(AlarmType.COMMENT)
+                .alarmStatus(AlarmStatus.WAIT)
+                .url("/post/" + postId)
+                .build();
+        alarmRepository.save(alarm);
+
     }
 
 

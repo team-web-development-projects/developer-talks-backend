@@ -1,15 +1,17 @@
 package com.dtalks.dtalks.board.post.service;
 
+import com.dtalks.dtalks.alarm.entity.Alarm;
+import com.dtalks.dtalks.alarm.enums.AlarmStatus;
+import com.dtalks.dtalks.alarm.enums.AlarmType;
+import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.entity.RecommendPost;
-import com.dtalks.dtalks.board.post.repository.CustomPostRepository;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.board.post.repository.RecommendPostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.*;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +23,8 @@ import java.util.Optional;
 public class RecommendPostServiceImpl implements RecommendPostService {
 
     private final RecommendPostRepository recommendPostRepository;
-    private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final AlarmRepository alarmRepository;
 
     @Override
     @Transactional
@@ -47,6 +49,15 @@ public class RecommendPostServiceImpl implements RecommendPostService {
         recommendPostRepository.save(recommendPost);
 
         post.setRecommendCount(post.getRecommendCount() + 1);
+
+        Alarm alarm = Alarm.builder()
+                .receiver(post.getUser())
+                .type(AlarmType.RECOMMEND_POST)
+                .alarmStatus(AlarmStatus.WAIT)
+                .url("/post/" + postId)
+                .build();
+        alarmRepository.save(alarm);
+
         return post.getRecommendCount();
     }
 

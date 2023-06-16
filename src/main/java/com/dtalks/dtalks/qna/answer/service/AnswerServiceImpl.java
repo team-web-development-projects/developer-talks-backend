@@ -1,5 +1,9 @@
 package com.dtalks.dtalks.qna.answer.service;
 
+import com.dtalks.dtalks.alarm.entity.Alarm;
+import com.dtalks.dtalks.alarm.enums.AlarmStatus;
+import com.dtalks.dtalks.alarm.enums.AlarmType;
+import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.exception.exception.*;
 import com.dtalks.dtalks.qna.answer.dto.AnswerDto;
 import com.dtalks.dtalks.qna.answer.dto.AnswerResponseDto;
@@ -29,6 +33,7 @@ public class AnswerServiceImpl implements AnswerService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final ActivityRepository activityRepository;
+    private final AlarmRepository alarmRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,6 +86,15 @@ public class AnswerServiceImpl implements AnswerService {
                 .build();
 
         activityRepository.save(activity);
+
+        Alarm alarm = Alarm.builder()
+                .receiver(question.getUser())
+                .type(AlarmType.ANSWER)
+                .alarmStatus(AlarmStatus.WAIT)
+                .url("/questions/" + questionId)
+                .build();
+        alarmRepository.save(alarm);
+
         return answer.getId();
     }
 
