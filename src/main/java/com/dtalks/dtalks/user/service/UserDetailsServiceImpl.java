@@ -1,11 +1,16 @@
 package com.dtalks.dtalks.user.service;
 
+import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService{
@@ -19,12 +24,20 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUserid(String userid) {
-        return userRepository.getByUserid(userid);
+        Optional<User> user = userRepository.findByUserid(userid);
+        if(user.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "유저를 찾을 수 없습니다.");
+        }
+        return user.get();
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
-        return userRepository.getByEmail(email);
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "유저를 찾을 수 없습니다.");
+        }
+        return user.get();
     }
 }

@@ -78,12 +78,7 @@ public class CommentServiceImpl implements CommentService{
     @Override
     @Transactional(readOnly = true)
     public List<UserCommentDto> searchListByUserId(String userId) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
-        User user = optionalUser.get();
+        User user = findUser(userId);
         List<Comment> commentList = commentRepository.findByUserIdAndIsRemovedFalse(user.getId());
         return commentList.stream().map(c -> {
             Post post = c.getPost();
@@ -95,12 +90,7 @@ public class CommentServiceImpl implements CommentService{
     @Transactional
     public void saveComment(Long postId, CommentRequestDto dto) {
         User user = SecurityUtil.getUser();
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
-        Post post = optionalPost.get();
+        Post post = findPost(postId);
         post.plusCommentCount();
 
         Comment comment = Comment.builder()
@@ -135,21 +125,12 @@ public class CommentServiceImpl implements CommentService{
     @Transactional
     public void saveReComment(Long postId, Long parentId, CommentRequestDto dto) {
         User user = SecurityUtil.getUser();
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
-        Optional<Comment> parentComment = commentRepository.findById(parentId);
-        if (parentComment.isEmpty()) {
-            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다.");
-        }
-
-        if (postId != parentComment.get().getPost().getId()) {
+        Comment parentComment = findComment(parentId);
+        if (postId != parentComment.getPost().getId()) {
             throw new ValidationException("부모 댓글과 자식 댓글의 게시글 번호가 일치하지 않습니다.");
         }
 
-        Post post = optionalPost.get();
+        Post post = findPost(postId);
         post.plusCommentCount();
 
         Comment comment = Comment.builder()
@@ -157,7 +138,7 @@ public class CommentServiceImpl implements CommentService{
                 .isSecret(dto.isSecret())
                 .user(user)
                 .post(post)
-                .parent(parentComment.get())
+                .parent(parentComment)
                 .build();
 
         commentRepository.save(comment);
@@ -180,7 +161,7 @@ public class CommentServiceImpl implements CommentService{
         alarmRepository.save(alarm);
 
         alarm = Alarm.builder()
-                .receiver(parentComment.get().getUser())
+                .receiver(parentComment.getUser())
                 .type(AlarmType.COMMENT)
                 .alarmStatus(AlarmStatus.WAIT)
                 .url("/post/" + postId)
@@ -193,18 +174,10 @@ public class CommentServiceImpl implements CommentService{
     @Override
     @Transactional
     public void updateComment(Long id, CommentRequestDto dto) {
-        Optional<Comment> optionalComment = commentRepository.findById(id);
-        if (optionalComment.isEmpty()) {
-            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다.");
-        }
-
         User user = SecurityUtil.getUser();
 
-        Comment comment = optionalComment.get();
-        Optional<Post> optionalPost = postRepository.findById(comment.getPost().getId());
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
+        Comment comment = findComment(id);
+        findPost(comment.getPost().getId());
 
         String currentUserId = user.getUserid();
         if (!comment.getUser().getUserid().equals(currentUserId)) {
@@ -218,13 +191,8 @@ public class CommentServiceImpl implements CommentService{
     @Override
     @Transactional
     public void deleteComment(Long id) {
-        Optional<Comment> optionalComment = commentRepository.findById(id);
-        if (optionalComment.isEmpty()) {
-            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다.");
-        }
-
         User user = SecurityUtil.getUser();
-        Comment comment = optionalComment.get();
+        Comment comment = findComment(id);
         String currentUserId = user.getUserid();
         if (!comment.getUser().getUserid().equals(currentUserId)) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 댓글을 수정할 권한이 없습니다.");
@@ -259,4 +227,32 @@ public class CommentServiceImpl implements CommentService{
         }
         return comment;
     }
+
+    @Transactional(readOnly = true)
+    private User findUser(String userid) {
+        Optional<User> user = userRepository.findByUserid(userid);
+        if (user.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+        return user.get();
+    }
+
+    @Transactional(readOnly = true)
+    private Post findPost(Long postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+        }
+        return post.get();
+    }
+
+    @Transactional(readOnly = true)
+    private Comment findComment(Long commentId) {
+        Optional<Comment> comment = commentRepository.findById(commentId);
+        if (comment.isEmpty()) {
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다.");
+        }
+        return comment.get();
+    }
+
 }
