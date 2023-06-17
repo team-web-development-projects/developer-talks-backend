@@ -277,8 +277,12 @@ public class StudyRoomServiceImpl implements StudyRoomService{
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "당신은 스터디룸 방장이 아닙니다.");
         }
 
-        User expeledUser = userRepository.getByNickname(nickname);
+        Optional<User> optionalUser = userRepository.findByNickname(nickname);
+        if (optionalUser.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "유저를 찾을 수 없습니다.");
+        }
 
+        User expeledUser = optionalUser.get();
         if(user.getNickname().equals(expeledUser.getNickname())) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "자기 자신을 강퇴할 수 없습니다.");
         }

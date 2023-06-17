@@ -50,11 +50,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostDto searchById(Long id) {
-        Optional<Post> optionalPost = postRepository.findById(id);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-        Post post = optionalPost.get();
+        Post post = findPost(id);
         post.setViewCount(post.getViewCount() + 1);
 
         List<PostImage> imageList = imageRepository.findByPostId(id);
@@ -63,7 +59,6 @@ public class PostServiceImpl implements PostService {
             for (PostImage image : imageList) {
                 urls.add(image.getDocument().getUrl());
             }
-
         }
         PostDto postDto = PostDto.toDto(post);
         postDto.setUrls(urls);
@@ -80,11 +75,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostDto> searchPostsByUser(String userId, Pageable pageable) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-        User user = optionalUser.get();
+        User user = findUser(userId);
         Page<Post> posts = postRepository.findByUserId(user.getId(), pageable);
         return posts.map(PostDto::toDto);
     }
@@ -142,12 +133,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Long updatePost(PostRequestDto postDto,  List<MultipartFile> files, Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
-        Post post = optionalPost.get();
+        Post post = findPost(postId);
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
@@ -225,12 +211,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deletePost(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
-        Post post = optionalPost.get();
+        Post post = findPost(postId);
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
@@ -261,5 +242,23 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    @Transactional(readOnly = true)
+    private User findUser(String userid) {
+        Optional<User> user = userRepository.findByUserid(userid);
+        if (user.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
+        }
+        return user.get();
+    }
+
+    @Transactional(readOnly = true)
+    private Post findPost(Long postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+        }
+        return post.get();
     }
 }

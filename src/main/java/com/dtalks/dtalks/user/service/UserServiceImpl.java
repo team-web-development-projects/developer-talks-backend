@@ -49,16 +49,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public SignUpResponseDto signUp(SignUpDto signUpDto) {
 
-        User userCheck = userRepository.getByUserid(signUpDto.getUserid());
-        User userCheck2 = userRepository.getByEmail(signUpDto.getEmail());
-        User userCheck3 = userRepository.getByNickname(signUpDto.getNickname());
-        if(userCheck != null) {
+        Optional<User> userCheck = userRepository.findByUserid(signUpDto.getUserid());
+        Optional<User> userCheck2 = userRepository.findByEmail(signUpDto.getEmail());
+        Optional<User> userCheck3 = userRepository.findByNickname(signUpDto.getNickname());
+        if(userCheck.isPresent()) {
             throw new CustomException(ErrorCode.USER_DUPLICATION_ERROR, "userid duplicated");
         }
-        if(userCheck2 != null) {
+        if(userCheck2.isPresent()) {
             throw new CustomException(ErrorCode.USER_DUPLICATION_ERROR, "email duplicated");
         }
-        if(userCheck3 != null) {
+        if(userCheck3.isPresent()) {
             throw new CustomException(ErrorCode.USER_DUPLICATION_ERROR, "nickname duplicated");
         }
 
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public SignInResponseDto signIn(SignInDto signInDto) {
         LOGGER.info("SERVICE signIn");
-        User user = userRepository.getByUserid(signInDto.getUserid());
+        User user = findUser(signInDto.getUserid());
 
         UserTokenDto userTokenDto = UserTokenDto.toDto(user);
 
@@ -116,9 +116,9 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public DuplicateResponseDto useridDuplicated(String userid) {
         LOGGER.info("useridDuplicated 호출됨");
-        User user = userRepository.getByUserid(userid);
+        Optional<User> user = userRepository.findByUserid(userid);
         DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
-        if(user == null) {
+        if(user.isEmpty()) {
             duplicateResponseDto.setDuplicated(false);
         }
         else {
@@ -131,9 +131,9 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public DuplicateResponseDto nicknameDuplicated(String nickname) {
         LOGGER.info("nicknameDuplicated 호출됨");
-        User user = userRepository.getByNickname(nickname);
+        Optional<User> user = userRepository.findByNickname(nickname);
         DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
-        if(user == null) {
+        if(user.isEmpty()) {
             duplicateResponseDto.setDuplicated(false);
         }
         else {
@@ -145,9 +145,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public DuplicateResponseDto emailDuplicated(String email) {
-        User user = userRepository.getByEmail(email);
+        Optional<User> user = userRepository.findByEmail(email);
         DuplicateResponseDto duplicateResponseDto = new DuplicateResponseDto();
-        if(user == null) {
+        if(user.isEmpty()) {
             duplicateResponseDto.setDuplicated(false);
         }
         else {
@@ -171,13 +171,13 @@ public class UserServiceImpl implements UserService {
         }
 
         String email = tokenService.getEmailByToken(refreshToken);
-        User user = userRepository.getByEmail(email);
+        Optional<User> user = userRepository.findByEmail(email);
 
-        if(user == null) {
+        if(user.isEmpty()) {
             setFailResult(signInResponseDto);
             return signInResponseDto;
         }
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(user.get());
 
         signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
         signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
@@ -285,7 +285,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByNickname(nickname));
+        Optional<User> optionalUser = userRepository.findByNickname(nickname);
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
@@ -344,11 +344,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public Boolean getPrivateStatus(String id) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(id));
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-        User user = optionalUser.get();
+        User user = findUser(id);
         return user.getIsPrivate();
     }
 
@@ -392,5 +388,14 @@ public class UserServiceImpl implements UserService {
         result.setSuccess(true);
         result.setCode(CommonResponse.FAIL.getCode());
         result.setMsg(CommonResponse.FAIL.getMsg());
+    }
+
+    @Transactional(readOnly = true)
+    private User findUser(String userid) {
+        Optional<User> user = userRepository.findByUserid(userid);
+        if(user.isEmpty()) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "유저를 찾을 수 없습니다.");
+        }
+        return user.get();
     }
 }

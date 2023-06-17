@@ -31,12 +31,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
     @Override
     @Transactional
     public Integer favorite(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
-        Post post = optionalPost.get();
+        Post post = findPost(postId);
         User user = SecurityUtil.getUser();
 
         if (user == post.getUser()) {
@@ -57,13 +52,8 @@ public class FavoritePostServiceImpl implements FavoritePostService {
     @Override
     @Transactional
     public Integer unFavorite(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
         User user = SecurityUtil.getUser();
-        Post post = optionalPost.get();
+        Post post = findPost(postId);
 
         Optional<FavoritePost> optionalFavoritePost = favoritePostRepository.findByPostIdAndUserId(postId, user.getId());
         if (optionalFavoritePost.isEmpty()) {
@@ -79,7 +69,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
 
     @Override
     public Page<PostDto> searchFavoritePostsByUser(String userId, Pageable pageable) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
+        Optional<User> optionalUser = userRepository.findByUserid(userId);
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }
@@ -92,5 +82,14 @@ public class FavoritePostServiceImpl implements FavoritePostService {
     public boolean checkFavorite(Long postId) {
         User user = SecurityUtil.getUser();
         return favoritePostRepository.existsByPostIdAndUserId(postId, user.getId());
+    }
+
+    @Transactional(readOnly = true)
+    private Post findPost(Long postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
+        }
+        return post.get();
     }
 }

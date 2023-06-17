@@ -51,7 +51,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional(readOnly = true)
     public Page<QuestionResponseDto> searchQuestionsByUser(String userId, Pageable pageable) {
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.getByUserid(userId));
+        Optional<User> optionalUser = userRepository.findByUserid(userId);
         if (optionalUser.isEmpty()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
         }

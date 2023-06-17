@@ -17,10 +17,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -69,7 +69,8 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
     }
 
     private User saveOrUpdate(UserDto userDto) {
-        User user = userRepository.getByEmail(userDto.getEmail());
+        Optional<User> optionalUser = userRepository.findByEmail(userDto.getEmail());
+        User user = optionalUser.get();
         if(user == null) {
             user = User.toUser(userDto);
         }
