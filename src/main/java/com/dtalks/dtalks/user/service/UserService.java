@@ -30,6 +30,8 @@ public interface UserService {
 
     DocumentResponseDto getUserProfileImage();
 
+    DocumentResponseDto changeUserProfileImage(MultipartFile multipartFile);
+
     UserResponseDto userInfo();
 
     UserResponseDto updateUserProfile(UserProfileRequestDto userProfileRequestDto);

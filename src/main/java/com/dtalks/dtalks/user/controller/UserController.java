@@ -85,6 +85,14 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserProfileImage());
     }
 
+    @Operation(summary = "프로필 이미지 수정(기존 이미지 없어도 됨)")
+    @PutMapping(value = "/profile/image"
+    , consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    , produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DocumentResponseDto> updateProfileImage(@RequestPart("file") MultipartFile file) {
+        return ResponseEntity.ok(userService.changeUserProfileImage(file));
+    }
+
     @Operation(summary = "유저 소개글, 기술스택 수정")
     @PutMapping(value = "/profile")
     public ResponseEntity<UserResponseDto> updateUserProfile(@RequestBody UserProfileRequestDto userProfileRequestDto) {
