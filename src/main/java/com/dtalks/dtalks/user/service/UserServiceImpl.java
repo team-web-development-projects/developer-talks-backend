@@ -211,6 +211,7 @@ public class UserServiceImpl implements UserService {
 
         Document document = Document.builder()
                 .inputName(file.getOriginalFilename())
+                .path(path)
                 .url(url).build();
 
         Document savedDocument = documentRepository.save(document);
