@@ -109,6 +109,7 @@ public class PostServiceImpl implements PostService {
                 Document document = Document.builder()
                         .inputName(file.getOriginalFilename())
                         .url(s3Uploader.fileUpload(file, path))
+                        .path(path)
                         .build();
                 documentRepository.save(document);
 
@@ -171,7 +172,7 @@ public class PostServiceImpl implements PostService {
                     }
                     if (isDeleted) {
                         imageRepository.delete(dbFile);
-                        s3Uploader.deleteFile(dbFile.getDocument().getUrl());
+                        s3Uploader.deleteFile(dbFile.getDocument().getPath());
                     } else {
                         dbInputNameList.add(inputName);
                     }
@@ -194,6 +195,7 @@ public class PostServiceImpl implements PostService {
                 Document document = Document.builder()
                         .inputName(file.getOriginalFilename())
                         .url(path)
+                        .path(path)
                         .build();
                 documentRepository.save(document);
 
@@ -238,7 +240,7 @@ public class PostServiceImpl implements PostService {
 
         List<PostImage> imageList = imageRepository.findByPostId(postId);
         for (PostImage image : imageList) {
-            s3Uploader.deleteFile(image.getDocument().getUrl());
+            s3Uploader.deleteFile(image.getDocument().getPath());
         }
 
         postRepository.delete(post);
