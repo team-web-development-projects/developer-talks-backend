@@ -61,7 +61,7 @@ public class PostServiceImpl implements PostService {
             }
         }
         PostDto postDto = PostDto.toDto(post);
-        postDto.setUrls(urls);
+        postDto.setImageUrls(urls);
         return postDto;
     }
 
@@ -96,11 +96,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long createPost(PostRequestDto postDto, List<MultipartFile> files) {
+    public Long createPost(PostRequestDto postDto) {
         User user = SecurityUtil.getUser();
         Post post = Post.toEntity(postDto, user);
         postRepository.save(post);
 
+        List<MultipartFile> files = postDto.getFiles();
         if (files != null){
             for (MultipartFile file : files) {
                 FileValidation.imageValidation(file.getOriginalFilename());
@@ -133,7 +134,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long updatePost(PostRequestDto postDto,  List<MultipartFile> files, Long postId) {
+    public Long updatePost(PostRequestDto postDto, Long postId) {
         Post post = findPost(postId);
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
@@ -142,6 +143,7 @@ public class PostServiceImpl implements PostService {
 
         post.update(postDto.getTitle(), postDto.getContent());
 
+        List<MultipartFile> files = postDto.getFiles();
         List<PostImage> dbFiles = imageRepository.findByPostId(postId);
         List<MultipartFile> newDBFiles = new ArrayList<>();
         if (dbFiles == null) {
@@ -154,6 +156,7 @@ public class PostServiceImpl implements PostService {
             if (files == null) {
                 for (PostImage image : dbFiles) {
                     imageRepository.delete(image);
+                    s3Uploader.deleteFile(image.getDocument().getPath());
                 }
             } else {
                 List<String> dbInputNameList = new ArrayList<>();

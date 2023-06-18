@@ -28,7 +28,7 @@ public class PostDto {
     private String content;
 
     @Schema(description = "이미지 urls")
-    private List<String> urls;
+    private List<String> imageUrls;
 
     @Schema(description = "게시글을 작성한 사용자의 닉네임")
     @NotBlank
