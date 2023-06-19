@@ -30,15 +30,23 @@ public interface UserService {
 
     DocumentResponseDto getUserProfileImage();
 
-    DocumentResponseDto changeUserProfileImage(MultipartFile multipartFile);
+    DocumentResponseDto updateUserProfileImage(MultipartFile multipartFile);
 
     UserResponseDto userInfo();
 
     UserResponseDto updateUserProfile(UserProfileRequestDto userProfileRequestDto);
 
     Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable);
+
     void updatePrivate(boolean status);
+
     Boolean getPrivateStatus(String id);
 
     SignInResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto);
+
+    SignInResponseDto updateUserid(UseridDto useridDto);
+
+    SignInResponseDto updateUserPassword(UserPasswordDto userPasswordDto);
+
+    SignInResponseDto updateUserEmail(UserEmailDto userEmailDto);
 }
