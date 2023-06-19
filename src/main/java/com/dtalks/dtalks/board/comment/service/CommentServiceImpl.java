@@ -1,7 +1,6 @@
 package com.dtalks.dtalks.board.comment.service;
 
 import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmStatus;
 import com.dtalks.dtalks.alarm.enums.AlarmType;
 import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.board.comment.dto.CommentInfoDto;
@@ -101,24 +100,9 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
+        activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
 
-        // 댓글 활동을 사용자 기록에 추가
-        Activity activity = Activity.builder()
-                .post(post)
-                .comment(comment)
-                .type(ActivityType.COMMENT)
-                .user(user)
-                .build();
-
-        activityRepository.save(activity);
-
-        Alarm alarm = Alarm.builder()
-                .receiver(post.getUser())
-                .type(AlarmType.COMMENT)
-                .alarmStatus(AlarmStatus.WAIT)
-                .url("/post/" + postId)
-                .build();
-        alarmRepository.save(alarm);
+        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "/post/" + postId));
     }
 
     @Override
@@ -142,31 +126,10 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
+        activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
 
-        Activity activity = Activity.builder()
-                .post(post)
-                .comment(comment)
-                .type(ActivityType.COMMENT)
-                .user(user)
-                .build();
-
-        activityRepository.save(activity);
-
-        Alarm alarm = Alarm.builder()
-                .receiver(post.getUser())
-                .type(AlarmType.COMMENT)
-                .alarmStatus(AlarmStatus.WAIT)
-                .url("/post/" + postId)
-                .build();
-        alarmRepository.save(alarm);
-
-        alarm = Alarm.builder()
-                .receiver(parentComment.getUser())
-                .type(AlarmType.COMMENT)
-                .alarmStatus(AlarmStatus.WAIT)
-                .url("/post/" + postId)
-                .build();
-        alarmRepository.save(alarm);
+        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "/post/" + postId));
+        alarmRepository.save(Alarm.createAlarm(parentComment.getUser(), AlarmType.RECOMMENT, "/post/" + postId));
 
     }
 

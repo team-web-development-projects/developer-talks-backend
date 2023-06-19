@@ -122,13 +122,7 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-        Activity activity = Activity.builder()
-                .post(post)
-                .type(ActivityType.POST)
-                .user(user)
-                .build();
-
-        activityRepository.save(activity);
+        activityRepository.save(Activity.createBoard(user, post, null, ActivityType.POST));
         return post.getId();
     }
 

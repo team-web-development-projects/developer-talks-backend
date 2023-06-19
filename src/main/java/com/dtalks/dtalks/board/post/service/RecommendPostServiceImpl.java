@@ -1,7 +1,6 @@
 package com.dtalks.dtalks.board.post.service;
 
 import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmStatus;
 import com.dtalks.dtalks.alarm.enums.AlarmType;
 import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.board.post.entity.Post;
@@ -50,13 +49,7 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
         post.setRecommendCount(post.getRecommendCount() + 1);
 
-        Alarm alarm = Alarm.builder()
-                .receiver(post.getUser())
-                .type(AlarmType.RECOMMEND_POST)
-                .alarmStatus(AlarmStatus.WAIT)
-                .url("/post/" + postId)
-                .build();
-        alarmRepository.save(alarm);
+        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.RECOMMEND_POST, "/post/" + postId));
 
         return post.getRecommendCount();
     }

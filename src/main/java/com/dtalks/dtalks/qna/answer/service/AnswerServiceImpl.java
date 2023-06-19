@@ -1,7 +1,6 @@
 package com.dtalks.dtalks.qna.answer.service;
 
 import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmStatus;
 import com.dtalks.dtalks.alarm.enums.AlarmType;
 import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.exception.exception.*;
@@ -78,22 +77,8 @@ public class AnswerServiceImpl implements AnswerService {
         Answer answer = Answer.toEntity(answerDto, question, user);
         answerRepository.save(answer);
 
-        Activity activity = Activity.builder()
-                .question(question)
-                .answer(answer)
-                .type(ActivityType.ANSWER)
-                .user(user)
-                .build();
-
-        activityRepository.save(activity);
-
-        Alarm alarm = Alarm.builder()
-                .receiver(question.getUser())
-                .type(AlarmType.ANSWER)
-                .alarmStatus(AlarmStatus.WAIT)
-                .url("/questions/" + questionId)
-                .build();
-        alarmRepository.save(alarm);
+        activityRepository.save(Activity.createQA(user, question, answer, ActivityType.ANSWER));
+        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.ANSWER, "/questions/" + questionId));
 
         return answer.getId();
     }
@@ -146,8 +131,9 @@ public class AnswerServiceImpl implements AnswerService {
         }
 
         Answer answer = optionalAnswer.get();
+        Question question = answer.getQuestion();
         User currentUser = SecurityUtil.getUser();
-        User selectUser = answer.getQuestion().getUser();
+        User selectUser = question.getUser();
 
         if (!selectUser.equals(currentUser)) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "질문글 작성자만 채택할 수 있습니다. ");
@@ -159,22 +145,8 @@ public class AnswerServiceImpl implements AnswerService {
 
         answer.setSelected(true);
 
-        Activity answer_selected = Activity.builder()
-                .question(answer.getQuestion())
-                .answer(answer)
-                .type(ActivityType.ANSWER_SELECTED)
-                .user(currentUser)
-                .build();
-
-        Activity select_answer = Activity.builder()
-                .question(answer.getQuestion())
-                .answer(answer)
-                .type(ActivityType.SELECT_ANSWER)
-                .user(selectUser)
-                .build();
-
-        activityRepository.save(answer_selected);
-        activityRepository.save(select_answer);
+        activityRepository.save(Activity.createQA(currentUser, question, answer, ActivityType.ANSWER_SELECTED));
+        activityRepository.save(Activity.createQA(selectUser, question, answer, ActivityType.SELECT_ANSWER));
 
         answerRepository.save(answer);
     }

@@ -1,7 +1,6 @@
 package com.dtalks.dtalks.qna.recommendation.service;
 
 import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmStatus;
 import com.dtalks.dtalks.alarm.enums.AlarmType;
 import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
@@ -43,14 +42,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         question.updateLike(true);
         recommendQuestionRepository.save(recommendQuestion);
-
-        Alarm alarm = Alarm.builder()
-                .receiver(question.getUser())
-                .type(AlarmType.RECOMMEND_QUESTION)
-                .alarmStatus(AlarmStatus.WAIT)
-                .url("/questions/" + questionId)
-                .build();
-        alarmRepository.save(alarm);
+        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.RECOMMEND_QUESTION, "/questions/" + questionId));
 
         return question.getLikeCount();
     }
