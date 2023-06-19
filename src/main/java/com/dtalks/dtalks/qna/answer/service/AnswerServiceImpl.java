@@ -145,9 +145,10 @@ public class AnswerServiceImpl implements AnswerService {
 
         answer.setSelected(true);
 
-        activityRepository.save(Activity.createQA(currentUser, question, answer, ActivityType.ANSWER_SELECTED));
+        activityRepository.save(Activity.createQA(answer.getUser(), question, answer, ActivityType.ANSWER_SELECTED));
         activityRepository.save(Activity.createQA(selectUser, question, answer, ActivityType.SELECT_ANSWER));
 
+        alarmRepository.save(Alarm.createAlarm(answer.getUser(), AlarmType.ANSWER_SELECTED, "/question/" + question.getId()));
         answerRepository.save(answer);
     }
 }
