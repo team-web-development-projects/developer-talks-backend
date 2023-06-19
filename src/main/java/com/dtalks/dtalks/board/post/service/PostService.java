@@ -4,7 +4,6 @@ import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,8 +15,8 @@ public interface PostService {
 
     List<PostDto> search5BestPosts();
 
-    Long createPost(PostRequestDto postDto, List<MultipartFile> files);
-    Long updatePost(PostRequestDto postDto, List<MultipartFile> files, Long id);
+    Long createPost(PostRequestDto postDto);
+    Long updatePost(PostRequestDto postDto, Long id);
     void deletePost(Long id);
 
 }
