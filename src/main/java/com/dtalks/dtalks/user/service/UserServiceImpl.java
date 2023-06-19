@@ -255,7 +255,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public DocumentResponseDto changeUserProfileImage(MultipartFile multipartFile) {
+    public DocumentResponseDto updateUserProfileImage(MultipartFile multipartFile) {
         FileValidation.imageValidation(multipartFile.getOriginalFilename());
         User user = SecurityUtil.getUser();
         Document document = user.getProfileImage();
@@ -376,6 +376,81 @@ public class UserServiceImpl implements UserService {
         signInResponseDto.setRefreshToken(refreshToken);
         setSuccessResult(signInResponseDto);
 
+        return signInResponseDto;
+    }
+
+    @Override
+    @Transactional
+    public SignInResponseDto updateUserid(UseridDto useridDto) {
+        User user = SecurityUtil.getUser();
+
+        if(user.getRegistrationId() != null) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "사이트를 통해 회원가입한 유저만 아이디 변경이 가능합니다.");
+        }
+
+        user.setUserid(useridDto.getUserid());
+        User savedUser = userRepository.save(user);
+
+        SignInResponseDto signInResponseDto = new SignInResponseDto();
+        setSuccessResult(signInResponseDto);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
+        String accessToken = tokenService.createAccessToken(userTokenDto);
+        String refreshToken = tokenService.createRefreshToken(userTokenDto);
+        signInResponseDto.setAccessToken(accessToken);
+        signInResponseDto.setRefreshToken(refreshToken);
+
+        return signInResponseDto;
+    }
+
+    @Override
+    @Transactional
+    public SignInResponseDto updateUserPassword(UserPasswordDto userPasswordDto) {
+        User user = SecurityUtil.getUser();
+
+        if(user.getRegistrationId() != null) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "사이트를 통해 회원가입한 유저만 아이디 변경이 가능합니다.");
+        }
+
+        if(!passwordEncoder.matches(userPasswordDto.getOldPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "기존 비밀번호가 틀렸습니다.");
+        }
+
+        if(!userPasswordDto.getNewPassword().equals(userPasswordDto.getCheckNewPassword())) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        user.setPassword(passwordEncoder.encode(userPasswordDto.getNewPassword()));
+        User savedUser = userRepository.save(user);
+
+        SignInResponseDto signInResponseDto = new SignInResponseDto();
+        setSuccessResult(signInResponseDto);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
+        String accessToken = tokenService.createAccessToken(userTokenDto);
+        String refreshToken = tokenService.createRefreshToken(userTokenDto);
+        signInResponseDto.setAccessToken(accessToken);
+        signInResponseDto.setRefreshToken(refreshToken);
+        return signInResponseDto;
+    }
+
+    @Override
+    @Transactional
+    public SignInResponseDto updateUserEmail(UserEmailDto userEmailDto) {
+        User user = SecurityUtil.getUser();
+
+        if(user.getRegistrationId() != null) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "사이트를 통해 회원가입한 유저만 아이디 변경이 가능합니다.");
+        }
+
+        user.setEmail(userEmailDto.getEmail());
+        User savedUser = userRepository.save(user);
+
+        SignInResponseDto signInResponseDto = new SignInResponseDto();
+        setSuccessResult(signInResponseDto);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
+        String accessToken = tokenService.createAccessToken(userTokenDto);
+        String refreshToken = tokenService.createRefreshToken(userTokenDto);
+        signInResponseDto.setAccessToken(accessToken);
+        signInResponseDto.setRefreshToken(refreshToken);
         return signInResponseDto;
     }
 

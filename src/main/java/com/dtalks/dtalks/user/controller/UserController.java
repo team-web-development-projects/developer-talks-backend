@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +92,7 @@ public class UserController {
     , consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     , produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DocumentResponseDto> updateProfileImage(@RequestPart("file") MultipartFile file) {
-        return ResponseEntity.ok(userService.changeUserProfileImage(file));
+        return ResponseEntity.ok(userService.updateUserProfileImage(file));
     }
 
     @Operation(summary = "유저 소개글, 기술스택 수정")
@@ -128,7 +130,31 @@ public class UserController {
 
     @Operation(summary = "유저 닉네임 변경")
     @PutMapping(value = "/profile/nickname")
-    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody @Schema(example = "{nickname: \"string\"}") String nickname) {
+    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody String nickname) {
         return ResponseEntity.ok(userService.updateNickname(nickname));
+    }
+
+    @Operation(summary = "유저 아이디 변경")
+    @PutMapping(value = "/profile/userid")
+    public ResponseEntity<SignInResponseDto> updateUserid(
+            @RequestBody @Valid UseridDto useridDto
+    ) {
+        return ResponseEntity.ok(userService.updateUserid(useridDto));
+    }
+
+    @Operation(summary = "유저 비밀번호 변경")
+    @PutMapping(value = "/profile/password")
+    public ResponseEntity<SignInResponseDto> updateUserPassword(
+            @RequestBody @Valid UserPasswordDto userPasswordDto
+    ) {
+        return ResponseEntity.ok(userService.updateUserPassword(userPasswordDto));
+    }
+
+    @Operation(summary = "유저 이메일 변경")
+    @PutMapping(value = "/profle/email")
+    public ResponseEntity<SignInResponseDto> updateUserEmail(
+            @RequestBody @Valid UserEmailDto userEmailDto
+    ) {
+        return ResponseEntity.ok(userService.updateUserEmail(userEmailDto));
     }
 }
