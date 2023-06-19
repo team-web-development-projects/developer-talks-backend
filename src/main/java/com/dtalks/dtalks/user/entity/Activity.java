@@ -39,4 +39,23 @@ public class Activity extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ActivityType type;
 
+    @Builder
+    public static Activity createQA(User user, Question question, Answer answer, ActivityType type) {
+        return Activity.builder()
+                .user(user)
+                .question(question)
+                .answer(answer)
+                .type(type)
+                .build();
+    }
+
+    @Builder
+    public static Activity createBoard(User user, Post post, Comment comment, ActivityType type) {
+        return Activity.builder()
+                .user(user)
+                .post(post)
+                .comment(comment)
+                .type(type)
+                .build();
+    }
 }

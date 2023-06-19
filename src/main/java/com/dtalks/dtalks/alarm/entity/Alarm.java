@@ -32,4 +32,15 @@ public class Alarm extends BaseTimeEntity{
     private AlarmStatus alarmStatus;
 
     private String url;
+
+    @Builder
+    public static Alarm createAlarm(User receiver, AlarmType type, String url) {
+        return Alarm.builder()
+                .receiver(receiver)
+                .type(type)
+                .alarmStatus(AlarmStatus.WAIT)
+                .url(url)
+                .build();
+    }
+
 }

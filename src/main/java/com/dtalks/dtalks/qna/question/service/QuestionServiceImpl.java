@@ -85,13 +85,7 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = Question.toEntity(questionDto, user);
         questionRepository.save(question);
 
-        Activity activity = Activity.builder()
-                .question(question)
-                .type(ActivityType.QUESTION)
-                .user(user)
-                .build();
-
-        activityRepository.save(activity);
+        activityRepository.save(Activity.createQA(user, question, null, ActivityType.QUESTION));
 
         return question.getId();
     }
