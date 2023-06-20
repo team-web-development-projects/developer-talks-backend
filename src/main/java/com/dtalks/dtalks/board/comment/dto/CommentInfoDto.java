@@ -32,10 +32,10 @@ public class CommentInfoDto {
     UserSimpleDto userInfo;
 
     @Schema(description = "비밀글 여부. true일 경우 사용자와 게시글 주인만 볼 수 있도록 처리하면 됨")
-    boolean isSecret;
+    boolean secret;
 
     @Schema(description = "댓글 삭제 여부. 사용자가 댓글을 삭제했는데 자식 댓글이 달려있는 경우로 true일 때 '삭제된 댓글입니다.'로 content에 들어가있음.")
-    boolean isRemoved;
+    boolean remove;
 
     @Schema(description = "부모댓글의 id. 자식 댓글일 경우 부모 댓글 필요.")
     Long parentId;
@@ -62,8 +62,8 @@ public class CommentInfoDto {
                 .postId(comment.getPost().getId())
                 .content(comment.isRemoved() ? "삭제된 댓글입니다." : comment.getContent())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
-                .isSecret(comment.isSecret())
-                .isRemoved(comment.isRemoved())
+                .secret(comment.isSecret())
+                .remove(comment.isRemoved())
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                 .parentNickname(comment.getParent() != null ? comment.getParent().getUser().getNickname() : null)
                 .childrenList(new ArrayList<>())

@@ -28,7 +28,7 @@ public class UserCommentDto {
     String content;
 
     @Schema(description = "비밀글 여부")
-    boolean isSecret;
+    boolean secret;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
@@ -42,7 +42,7 @@ public class UserCommentDto {
                 .postId(postId)
                 .postTitle(title)
                 .content(comment.getContent())
-                .isSecret(comment.isSecret())
+                .secret(comment.isSecret())
                 .createDate(comment.getCreateDate())
                 .modifiedDate(comment.getModifiedDate())
                 .build();

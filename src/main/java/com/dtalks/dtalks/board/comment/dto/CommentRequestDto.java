@@ -11,5 +11,5 @@ public class CommentRequestDto {
     String content;
 
     @Schema(description = "비밀글 여부.")
-    boolean isSecret;
+    boolean secret;
 }

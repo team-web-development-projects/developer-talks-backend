@@ -78,7 +78,7 @@ public class CommentServiceImpl implements CommentService{
     @Transactional(readOnly = true)
     public List<UserCommentDto> searchListByUserId(String userId) {
         User user = findUser(userId);
-        List<Comment> commentList = commentRepository.findByUserIdAndIsRemovedFalse(user.getId());
+        List<Comment> commentList = commentRepository.findByUserIdAndRemovedFalse(user.getId());
         return commentList.stream().map(c -> {
             Post post = c.getPost();
             return UserCommentDto.toDto(c, post.getId(), post.getTitle());
@@ -94,7 +94,7 @@ public class CommentServiceImpl implements CommentService{
 
         Comment comment = Comment.builder()
                 .content(dto.getContent())
-                .isSecret(dto.isSecret())
+                .secret(dto.isSecret())
                 .user(user)
                 .post(post)
                 .build();
@@ -119,7 +119,7 @@ public class CommentServiceImpl implements CommentService{
 
         Comment comment = Comment.builder()
                 .content(dto.getContent())
-                .isSecret(dto.isSecret())
+                .secret(dto.isSecret())
                 .user(user)
                 .post(post)
                 .parent(parentComment)
@@ -146,9 +146,7 @@ public class CommentServiceImpl implements CommentService{
         if (!comment.getUser().getUserid().equals(currentUserId)) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 댓글을 수정할 권한이 없습니다.");
         }
-
-        comment.setContent(dto.getContent());
-        comment.setSecret(dto.isSecret());
+        comment.updateComment(dto.getContent(), dto.isSecret());
     }
 
     @Override
@@ -173,7 +171,7 @@ public class CommentServiceImpl implements CommentService{
 
         /**
          * 삭제하려는 댓글의 자식 댓글이 있는 경우
-         * db에서 삭제가 아닌 '삭제된 댓글입니다.'로 표시하기 위해 isRemoved = true로 변경
+         * db에서 삭제가 아닌 '삭제된 댓글입니다.'로 표시하기 위해 removed = true로 변경
          */
         if (comment.getChildList().size() != 0) {
             comment.setRemoved(true);
