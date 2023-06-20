@@ -1,6 +1,8 @@
 package com.dtalks.dtalks.board.comment.dto;
 
 import com.dtalks.dtalks.board.comment.entity.Comment;
+import com.dtalks.dtalks.user.dto.UserSimpleDto;
+import com.dtalks.dtalks.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -26,9 +28,8 @@ public class CommentInfoDto {
     @NotBlank
     String content;
 
-    @Schema(description = "댓글을 단 사용자의 닉네임")
-    @NotBlank
-    String nickname;
+    @Schema(description = "작성한 사용자의 닉네임, 이미지")
+    UserSimpleDto userInfo;
 
     @Schema(description = "비밀글 여부. true일 경우 사용자와 게시글 주인만 볼 수 있도록 처리하면 됨")
     boolean isSecret;
@@ -53,11 +54,14 @@ public class CommentInfoDto {
 
     @Builder
     public static CommentInfoDto toDto(Comment comment) {
+        User user = comment.getUser();
+        String profile = (user.getProfileImage() != null ? user.getProfileImage().getUrl() : null);
+
         return CommentInfoDto.builder()
                 .id(comment.getId())
                 .postId(comment.getPost().getId())
                 .content(comment.isRemoved() ? "삭제된 댓글입니다." : comment.getContent())
-                .nickname(comment.getUser().getNickname())
+                .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .isSecret(comment.isSecret())
                 .isRemoved(comment.isRemoved())
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
