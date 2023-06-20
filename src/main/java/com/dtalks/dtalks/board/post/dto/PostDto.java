@@ -1,11 +1,12 @@
 package com.dtalks.dtalks.board.post.dto;
 
 import com.dtalks.dtalks.board.post.entity.Post;
+import com.dtalks.dtalks.user.dto.UserSimpleDto;
+import com.dtalks.dtalks.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.springframework.core.io.Resource;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,9 +31,8 @@ public class PostDto {
     @Schema(description = "이미지 urls")
     private List<String> imageUrls;
 
-    @Schema(description = "게시글을 작성한 사용자의 닉네임")
-    @NotBlank
-    private String nickname;
+    @Schema(description = "작성한 사용자의 닉네임, 이미지")
+    UserSimpleDto userInfo;
 
     @Schema(description = "게시글의 댓글수")
     private Integer commentCount;
@@ -54,11 +54,14 @@ public class PostDto {
 
     @Builder
     public static PostDto toDto(Post post) {
+        User user = post.getUser();
+        String profile = (user.getProfileImage() != null ? user.getProfileImage().getUrl() : null);
+
         return PostDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .nickname(post.getUser().getNickname())
+                .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())
                 .favoriteCount(post.getFavoriteCount())

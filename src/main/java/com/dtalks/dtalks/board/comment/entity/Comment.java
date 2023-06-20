@@ -30,9 +30,9 @@ public class Comment extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    private boolean isSecret;
+    private boolean secret;
 
-    private boolean isRemoved;
+    private boolean removed;
 
     // 부모 댓글
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,4 +41,9 @@ public class Comment extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "parent", orphanRemoval = true)
     private List<Comment> childList = new ArrayList<>();
+
+    public void updateComment(String content, boolean secret) {
+        this.content = content;
+        this.secret = secret;
+    }
 }
