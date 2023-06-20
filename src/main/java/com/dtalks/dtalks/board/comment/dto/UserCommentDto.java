@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -35,6 +33,8 @@ public class UserCommentDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime modifiedDate;
     @Builder
     public static UserCommentDto toDto(Comment comment, Long postId, String title) {
         return UserCommentDto.builder()
@@ -44,6 +44,7 @@ public class UserCommentDto {
                 .content(comment.getContent())
                 .isSecret(comment.isSecret())
                 .createDate(comment.getCreateDate())
+                .modifiedDate(comment.getModifiedDate())
                 .build();
     }
 }

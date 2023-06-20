@@ -1,10 +1,12 @@
 package com.dtalks.dtalks.board.comment.dto;
 
 import com.dtalks.dtalks.board.comment.entity.Comment;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +45,12 @@ public class CommentInfoDto {
     @Schema(description = "자식 댓글 리스트. 자신이 부모 댓글일 경우 자식 댓글 리스트 필요")
     List<CommentInfoDto> childrenList = new ArrayList<>();
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime modifiedDate;
+
     @Builder
     public static CommentInfoDto toDto(Comment comment) {
         return CommentInfoDto.builder()
@@ -55,6 +63,8 @@ public class CommentInfoDto {
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                 .parentNickname(comment.getParent() != null ? comment.getParent().getUser().getNickname() : null)
                 .childrenList(new ArrayList<>())
+                .createDate(comment.getCreateDate())
+                .modifiedDate(comment.getModifiedDate())
                 .build();
     }
 }
