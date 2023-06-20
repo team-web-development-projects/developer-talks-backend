@@ -8,6 +8,7 @@ import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
 import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
+import com.dtalks.dtalks.qna.question.entity.ScrapQuestion;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
 import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.dto.UserDto;
@@ -90,6 +91,9 @@ public class User extends BaseTimeEntity implements UserDetails{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Question> questionList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<ScrapQuestion> scrapQuestionList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Answer> answerList = new ArrayList<>();
