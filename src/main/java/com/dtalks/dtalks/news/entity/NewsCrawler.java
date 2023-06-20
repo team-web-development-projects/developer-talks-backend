@@ -6,7 +6,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +21,10 @@ import java.util.Optional;
 public class NewsCrawler {
     private static final int MAX_LENGTH = 100;
     private final NewsRepository newsRepository;
-    public List<News> crawlNews() throws IOException {
+    @Scheduled(fixedDelay = 3600000) // 1시간마다 실행 (단위: 밀리초)
+    @Transactional
+    @Async
+    public void crawlNews() throws IOException {
         List<News> newsList = new ArrayList<>();
 
         String pageUrl = "https://www.bloter.net/news/articleList.html?sc_sub_section_code=S2N15&view_type=sm";//크롤링할 사이트
@@ -49,6 +55,6 @@ public class NewsCrawler {
             News news = News.toEntity(title, content, writer, image, date, url);
             newsList.add(news);
         }
-        return newsList;
+        newsRepository.saveAll(newsList);
     }
 }
