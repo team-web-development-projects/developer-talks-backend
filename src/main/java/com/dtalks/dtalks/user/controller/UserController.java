@@ -130,8 +130,8 @@ public class UserController {
 
     @Operation(summary = "유저 닉네임 변경")
     @PutMapping(value = "/profile/nickname")
-    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody String nickname) {
-        return ResponseEntity.ok(userService.updateNickname(nickname));
+    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody UserNicknameDto userNicknameDto) {
+        return ResponseEntity.ok(userService.updateNickname(userNicknameDto));
     }
 
     @Operation(summary = "유저 아이디 변경")

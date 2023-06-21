@@ -18,7 +18,7 @@ public interface UserService {
 
     SignInResponseDto reSignIn(String refreshToken);
 
-    SignInResponseDto updateNickname(String nickname);
+    SignInResponseDto updateNickname(UserNicknameDto userNicknameDto);
 
     DuplicateResponseDto useridDuplicated(String userid);
 
