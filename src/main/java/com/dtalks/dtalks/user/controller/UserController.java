@@ -151,7 +151,7 @@ public class UserController {
     }
 
     @Operation(summary = "유저 이메일 변경")
-    @PutMapping(value = "/profle/email")
+    @PutMapping(value = "/profile/email")
     public ResponseEntity<SignInResponseDto> updateUserEmail(
             @RequestBody @Valid UserEmailDto userEmailDto
     ) {
