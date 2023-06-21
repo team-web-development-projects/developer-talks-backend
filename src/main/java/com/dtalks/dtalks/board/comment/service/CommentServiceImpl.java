@@ -8,7 +8,6 @@ import com.dtalks.dtalks.board.comment.dto.UserCommentDto;
 import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.comment.dto.CommentRequestDto;
 import com.dtalks.dtalks.board.comment.repository.CommentRepository;
-import com.dtalks.dtalks.board.comment.repository.CustomCommentRepository;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
@@ -31,7 +30,6 @@ import java.util.*;
 public class CommentServiceImpl implements CommentService{
 
     private final CommentRepository commentRepository;
-    private final CustomCommentRepository customCommentRepository;
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
@@ -57,21 +55,30 @@ public class CommentServiceImpl implements CommentService{
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
-        List<Comment> commentList = customCommentRepository.findAllByPost(optionalPost.get());
+        List<Comment> commentList = commentRepository.findByPostId(postId);
         List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
         Map<Long, CommentInfoDto> map = new HashMap<>();
 
         commentList.stream().forEach(c -> {
             CommentInfoDto dto = CommentInfoDto.toDto(c);
-            map.put(dto.getId(), dto);
             if (dto.getParentId() != null) {
-                map.get(dto.getParentId()).getChildrenList().add(dto);
+                Long startComment = getParentComment(c).getId();
+                map.get(startComment).getChildrenList().add(dto);
             } else {
+                map.put(dto.getId(), dto);
                 commentInfoDtoList.add(dto);
             }
         });
 
         return commentInfoDtoList;
+    }
+
+    private Comment getParentComment(Comment comment) {
+        Comment parent = comment.getParent();
+        if (parent != null) {
+            return getParentComment(parent);
+        }
+        return comment;
     }
 
     @Override

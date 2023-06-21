@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -90,7 +91,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public List<PostDto> search5BestPosts() {
-        List<Post> top5Posts = postRepository.findTop5ByOrderByRecommendCountDesc();
+        LocalDateTime time = LocalDateTime.now().minusDays(7);
+        LocalDateTime goe = time.withHour(0).withMinute(0).withSecond(0);
+        List<Post> top5Posts = postRepository.findTop5ByCreateDateGreaterThanEqualOrderByRecommendCountDesc(goe);
         return top5Posts.stream().map(PostDto::toDto).toList();
     }
 
