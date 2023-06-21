@@ -188,12 +188,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public SignInResponseDto updateNickname(String nickname) {
+    public SignInResponseDto updateNickname(UserNicknameDto userNicknameDto) {
         User user = SecurityUtil.getUser();
-        user.setNickname(nickname);
+        user.setNickname(userNicknameDto.getNickname());
 
         User savedUser = userRepository.save(user);
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
 
         signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
