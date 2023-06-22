@@ -1,7 +1,10 @@
 package com.dtalks.dtalks.user.controller;
 
+import com.dtalks.dtalks.user.dto.AccessTokenDto;
 import com.dtalks.dtalks.user.dto.EmailVerifyResponseDto;
+import com.dtalks.dtalks.user.dto.UserEmailDto;
 import com.dtalks.dtalks.user.service.EmailService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +23,24 @@ public class EmailController {
         this.emailService = emailService;
     }
 
-    @GetMapping("/verify")
-    public ResponseEntity<EmailVerifyResponseDto> emailVerify(@RequestParam String email) throws Exception{
+    @Operation(summary = "이메일 인증번호 발송")
+    @PostMapping("/verify")
+    public ResponseEntity<EmailVerifyResponseDto> sendEmailVerify(@RequestBody UserEmailDto userEmailDto) throws Exception{
         LOGGER.info("emailVerify 호출됨");
-        String code = emailService.sendEmailAuthenticationCode(email);
-        EmailVerifyResponseDto emailVerifyResponseDto = new EmailVerifyResponseDto();
-        emailVerifyResponseDto.setEmail(email);
-        emailVerifyResponseDto.setCode(code);
-        return ResponseEntity.ok(emailVerifyResponseDto);
+        String code = emailService.sendEmailAuthenticationCode(userEmailDto.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "이메일 인증번호 확인")
+    @GetMapping("/verify")
+    public ResponseEntity emailVerify(@RequestParam String code) {
+        emailService.checkEmailVerify(code);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "비밀번호 찾기를 위한 이메일 인증번호 확인")
+    @GetMapping("/password/verify")
+    public ResponseEntity<AccessTokenDto> passwordEmailVerify(@RequestParam String code) {
+        return ResponseEntity.ok(emailService.checkEmailVerifyPassword(code));
     }
 }
