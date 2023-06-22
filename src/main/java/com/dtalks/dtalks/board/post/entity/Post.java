@@ -32,6 +32,8 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    private String thumbnailUrl;
+
     @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     List<PostImage> imageList = new ArrayList<>();
 
