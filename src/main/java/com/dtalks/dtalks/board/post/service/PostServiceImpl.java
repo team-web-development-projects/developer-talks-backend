@@ -194,7 +194,7 @@ public class PostServiceImpl implements PostService {
 
                 Document document = Document.builder()
                         .inputName(file.getOriginalFilename())
-                        .url(path)
+                        .url(s3Uploader.fileUpload(file, path))
                         .path(path)
                         .build();
                 documentRepository.save(document);
