@@ -3,6 +3,7 @@ package com.dtalks.dtalks.user.service;
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.dto.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,4 +50,8 @@ public interface UserService {
     SignInResponseDto updateUserPassword(UserPasswordDto userPasswordDto);
 
     SignInResponseDto updateUserEmail(UserEmailDto userEmailDto);
+
+    void findUserid(String email);
+
+    void findUserPassword(HttpServletRequest request, UserPasswordFindDto userPasswordFindDto);
 }
