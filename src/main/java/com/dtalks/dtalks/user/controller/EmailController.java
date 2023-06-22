@@ -1,7 +1,7 @@
 package com.dtalks.dtalks.user.controller;
 
 import com.dtalks.dtalks.user.dto.AccessTokenDto;
-import com.dtalks.dtalks.user.dto.EmailVerifyResponseDto;
+import com.dtalks.dtalks.user.dto.TimerDto;
 import com.dtalks.dtalks.user.dto.UserEmailDto;
 import com.dtalks.dtalks.user.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,10 +25,9 @@ public class EmailController {
 
     @Operation(summary = "이메일 인증번호 발송")
     @PostMapping("/verify")
-    public ResponseEntity<EmailVerifyResponseDto> sendEmailVerify(@RequestBody UserEmailDto userEmailDto) throws Exception{
+    public ResponseEntity<TimerDto> sendEmailVerify(@RequestBody UserEmailDto userEmailDto) throws Exception{
         LOGGER.info("emailVerify 호출됨");
-        String code = emailService.sendEmailAuthenticationCode(userEmailDto.getEmail());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(emailService.sendEmailAuthenticationCode(userEmailDto.getEmail()));
     }
 
     @Operation(summary = "이메일 인증번호 확인")

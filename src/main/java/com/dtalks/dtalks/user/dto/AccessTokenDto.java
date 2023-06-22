@@ -8,4 +8,6 @@ import lombok.Setter;
 public class AccessTokenDto {
 
     private String accessToken;
+
+    private int timer = 300;
 }

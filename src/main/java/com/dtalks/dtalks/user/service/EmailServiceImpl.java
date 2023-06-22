@@ -3,6 +3,7 @@ package com.dtalks.dtalks.user.service;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.dto.AccessTokenDto;
+import com.dtalks.dtalks.user.dto.TimerDto;
 import com.dtalks.dtalks.user.dto.UserTokenDto;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
 import com.dtalks.dtalks.user.entity.EmailAuthentication;
@@ -15,8 +16,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
@@ -36,14 +35,14 @@ public class EmailServiceImpl implements EmailService{
     private final TokenService tokenService;
 
     @Override
-    public String sendEmailAuthenticationCode(String email) {
+    public TimerDto sendEmailAuthenticationCode(String email) {
         try {
             String code = createCode();
             MimeMessage mimeMessage = createMessage(email, code);
             javaMailSender.send(mimeMessage);
             EmailAuthentication emailAuthentication = new EmailAuthentication(code, email, LocalDateTime.now());
             emailAuthenticationRepository.save(emailAuthentication);
-            return code;
+            return new TimerDto(300);
         }
         catch (MessagingException e) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "이메일 발송에 실패하였습니다.");
