@@ -160,28 +160,44 @@ public class QuestionServiceImpl implements QuestionService {
                 .map(image -> image.getDocument().getInputName())
                 .collect(Collectors.toList());
 
+        //새로운 파일 OriginalFilename
+        List<String> newFilesName = newFiles.stream()
+                .map(MultipartFile::getOriginalFilename)
+                .collect(Collectors.toList());
+
         //수정 질문글에 이미지 존재하는 경우
-        if(newFiles != null){
-            //기존 파일과 일치하는 이미지
-            existingImages.removeIf(image -> !existingFileNames.contains(image.getDocument().getInputName()));
+        if (newFiles != null) {
 
             for (MultipartFile file : newFiles) {
-                FileValidation.imageValidation(file.getOriginalFilename());
-                String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
+                // 새로운 파일중 기존 파일에 없는 것 추가
+                boolean fileExists = existingFileNames.contains(file.getOriginalFilename());
 
-                Document document = Document.builder()
-                        .inputName(file.getOriginalFilename())
-                        .url(s3Uploader.fileUpload(file, path))
-                        .path(path)
-                        .build();
-                documentRepository.save(document);
+                if (!fileExists) {
+                    FileValidation.imageValidation(file.getOriginalFilename());
+                    String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
 
-                QuestionImage questionImage = QuestionImage.builder()
-                        .question(question)
-                        .document(document)
-                        .build();
-                imageRepository.save(questionImage);
+                    Document document = Document.builder()
+                            .inputName(file.getOriginalFilename())
+                            .url(s3Uploader.fileUpload(file, path))
+                            .path(path)
+                            .build();
+                    documentRepository.save(document);
+
+                    QuestionImage questionImage = QuestionImage.builder()
+                            .question(question)
+                            .document(document)
+                            .build();
+                    imageRepository.save(questionImage);
+                }
             }
+            //기존 파일중 새로운 파일에 이름과 일피 하는 파일만 남음
+            existingImages.removeIf(image -> !newFilesName.contains(image.getDocument().getInputName()));
+            for (QuestionImage removedImage : existingImages) {
+                String path = removedImage.getDocument().getPath();
+                s3Uploader.deleteFile(path); // Delete image from S3 storage
+                imageRepository.delete(removedImage); // Delete image from the database
+            }
+
         } else {
             // 새로운 파일이 제공되지 않은 경우, 모든 기존 이미지 제거
             existingImages.forEach(image -> {
