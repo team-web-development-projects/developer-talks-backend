@@ -12,16 +12,22 @@ import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
+import com.dtalks.dtalks.user.entity.AccessTokenPassword;
 import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActivityType;
+import com.dtalks.dtalks.user.repository.AccessTokenPasswordRepository;
 import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +49,8 @@ public class UserServiceImpl implements UserService {
     private final DocumentRepository documentRepository;
     private final ActivityRepository activityRepository;
     private final S3Uploader s3Uploader;
+    private final EmailService emailService;
+    private final AccessTokenPasswordRepository accessTokenPasswordRepository;
     private final String imagePath =  "profiles";
 
     @Override
@@ -188,12 +196,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public SignInResponseDto updateNickname(String nickname) {
+    public SignInResponseDto updateNickname(UserNicknameDto userNicknameDto) {
         User user = SecurityUtil.getUser();
-        user.setNickname(nickname);
+        user.setNickname(userNicknameDto.getNickname());
 
         User savedUser = userRepository.save(user);
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
 
         signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
@@ -452,6 +460,33 @@ public class UserServiceImpl implements UserService {
         signInResponseDto.setAccessToken(accessToken);
         signInResponseDto.setRefreshToken(refreshToken);
         return signInResponseDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void findUserid(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if(optionalUser.isEmpty()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "가입되지 않은 이메일입니다.");
+        }
+
+        User user = optionalUser.get();
+
+        MimeMessage mimeMessage = emailService.createUseridMessage(user.getEmail(), user.getUserid());
+        emailService.sendEmail(mimeMessage);
+    }
+
+    @Override
+    @Transactional
+    public void findUserPassword(HttpServletRequest httpServletRequest, UserPasswordFindDto userPasswordFindDto) {
+        Optional<AccessTokenPassword> optionalAccessTokenPassword = accessTokenPasswordRepository.findById(tokenService.resolveToken(httpServletRequest));
+        if(optionalAccessTokenPassword.isEmpty()) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "인증되지 않은 토큰입니다.");
+        }
+
+        User user = SecurityUtil.getUser();
+        user.setPassword(passwordEncoder.encode(userPasswordFindDto.getNewPassword()));
+        userRepository.save(user);
     }
 
     private void setSuccessResult(SignUpResponseDto result) {

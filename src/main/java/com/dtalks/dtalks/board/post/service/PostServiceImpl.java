@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -90,7 +91,9 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public List<PostDto> search5BestPosts() {
-        List<Post> top5Posts = postRepository.findTop5ByOrderByRecommendCountDesc();
+        LocalDateTime time = LocalDateTime.now().minusDays(7);
+        LocalDateTime goe = time.withHour(0).withMinute(0).withSecond(0);
+        List<Post> top5Posts = postRepository.findTop5ByCreateDateGreaterThanEqualOrderByRecommendCountDesc(goe);
         return top5Posts.stream().map(PostDto::toDto).toList();
     }
 
@@ -103,6 +106,7 @@ public class PostServiceImpl implements PostService {
 
         List<MultipartFile> files = postDto.getFiles();
         if (files != null){
+            boolean setThumbnail = false;
             for (MultipartFile file : files) {
                 FileValidation.imageValidation(file.getOriginalFilename());
                 String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
@@ -113,6 +117,11 @@ public class PostServiceImpl implements PostService {
                         .path(path)
                         .build();
                 documentRepository.save(document);
+
+                if (!setThumbnail) {
+                    post.setThumbnailUrl(document.getUrl());
+                    setThumbnail = true;
+                }
 
                 PostImage postImage = PostImage.builder()
                         .post(post)
@@ -149,6 +158,7 @@ public class PostServiceImpl implements PostService {
         } else {
             if (files == null) {
                 for (PostImage image : dbFiles) {
+                    post.setThumbnailUrl(null);
                     imageRepository.delete(image);
                     s3Uploader.deleteFile(image.getDocument().getPath());
                 }
@@ -191,7 +201,7 @@ public class PostServiceImpl implements PostService {
 
                 Document document = Document.builder()
                         .inputName(file.getOriginalFilename())
-                        .url(path)
+                        .url(s3Uploader.fileUpload(file, path))
                         .path(path)
                         .build();
                 documentRepository.save(document);
@@ -204,6 +214,10 @@ public class PostServiceImpl implements PostService {
             }
         }
 
+        if (files != null && dbFiles != null) {
+            Optional<PostImage> top1Image = imageRepository.findTop1ByPostId(postId);
+            post.setThumbnailUrl(top1Image.get().getDocument().getUrl());
+        }
         return postId;
     }
 

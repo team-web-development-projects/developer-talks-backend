@@ -28,10 +28,13 @@ public class PostDto {
     @NotBlank
     private String content;
 
+    @Schema(description = "게시글 썸네일")
+    private String thumbnailUrl;
+
     @Schema(description = "이미지 urls")
     private List<String> imageUrls;
 
-    @Schema(description = "작성한 사용자의 닉네임, 이미지")
+    @Schema(description = "작성한 사용자의 닉네임, 프로필 이미지")
     UserSimpleDto userInfo;
 
     @Schema(description = "게시글의 댓글수")
@@ -61,6 +64,7 @@ public class PostDto {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .thumbnailUrl(post.getThumbnailUrl())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .commentCount(post.getCommentCount())
                 .viewCount(post.getViewCount())

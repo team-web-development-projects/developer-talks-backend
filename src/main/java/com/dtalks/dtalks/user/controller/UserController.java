@@ -1,21 +1,18 @@
 package com.dtalks.dtalks.user.controller;
 
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
-import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserDetailsService;
 import com.dtalks.dtalks.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,9 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.util.List;
 
 @Tag(name = "users")
 @RestController
@@ -130,8 +124,8 @@ public class UserController {
 
     @Operation(summary = "유저 닉네임 변경")
     @PutMapping(value = "/profile/nickname")
-    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody String nickname) {
-        return ResponseEntity.ok(userService.updateNickname(nickname));
+    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody UserNicknameDto userNicknameDto) {
+        return ResponseEntity.ok(userService.updateNickname(userNicknameDto));
     }
 
     @Operation(summary = "유저 아이디 변경")
@@ -151,10 +145,24 @@ public class UserController {
     }
 
     @Operation(summary = "유저 이메일 변경")
-    @PutMapping(value = "/profle/email")
+    @PutMapping(value = "/profile/email")
     public ResponseEntity<SignInResponseDto> updateUserEmail(
             @RequestBody @Valid UserEmailDto userEmailDto
     ) {
         return ResponseEntity.ok(userService.updateUserEmail(userEmailDto));
+    }
+
+    @Operation(summary = "유저 아이디 찾기")
+    @GetMapping(value = "/userid")
+    public ResponseEntity findUserid(@RequestParam String email) {
+        userService.findUserid(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "유저 비밀번호 찾기(변경)")
+    @PutMapping(value = "/password")
+    public ResponseEntity findUserPassword(HttpServletRequest request, @RequestBody UserPasswordFindDto userPasswordFindDto) {
+        userService.findUserPassword(request, userPasswordFindDto);
+        return ResponseEntity.ok().build();
     }
 }
