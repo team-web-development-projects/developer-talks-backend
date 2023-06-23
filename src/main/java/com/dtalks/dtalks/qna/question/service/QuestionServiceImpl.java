@@ -1,8 +1,14 @@
 package com.dtalks.dtalks.qna.question.service;
 
+import com.dtalks.dtalks.base.component.S3Uploader;
+import com.dtalks.dtalks.base.entity.Document;
+import com.dtalks.dtalks.base.repository.DocumentRepository;
+import com.dtalks.dtalks.base.validation.FileValidation;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.qna.question.entity.Question;
+import com.dtalks.dtalks.qna.question.entity.QuestionImage;
+import com.dtalks.dtalks.qna.question.repository.QuestionImageRepository;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
@@ -17,9 +23,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +37,11 @@ public class QuestionServiceImpl implements QuestionService {
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
     private final ActivityRepository activityRepository;
+    private final DocumentRepository documentRepository;
+    private final QuestionImageRepository imageRepository;
+    private final S3Uploader s3Uploader;
+    private final String imagePath = "questions";
+
 
     @Override
     @Transactional(readOnly = true)
@@ -38,7 +52,19 @@ public class QuestionServiceImpl implements QuestionService {
         }
         Question question = optionalQuestion.get();
         question.updateViewCount();
-        return QuestionResponseDto.toDto(question);
+
+        List<QuestionImage> imageList = imageRepository.findByQuestionId(id);
+        List<String> urls = new ArrayList<>();
+
+        if (imageList != null) {
+            for (QuestionImage image : imageList) {
+                urls.add(image.getDocument().getUrl());
+            }
+        }
+        QuestionResponseDto questionResponseDto = QuestionResponseDto.toDto(question);
+        questionResponseDto.setImageUrls(urls);
+
+        return questionResponseDto;
     }
 
     @Override
@@ -63,7 +89,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<QuestionResponseDto> searchQuestions(String keyword, Pageable pageable) {
+    public Page<QuestionResponseDto> searchByKeyword(String keyword, Pageable pageable) {
         Page<Question> questionPage = questionRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
         if (questionPage.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
@@ -81,12 +107,33 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public Long createQuestion(QuestionDto questionDto) {
+
         User user = SecurityUtil.getUser();
         Question question = Question.toEntity(questionDto, user);
         questionRepository.save(question);
 
-        activityRepository.save(Activity.createQA(user, question, null, ActivityType.QUESTION));
+        List<MultipartFile> files = questionDto.getFiles();
+        if (files != null) {
+            for (MultipartFile file : files) {
+                FileValidation.imageValidation(file.getOriginalFilename());
+                String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
 
+                Document document = Document.builder()
+                        .inputName(file.getOriginalFilename())
+                        .url(s3Uploader.fileUpload(file, path))
+                        .path(path)
+                        .build();
+                documentRepository.save(document);
+
+                QuestionImage questionImage = QuestionImage.builder()
+                        .question(question)
+                        .document(document)
+                        .build();
+                imageRepository.save(questionImage);
+            }
+        }
+
+        activityRepository.save(Activity.createQA(user, question, null, ActivityType.QUESTION));
         return question.getId();
     }
 
@@ -102,7 +149,48 @@ public class QuestionServiceImpl implements QuestionService {
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다. ");
         }
+        //제목, 내용 update
         question.update(questionDto.getTitle(), questionDto.getContent());
+
+        List<QuestionImage> existingImages = question.getImageList();
+        List<MultipartFile> newFiles = questionDto.getFiles();
+
+        //기존 파일 inputName 추출
+        List<String> existingFileNames = existingImages.stream()
+                .map(image -> image.getDocument().getInputName())
+                .collect(Collectors.toList());
+
+        //수정 질문글에 이미지 존재하는 경우
+        if(newFiles != null){
+            //기존 파일과 일치하는 이미지
+            existingImages.removeIf(image -> !existingFileNames.contains(image.getDocument().getInputName()));
+
+            for (MultipartFile file : newFiles) {
+                FileValidation.imageValidation(file.getOriginalFilename());
+                String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
+
+                Document document = Document.builder()
+                        .inputName(file.getOriginalFilename())
+                        .url(s3Uploader.fileUpload(file, path))
+                        .path(path)
+                        .build();
+                documentRepository.save(document);
+
+                QuestionImage questionImage = QuestionImage.builder()
+                        .question(question)
+                        .document(document)
+                        .build();
+                imageRepository.save(questionImage);
+            }
+        } else {
+            // 새로운 파일이 제공되지 않은 경우, 모든 기존 이미지 제거
+            existingImages.forEach(image -> {
+                String path = image.getDocument().getPath();
+                s3Uploader.deleteFile(path); // S3에서 이미지 삭제
+                imageRepository.delete(image); // 데이터베이스에서 이미지 삭제
+            });
+        }
+
         return questionId;
     }
 
@@ -126,6 +214,11 @@ public class QuestionServiceImpl implements QuestionService {
         List<Activity> activityList = activityRepository.findByQuestionId(id);
         for (Activity activity : activityList) {
             activity.setQuestion(null);
+        }
+
+        List<QuestionImage> imageList = imageRepository.findByQuestionId(id);
+        for (QuestionImage image : imageList) {
+            s3Uploader.deleteFile(image.getDocument().getPath());
         }
 
         questionRepository.delete(question);

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,11 +54,11 @@ public class QuestionController {
         return ResponseEntity.ok(scrapQuestionService.searchScrapQuestionsByUser(userId, pageable));
     }
 
-    @Operation(summary = "키워드로 질가글 조회(제목과 본문에 keyword 포함시 조회)")
+    @Operation(summary = "키워드로 질문글 조회(제목과 본문에 keyword 포함시 조회)")
     @GetMapping("/search")
 
     public ResponseEntity<Page<QuestionResponseDto>> searchQuestions(@RequestParam String keyword, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(questionService.searchQuestions(keyword, pageable));
+        return ResponseEntity.ok(questionService.searchByKeyword(keyword, pageable));
     }
 
     @Operation(summary = "추천수 best 5 질문글 조회")
@@ -65,17 +66,15 @@ public class QuestionController {
     public ResponseEntity<List<QuestionResponseDto>> search5BestQuestions() {
         return ResponseEntity.ok(questionService.search5BestQuestions());
     }
-
-    @Operation(summary = "질문글 작성")
-    @PostMapping
-
-    public ResponseEntity<Long> createQuestion(@Valid @RequestBody QuestionDto questionDto) {
+    @Operation(summary = "질문글 등록")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Long> createQuestion(@Valid QuestionDto questionDto) {
         return ResponseEntity.ok(questionService.createQuestion(questionDto));
     }
 
     @Operation(summary = "질문글 수정")
-    @PutMapping("/{id}")
-    public ResponseEntity<Long> updateQuestion(@Valid @RequestBody QuestionDto questionDto, @PathVariable Long id) {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Long> updateQuestion(@Valid QuestionDto questionDto, @PathVariable Long id) {
         return ResponseEntity.ok(questionService.updateQuestion(id, questionDto));
     }
 
