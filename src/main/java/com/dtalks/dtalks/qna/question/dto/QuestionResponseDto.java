@@ -1,20 +1,24 @@
 package com.dtalks.dtalks.qna.question.dto;
 
 import com.dtalks.dtalks.qna.question.entity.Question;
+import com.dtalks.dtalks.user.dto.UserSimpleDto;
+import com.dtalks.dtalks.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "질문글 응답 DTO")
 public class QuestionResponseDto {
+
     private Long id;
 
     @NotBlank
@@ -23,9 +27,13 @@ public class QuestionResponseDto {
     @NotBlank
     private String content;
 
-    @NotBlank
-    private String nickname;
+    @Schema(description = "이미지 urls")
+    private List<String> imageUrls;
 
+    @Schema(description = "작성한 사용자의 닉네임, 이미지")
+    UserSimpleDto userInfo;
+
+    @Schema(description = "질문글 추천수")
     private Integer likeCount;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -36,11 +44,14 @@ public class QuestionResponseDto {
 
     @Builder
     public static QuestionResponseDto toDto(Question question) {
+        User user = question.getUser();
+        String profile = (user.getProfileImage() != null ? user.getProfileImage().getUrl() : null);
+
         return QuestionResponseDto.builder()
                 .id(question.getId())
                 .title(question.getTitle())
                 .content(question.getContent())
-                .nickname(question.getUser().getNickname())
+                .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .likeCount(question.getLikeCount())
                 .createDate(question.getCreateDate())
                 .modifiedDate(question.getModifiedDate())
