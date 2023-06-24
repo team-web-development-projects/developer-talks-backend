@@ -9,6 +9,7 @@ import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.qna.question.entity.Question;
+import com.dtalks.dtalks.studyroom.entity.StudyRoom;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
@@ -335,6 +336,13 @@ public class UserServiceImpl implements UserService {
                     }
                     if (p.getAnswer() != null) {
                         subId = p.getAnswer().getId();
+                    }
+                    break;
+                case STUDY_CREATE, STUDY_JOIN_REQUEST, STUDY_ACCEPTED, STUDY_REQUEST_DENIED, QUIT_STUDY, EXPELLED_STUDY:
+                    StudyRoom studyRoom = p.getStudyRoom();
+                    if (studyRoom != null) {
+                        id = studyRoom.getId();
+                        title = studyRoom.getTitle();
                     }
                     break;
             }
