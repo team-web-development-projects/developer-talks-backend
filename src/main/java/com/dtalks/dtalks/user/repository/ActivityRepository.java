@@ -19,6 +19,8 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     Optional<Activity> findByAnswerIdAndType(Long answerId, ActivityType type);
     Optional<Activity> findByQuestionIdAndType(Long questionId, ActivityType type);
 
+    List<Activity> findByStudyRoomId(Long studyId);
+
     List<Activity> findByPostIdAndType(Long postId, ActivityType type);
 
     Page<Activity> findByUserIdAndCreateDateBetween(Long userId, LocalDateTime goe, LocalDateTime loe, Pageable pageable);
