@@ -42,7 +42,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         question.updateLike(true);
         recommendQuestionRepository.save(recommendQuestion);
-        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.RECOMMEND_QUESTION, "/questions/" + questionId));
+        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.RECOMMEND_QUESTION, "작성한 질문이 추천받았습니다.", "/questions/" + questionId));
 
         return question.getLikeCount();
     }

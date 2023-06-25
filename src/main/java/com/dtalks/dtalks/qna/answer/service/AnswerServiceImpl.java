@@ -78,7 +78,7 @@ public class AnswerServiceImpl implements AnswerService {
         answerRepository.save(answer);
 
         activityRepository.save(Activity.createQA(user, question, answer, ActivityType.ANSWER));
-        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.ANSWER, "/questions/" + questionId));
+        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.ANSWER, "작성한 질문에 답변이 달렸습니다.", "/questions/" + questionId));
 
         return answer.getId();
     }
@@ -148,7 +148,7 @@ public class AnswerServiceImpl implements AnswerService {
         activityRepository.save(Activity.createQA(answer.getUser(), question, answer, ActivityType.ANSWER_SELECTED));
         activityRepository.save(Activity.createQA(selectUser, question, answer, ActivityType.SELECT_ANSWER));
 
-        alarmRepository.save(Alarm.createAlarm(answer.getUser(), AlarmType.ANSWER_SELECTED, "/question/" + question.getId()));
+        alarmRepository.save(Alarm.createAlarm(answer.getUser(), AlarmType.ANSWER_SELECTED, "작성한 답변이 채택되었습니다.", "/question/" + question.getId()));
         answerRepository.save(answer);
     }
 }

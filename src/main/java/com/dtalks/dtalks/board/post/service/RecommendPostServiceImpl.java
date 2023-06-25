@@ -49,7 +49,7 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
         post.setRecommendCount(post.getRecommendCount() + 1);
 
-        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.RECOMMEND_POST, "/post/" + postId));
+        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.RECOMMEND_POST, "작성한 게시글이 추천되었습니다.", "/post/" + postId));
 
         return post.getRecommendCount();
     }

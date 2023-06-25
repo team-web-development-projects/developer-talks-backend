@@ -109,7 +109,7 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
         activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
 
-        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "/post/" + postId));
+        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "작성한 게시글에 댓글이 달렸습니다.", "/post/" + postId));
     }
 
     @Override
@@ -135,8 +135,8 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
         activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
 
-        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "/post/" + postId));
-        alarmRepository.save(Alarm.createAlarm(parentComment.getUser(), AlarmType.RECOMMENT, "/post/" + postId));
+        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "작성한 게시글에 댓글이 달렸습니다.", "/post/" + postId));
+        alarmRepository.save(Alarm.createAlarm(parentComment.getUser(), AlarmType.RECOMMENT, "작성한 댓글에 댓글이 달렸습니다." , "/post/" + postId));
 
     }
 
