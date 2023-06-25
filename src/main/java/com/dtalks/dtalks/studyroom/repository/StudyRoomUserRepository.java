@@ -2,6 +2,7 @@ package com.dtalks.dtalks.studyroom.repository;
 
 import com.dtalks.dtalks.studyroom.entity.StudyRoom;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
+import com.dtalks.dtalks.studyroom.enums.StudyRoomLevel;
 import com.dtalks.dtalks.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,6 @@ public interface StudyRoomUserRepository extends JpaRepository<StudyRoomUser, Lo
     public List<StudyRoomUser> findAllByStudyRoom(StudyRoom studyRoom);
 
     public Optional<StudyRoomUser> findByStudyRoomAndUser(StudyRoom studyRoom, User user);
+
+    Optional<StudyRoomUser> findByStudyRoomIdAndStudyRoomLevel(Long StudyRoomId, StudyRoomLevel level);
 }
