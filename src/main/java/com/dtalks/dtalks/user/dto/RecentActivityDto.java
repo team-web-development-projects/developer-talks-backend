@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Schema(description = "사용자의 최근활동 dto")
 public class RecentActivityDto {
 
-    @Schema(description = "게시글, 댓글 타입에는 게시글의 id, 질문, 답변 관련에는 질문글의 id")
+    @Schema(description = "게시글, 댓글 타입에는 게시글의 id, 질문, 답변 관련에는 질문글의 id, 스터디는 스터디 id")
     private Long id;
 
     @Schema(description = "댓글, 답변의 id")

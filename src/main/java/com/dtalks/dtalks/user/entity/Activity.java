@@ -5,6 +5,7 @@ import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.qna.answer.entity.Answer;
 import com.dtalks.dtalks.qna.question.entity.Question;
+import com.dtalks.dtalks.studyroom.entity.StudyRoom;
 import com.dtalks.dtalks.user.enums.ActivityType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +37,9 @@ public class Activity extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Answer answer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private StudyRoom studyRoom;
+
     @Enumerated(EnumType.STRING)
     private ActivityType type;
 
@@ -55,6 +59,15 @@ public class Activity extends BaseTimeEntity {
                 .user(user)
                 .post(post)
                 .comment(comment)
+                .type(type)
+                .build();
+    }
+
+    @Builder
+    public static Activity createStudy(User user, StudyRoom studyRoom, ActivityType type) {
+        return Activity.builder()
+                .user(user)
+                .studyRoom(studyRoom)
                 .type(type)
                 .build();
     }

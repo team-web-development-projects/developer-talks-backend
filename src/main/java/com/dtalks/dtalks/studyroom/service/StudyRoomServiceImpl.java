@@ -53,6 +53,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         studyRoom.setStudyRoomUsers(studyRoomUsers);
         StudyRoom savedStudyroom = studyRoomRepository.save(studyRoom);
 
+        activityRepository.save(Activity.createStudy(user, studyRoom, ActivityType.STUDY_CREATE));
         StudyRoomResponseDto studyRoomResponseDto = StudyRoomResponseDto.toDto(savedStudyroom);
 
         return studyRoomResponseDto;
@@ -112,6 +113,11 @@ public class StudyRoomServiceImpl implements StudyRoomService{
             if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER)) {
                 if(studyRoomUser.getUser().getUserid().equals(SecurityUtil.getUser().getUserid())) {
                     studyRoomRepository.delete(studyRoom);
+
+                    List<Activity> studyActivities = activityRepository.findByStudyRoomId(id);
+                    for (Activity activity : studyActivities) {
+                        activity.setStudyRoom(null);
+                    }
                     return;
                 }
             }
@@ -156,6 +162,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         studyRoom.addStudyRoomUser(studyRoomUser);
 
         StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
+        activityRepository.save(Activity.createStudy(user, studyRoom, ActivityType.STUDY_JOIN_REQUEST));
         return StudyRoomResponseDto.toDto(savedStudyRoom);
     }
 
@@ -213,11 +220,12 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         User requestUser = requestStudyRoomUser.getUser();
         Activity activity = new Activity();
         activity.setUser(requestUser);
+        activity.setStudyRoom(studyRoom);
         if(!status) {
             studyRoom.getStudyRoomUsers().remove(requestStudyRoomUser);
             requestUser.getStudyRoomUserList().remove(requestStudyRoomUser);
             studyRoomUserRepository.delete(requestStudyRoomUser);
-            activity.setType(ActivityType.STUDYROOM_DENY);
+            activity.setType(ActivityType.STUDY_REQUEST_DENIED);
             activityRepository.save(activity);
             return StudyRoomResponseDto.toDto(studyRoom);
         }
@@ -227,7 +235,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         }
         studyRoom.addJoinCount();
         requestStudyRoomUser.setStatus(true);
-        activity.setType(ActivityType.STUDYROOM_ACCEPT);
+        activity.setType(ActivityType.STUDY_ACCEPTED);
         StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
         studyRoomUserRepository.save(requestStudyRoomUser);
         activityRepository.save(activity);
@@ -249,6 +257,8 @@ public class StudyRoomServiceImpl implements StudyRoomService{
                     studyRoom.subJoinCount();
                     studyRoomUsers.remove(studyRoomUser);
                     studyRoom.setStudyRoomUsers(studyRoomUsers);
+
+                    activityRepository.save(Activity.createStudy(user, studyRoom, ActivityType.QUIT_STUDY));
                     studyRoomUserRepository.delete(studyRoomUser);
                     return;
                 }
@@ -294,6 +304,8 @@ public class StudyRoomServiceImpl implements StudyRoomService{
 
         StudyRoomUser expelStudyRoomUser = optionalExpelStudyRoomUser.get();
         studyRoom.getStudyRoomUsers().remove(expelStudyRoomUser);
+
+        activityRepository.save(Activity.createStudy(expeledUser, studyRoom, ActivityType.EXPELLED_STUDY));
         studyRoomUserRepository.delete(expelStudyRoomUser);
         studyRoom.subJoinCount();
         return StudyRoomResponseDto.toDto(studyRoom);
