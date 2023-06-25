@@ -171,10 +171,11 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         Optional<StudyRoomUser> leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.LEADER);
         Optional<StudyRoomUser> sub_leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.SUB_LEADER);
 
-        alarmRepository.save(Alarm.createAlarm(leader.get().getUser(), AlarmType.STUDY_JOIN_REQUEST, "스터디 가입 신청이 들어왔습니다.", "/study-rooms/" + studyRoom.getId()));
+        String message = "\'" + studyRoom.getTitle() + "\'에 가입 신청이 들어왔습니다.";
+        alarmRepository.save(Alarm.createAlarm(leader.get().getUser(), AlarmType.STUDY_JOIN_REQUEST, message, "/study-rooms/" + studyRoom.getId()));
 
         if (sub_leader.isPresent()) {
-            alarmRepository.save(Alarm.createAlarm(sub_leader.get().getUser(), AlarmType.STUDY_JOIN_REQUEST, "스터디 가입 신청이 들어왔습니다.", "/study-rooms/" + studyRoom.getId()));
+            alarmRepository.save(Alarm.createAlarm(sub_leader.get().getUser(), AlarmType.STUDY_JOIN_REQUEST, message, "/study-rooms/" + studyRoom.getId()));
         }
 
         return StudyRoomResponseDto.toDto(savedStudyRoom);
@@ -254,7 +255,9 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
         studyRoomUserRepository.save(requestStudyRoomUser);
         activityRepository.save(activity);
-        alarmRepository.save(Alarm.createAlarm(requestUser, AlarmType.STUDY_REQUEST_ACCEPTED, "스터디 가입 신청이 승인되었습니다.", "/study-rooms/" + studyRoom.getId()));
+
+        String message = "\'" + studyRoom.getTitle() + "\' 가입 신청이 승인되었습니다.";
+        alarmRepository.save(Alarm.createAlarm(requestUser, AlarmType.STUDY_REQUEST_ACCEPTED, message, "/study-rooms/" + studyRoom.getId()));
 
         return StudyRoomResponseDto.toDto(savedStudyRoom);
     }
@@ -279,9 +282,10 @@ public class StudyRoomServiceImpl implements StudyRoomService{
                     Optional<StudyRoomUser> leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.LEADER);
                     Optional<StudyRoomUser> sub_leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.SUB_LEADER);
 
-                    alarmRepository.save(Alarm.createAlarm(leader.get().getUser(), AlarmType.STUDY_MEMBER_QUIT, "스터디 멤버가 나갔습니다.", "/study-rooms/" + studyRoom.getId()));
+                    String message = "\'" + studyRoom.getTitle() + "\'에서 멤버가 나갔습니다.";
+                    alarmRepository.save(Alarm.createAlarm(leader.get().getUser(), AlarmType.STUDY_MEMBER_QUIT, message, "/study-rooms/" + studyRoom.getId()));
                     if (sub_leader.isPresent()) {
-                        alarmRepository.save(Alarm.createAlarm(sub_leader.get().getUser(), AlarmType.STUDY_MEMBER_QUIT, "스터디 멤버가 나갔습니다.", "/study-rooms/" + studyRoom.getId()));
+                        alarmRepository.save(Alarm.createAlarm(sub_leader.get().getUser(), AlarmType.STUDY_MEMBER_QUIT, message, "/study-rooms/" + studyRoom.getId()));
                     }
 
                     studyRoomUserRepository.delete(studyRoomUser);
@@ -331,7 +335,9 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         studyRoom.getStudyRoomUsers().remove(expelStudyRoomUser);
 
         activityRepository.save(Activity.createStudy(expeledUser, studyRoom, ActivityType.EXPELLED_STUDY));
-        alarmRepository.save(Alarm.createAlarm(expeledUser, AlarmType.STUDY_EXPELLED, "스터디에서 추방되었습니다", "/study-rooms/" + studyRoom.getId()));
+
+        String message = "\'" + studyRoom.getTitle() + "\'에서 추방되었습니다.";
+        alarmRepository.save(Alarm.createAlarm(expeledUser, AlarmType.STUDY_EXPELLED, message, "/study-rooms/" + studyRoom.getId()));
 
         studyRoomUserRepository.delete(expelStudyRoomUser);
         studyRoom.subJoinCount();
@@ -392,13 +398,13 @@ public class StudyRoomServiceImpl implements StudyRoomService{
             ownerStudyRoomUser.setStudyRoomLevel(StudyRoomLevel.NORMAL);
             studyRoomUser.setStudyRoomLevel(StudyRoomLevel.LEADER);
 
-            String ownerAlarmMessage = "스터디 권한이 방장에서 멤버로 변경되었습니다.";
-            memberAlarmMessage = "스터디 권한이 멤버에서 방장으로 변경되었습니다.";
+            String ownerAlarmMessage = "\'" + studyRoom.getTitle() + "\'에서 권한이 멤버로 변경되었습니다.";
+            memberAlarmMessage = "\'" + studyRoom.getTitle() + "\'에서 권한이 방장으로 변경되었습니다.";
             alarmRepository.save(Alarm.createAlarm(ownerStudyRoomUser.getUser(), AlarmType.STUDY_LEVEL_UPDATE, ownerAlarmMessage, "/study-rooms/" + studyRoom.getId()));
         }
         else {
             studyRoomUser.setStudyRoomLevel(studyRoomLevel);
-            memberAlarmMessage = studyRoom.getTitle() + "스터디 권한이 변경됐습니다.";
+            memberAlarmMessage = "\'" + studyRoom.getTitle() + "\'에서 권한이 변경됐습니다.";
         }
 
         alarmRepository.save(Alarm.createAlarm(studyRoomUser.getUser(), AlarmType.STUDY_LEVEL_UPDATE, memberAlarmMessage, "/study-rooms/" + studyRoom.getId()));
