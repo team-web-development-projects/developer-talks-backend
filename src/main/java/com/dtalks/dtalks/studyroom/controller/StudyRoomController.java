@@ -104,7 +104,7 @@ public class StudyRoomController {
 
     @Operation(summary = "스터디룸원 추방")
     @DeleteMapping("/expel/{studyRoomId}/{nickname}")
-    public ResponseEntity<StudyRoomResponseDto> expelStudyRoomUser(Long studyRoomId, String nickname) {
+    public ResponseEntity<StudyRoomResponseDto> expelStudyRoomUser(@PathVariable Long studyRoomId, @PathVariable String nickname) {
         return ResponseEntity.ok(studyRoomService.expelStudyRoomUser(studyRoomId, nickname));
     }
 

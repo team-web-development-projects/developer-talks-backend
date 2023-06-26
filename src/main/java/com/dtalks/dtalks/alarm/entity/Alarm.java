@@ -28,16 +28,19 @@ public class Alarm extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private AlarmType type;
 
+    private String message;
+
     @Enumerated(EnumType.STRING)
     private AlarmStatus alarmStatus;
 
     private String url;
 
     @Builder
-    public static Alarm createAlarm(User receiver, AlarmType type, String url) {
+    public static Alarm createAlarm(User receiver, AlarmType type, String message, String url) {
         return Alarm.builder()
                 .receiver(receiver)
                 .type(type)
+                .message(message)
                 .alarmStatus(AlarmStatus.WAIT)
                 .url(url)
                 .build();

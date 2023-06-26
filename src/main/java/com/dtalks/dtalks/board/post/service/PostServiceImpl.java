@@ -46,7 +46,7 @@ public class PostServiceImpl implements PostService {
     private final PostImageRepository imageRepository;
     private final DocumentRepository documentRepository;
     private final S3Uploader s3Uploader;
-    private final String imagePath =  new File("").getAbsolutePath() + "posts";
+    private final String imagePath =  "posts";
 
     @Override
     @Transactional
