@@ -100,7 +100,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public List<QuestionResponseDto> search5BestQuestions() {
-        List<Question> top5Questions = questionRepository.findTop5ByOrderByLikeCountDesc();
+        List<Question> top5Questions = questionRepository.findTop5ByOrderByRecommendCountDesc();
         return top5Questions.stream().map(QuestionResponseDto::toDto).toList();
     }
 
@@ -166,7 +166,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .collect(Collectors.toList());
 
         //수정 질문글에 이미지 존재하는 경우
-        //!!추후 수정 필요
+        //!!추후 수정 필
         if (newFiles != null) {
 
             for (MultipartFile file : newFiles) {

@@ -37,7 +37,7 @@ public class QuestionResponseDto {
     private Integer viewCount;
 
     @Schema(description = "질문글 추천수")
-    private Integer likeCount;
+    private Integer recommendCount;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
@@ -56,7 +56,7 @@ public class QuestionResponseDto {
                 .content(question.getContent())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .viewCount(question.getViewCount())
-                .likeCount(question.getLikeCount())
+                .recommendCount(question.getRecommendCount())
                 .createDate(question.getCreateDate())
                 .modifiedDate(question.getModifiedDate())
                 .build();

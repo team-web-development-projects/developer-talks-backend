@@ -14,6 +14,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     Page<Question> findByUserId(Long id, Pageable pageable);
 
-    List<Question> findTop5ByOrderByLikeCountDesc();
+    List<Question> findTop5ByOrderByRecommendCountDesc();
 
 }
