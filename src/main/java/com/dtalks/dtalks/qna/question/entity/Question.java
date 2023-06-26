@@ -42,6 +42,11 @@ public class Question extends BaseTimeEntity {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScrapQuestion> scrapQuestionList = new ArrayList<>();
 
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Integer answerCount;
+
     @ColumnDefault("0")
     @Column(nullable = false)
     private Integer viewCount;
@@ -89,5 +94,13 @@ public class Question extends BaseTimeEntity {
         } else {
             this.favoriteCount--;
         }
+    }
+
+    public void plusAnswerCount() {
+        this.answerCount++;
+    }
+
+    public void minusAnswerCount() {
+        this.answerCount--;
     }
 }
