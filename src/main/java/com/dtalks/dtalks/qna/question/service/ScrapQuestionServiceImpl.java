@@ -53,8 +53,8 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
         ScrapQuestion scrapQuestion = ScrapQuestion.toEntity(question, user);
         scrapQuestionRepository.save(scrapQuestion);
 
-        question.updateScrap(true);
-        return question.getScrapCount();
+        question.updateFavoriteCount(true);
+        return question.getFavoriteCount();
     }
 
     @Override
@@ -76,8 +76,8 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
         ScrapQuestion scrapQuestion = optionalScrapQuestion.get();
         scrapQuestionRepository.delete(scrapQuestion);
 
-        question.updateScrap(false);
-        return question.getScrapCount();
+        question.updateFavoriteCount(false);
+        return question.getFavoriteCount();
     }
 
     @Override

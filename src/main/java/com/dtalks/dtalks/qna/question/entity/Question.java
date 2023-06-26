@@ -51,7 +51,7 @@ public class Question extends BaseTimeEntity {
 
     @ColumnDefault("0")
     @Column(nullable = false)
-    private Integer scrapCount;
+    private Integer favoriteCount;
 
     @Builder
     public static  Question toEntity(QuestionDto questionDto, User user) {
@@ -61,7 +61,7 @@ public class Question extends BaseTimeEntity {
                 .content(questionDto.getContent())
                 .viewCount(0)
                 .recommendCount(0)
-                .scrapCount(0)
+                .favoriteCount(0)
                 .build();
     }
 
@@ -83,11 +83,11 @@ public class Question extends BaseTimeEntity {
         }
     }
 
-    public void updateScrap(boolean scrap) {
+    public void updateFavoriteCount(boolean scrap) {
         if (scrap) {
-            this.scrapCount++;
+            this.favoriteCount++;
         } else {
-            this.scrapCount--;
+            this.favoriteCount--;
         }
     }
 }

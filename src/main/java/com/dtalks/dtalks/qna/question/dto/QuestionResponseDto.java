@@ -33,8 +33,11 @@ public class QuestionResponseDto {
     @Schema(description = "작성한 사용자의 닉네임, 이미지")
     UserSimpleDto userInfo;
 
-    @Schema(description = "게시글 조회수")
+    @Schema(description = "질문글 조회수")
     private Integer viewCount;
+
+    @Schema(description = "게시글 즐겨찾기수")
+    private Integer favoriteCount;
 
     @Schema(description = "질문글 추천수")
     private Integer recommendCount;
@@ -56,6 +59,7 @@ public class QuestionResponseDto {
                 .content(question.getContent())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .viewCount(question.getViewCount())
+                .favoriteCount(question.getFavoriteCount())
                 .recommendCount(question.getRecommendCount())
                 .createDate(question.getCreateDate())
                 .modifiedDate(question.getModifiedDate())
