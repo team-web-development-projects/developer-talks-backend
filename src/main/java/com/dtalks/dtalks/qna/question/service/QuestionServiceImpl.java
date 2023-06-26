@@ -44,7 +44,7 @@ public class QuestionServiceImpl implements QuestionService {
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public QuestionResponseDto searchById(Long id) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {
@@ -166,6 +166,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .collect(Collectors.toList());
 
         //수정 질문글에 이미지 존재하는 경우
+        //!!추후 수정 필요
         if (newFiles != null) {
 
             for (MultipartFile file : newFiles) {
