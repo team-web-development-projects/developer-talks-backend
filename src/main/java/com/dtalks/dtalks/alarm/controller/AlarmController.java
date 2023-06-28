@@ -25,21 +25,26 @@ public class AlarmController {
 //        return sseEmitters.subscribe(userDetails.getUsername(), lastEventId);
 //    }
 
-    @Operation(description = "특정 알람 하나 조회. WAIT -> READ로 상태 변경. 엔드포인트 String 반환 (ex. /post/1", parameters = {
-        @Parameter(name = "id", description = "조회할 알람의 id")
-    })
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<String> findByIdAndUpdateStatus(@PathVariable Long id) {
-        return ResponseEntity.ok(alarmService.findByIdAndUpdateStatus(id));
+    @Operation(summary = "모든 알람 WAIT -> READ로 상태 변경")
+    @PostMapping
+    public void updateAllStatus() {
+        alarmService.updateAllStatus();
     }
 
-    @Operation(description = "사용자에게 온 알람 전체 보기")
+    @Operation(summary = "특정 알람 WAIT -> READ로 상태 변경")
+    @PostMapping(value = "/{id}")
+    public void updateAllStatus(@PathVariable Long id) {
+        alarmService.updateStatus(id);
+    }
+
+    @Operation(summary = "사용자에게 온 알람 리스트 전체 보기")
     @GetMapping(value = "/all")
     public ResponseEntity<List<AlarmDto>> findAllByUserid() {
         return ResponseEntity.ok(alarmService.findAllAlarmByUserid());
     }
 
-    @Operation(description = "사용자에게 온 알람 status에 해당하는 것만 보기 (READ / WAIT)", parameters = {
+    @Operation(summary = "알람 리스트에서 읽음 상태 설정", description = "사용자에게 온 알람 status에 해당하는 것만 보기 (READ / WAIT)"
+            , parameters = {
             @Parameter(name = "status", description = "알람의 상태 (읽음 READ / 안 읽음 WAIT)")
     })
     @GetMapping(value = "/all/{status}")
@@ -47,11 +52,13 @@ public class AlarmController {
         return ResponseEntity.ok(alarmService.findAllAlarmByUseridAndStatus(status));
     }
 
+    @Operation(summary = "안 읽은 알람 수")
     @GetMapping(value = "/count")
     public ResponseEntity<Long> countUnreadAlarm() {
         return ResponseEntity.ok(alarmService.countUnreadAlarm());
     }
 
+    @Operation(summary = "알람 삭제, db에서 삭제")
     @DeleteMapping(value = "/{id}")
     public void deleteAlarm(@PathVariable Long id) {
         alarmService.deleteById(id);
