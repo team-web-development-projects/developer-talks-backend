@@ -327,7 +327,7 @@ public class UserServiceImpl implements UserService {
                         subId = p.getComment().getId();
                     }
                     break;
-                case QUESTION, ANSWER, ANSWER_SELECTED, SELECT_ANSWER:
+                case QUESTION, ANSWER, SELECT_ANSWER:
                     Question question = p.getQuestion();
                     if (question != null) {
                         id = question.getId();
@@ -338,7 +338,7 @@ public class UserServiceImpl implements UserService {
                         subId = p.getAnswer().getId();
                     }
                     break;
-                case STUDY_CREATE, STUDY_JOIN_REQUEST, STUDY_ACCEPTED, STUDY_REQUEST_DENIED, QUIT_STUDY, EXPELLED_STUDY:
+                case STUDY_CREATE, STUDY_JOIN_REQUEST, QUIT_STUDY:
                     StudyRoom studyRoom = p.getStudyRoom();
                     if (studyRoom != null) {
                         id = studyRoom.getId();
