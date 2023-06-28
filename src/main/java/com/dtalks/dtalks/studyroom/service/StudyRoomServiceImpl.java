@@ -233,15 +233,10 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         }
 
         User requestUser = requestStudyRoomUser.getUser();
-        Activity activity = new Activity();
-        activity.setUser(requestUser);
-        activity.setStudyRoom(studyRoom);
         if(!status) {
             studyRoom.getStudyRoomUsers().remove(requestStudyRoomUser);
             requestUser.getStudyRoomUserList().remove(requestStudyRoomUser);
             studyRoomUserRepository.delete(requestStudyRoomUser);
-            activity.setType(ActivityType.STUDY_REQUEST_DENIED);
-            activityRepository.save(activity);
             alarmRepository.save(Alarm.createAlarm(requestUser, AlarmType.STUDY_REQUEST_DENIED, "스터디 가입 신청이 거절되었습니다.", "/study-rooms/" + studyRoom.getId()));
             return StudyRoomResponseDto.toDto(studyRoom);
         }
@@ -251,10 +246,8 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         }
         studyRoom.addJoinCount();
         requestStudyRoomUser.setStatus(true);
-        activity.setType(ActivityType.STUDY_ACCEPTED);
         StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
         studyRoomUserRepository.save(requestStudyRoomUser);
-        activityRepository.save(activity);
 
         String message = "\'" + studyRoom.getTitle() + "\' 가입 신청이 승인되었습니다.";
         alarmRepository.save(Alarm.createAlarm(requestUser, AlarmType.STUDY_REQUEST_ACCEPTED, message, "/study-rooms/" + studyRoom.getId()));
@@ -333,8 +326,6 @@ public class StudyRoomServiceImpl implements StudyRoomService{
 
         StudyRoomUser expelStudyRoomUser = optionalExpelStudyRoomUser.get();
         studyRoom.getStudyRoomUsers().remove(expelStudyRoomUser);
-
-        activityRepository.save(Activity.createStudy(expeledUser, studyRoom, ActivityType.EXPELLED_STUDY));
 
         String message = "\'" + studyRoom.getTitle() + "\'에서 추방되었습니다.";
         alarmRepository.save(Alarm.createAlarm(expeledUser, AlarmType.STUDY_EXPELLED, message, "/study-rooms/" + studyRoom.getId()));
