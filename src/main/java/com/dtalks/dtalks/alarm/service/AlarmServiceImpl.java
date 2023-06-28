@@ -22,7 +22,7 @@ public class AlarmServiceImpl implements AlarmService {
     private final AlarmRepository alarmRepository;
 
     @Override
-    public String findByIdAndUpdateStatus(Long id) {
+    public void updateStatus(Long id) {
         Optional<Alarm> optionalAlarm = alarmRepository.findById(id);
         if (optionalAlarm.isEmpty()) {
             throw new CustomException(ErrorCode.ALARM_NOT_FOUND_ERROR, "해당하는 알람을 찾을 수 없습니다.");
@@ -30,7 +30,15 @@ public class AlarmServiceImpl implements AlarmService {
 
         Alarm alarm = optionalAlarm.get();
         alarm.setAlarmStatus(AlarmStatus.READ);
-        return alarm.getUrl();
+    }
+
+    @Override
+    public void updateAllStatus() {
+        User user = SecurityUtil.getUser();
+        List<Alarm> alarmList = alarmRepository.findByReceiverIdAndAlarmStatus(user.getId(), AlarmStatus.WAIT);
+        for (Alarm alarm : alarmList) {
+            alarm.setAlarmStatus(AlarmStatus.READ);
+        }
     }
 
     @Override

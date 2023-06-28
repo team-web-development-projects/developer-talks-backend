@@ -4,6 +4,7 @@ import com.dtalks.dtalks.base.component.S3Uploader;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
+import com.dtalks.dtalks.board.comment.repository.CommentRepository;
 import com.dtalks.dtalks.board.post.entity.FavoritePost;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.entity.PostImage;
@@ -29,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -42,6 +42,7 @@ public class PostServiceImpl implements PostService {
     private final FavoritePostRepository favoritePostRepository;
     private final RecommendPostRepository recommendPostRepository;
     private final ActivityRepository activityRepository;
+    private final CommentRepository commentRepository;
 
     private final PostImageRepository imageRepository;
     private final DocumentRepository documentRepository;
@@ -228,6 +229,11 @@ public class PostServiceImpl implements PostService {
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
+        }
+
+        boolean commentExists = commentRepository.existsByPostId(postId);
+        if (commentExists) {
+            throw new CustomException(ErrorCode.POST_NOT_DELETABLE, "댓글이 존재하는 게시글은 삭제할 수 없습니다.");
         }
 
         List<FavoritePost> favoritePostList = favoritePostRepository.findByPostId(post.getId());
