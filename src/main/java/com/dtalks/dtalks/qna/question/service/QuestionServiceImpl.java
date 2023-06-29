@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +101,8 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public List<QuestionResponseDto> search5BestQuestions() {
-        List<Question> top5Questions = questionRepository.findTop5ByOrderByRecommendCountDesc();
+        LocalDateTime startDateTime = LocalDateTime.now().minusDays(7).withHour(0).withMinute(0).withSecond(0);
+        List<Question> top5Questions = questionRepository.findTop5ByCreateDateGreaterThanEqualOrderByRecommendCountDesc(startDateTime);
         return top5Questions.stream().map(QuestionResponseDto::toDto).toList();
     }
 
