@@ -354,7 +354,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updatePrivate(boolean status) {
-        User user = SecurityUtil.getUser();
+        User user = userRepository.findById(SecurityUtil.getUser().getId()).get();
         user.setIsPrivate(status);
     }
 
