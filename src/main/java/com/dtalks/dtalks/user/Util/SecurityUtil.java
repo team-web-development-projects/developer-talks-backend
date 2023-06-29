@@ -18,4 +18,15 @@ public class SecurityUtil {
         }
         return user;
     }
+
+    public static String getCurrentUserId() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            throw new RuntimeException("Security Context 에 인증 정보가 없습니다.");
+        }
+
+        return authentication.getName();
+    }
+
 }
