@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class QuestionServiceImpl implements QuestionService {
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public QuestionResponseDto searchById(Long id) {
         Optional<Question> optionalQuestion = questionRepository.findById(id);
         if (optionalQuestion.isEmpty()) {
@@ -100,7 +101,8 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public List<QuestionResponseDto> search5BestQuestions() {
-        List<Question> top5Questions = questionRepository.findTop5ByOrderByLikeCountDesc();
+        LocalDateTime startDateTime = LocalDateTime.now().minusDays(7).withHour(0).withMinute(0).withSecond(0);
+        List<Question> top5Questions = questionRepository.findTop5ByCreateDateGreaterThanEqualOrderByRecommendCountDesc(startDateTime);
         return top5Questions.stream().map(QuestionResponseDto::toDto).toList();
     }
 
@@ -166,6 +168,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .collect(Collectors.toList());
 
         //수정 질문글에 이미지 존재하는 경우
+        //!!추후 수정 필
         if (newFiles != null) {
 
             for (MultipartFile file : newFiles) {

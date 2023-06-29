@@ -40,11 +40,11 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         RecommendQuestion recommendQuestion = RecommendQuestion.toEntity(user, question);
 
-        question.updateLike(true);
+        question.updateRecommendCount(true);
         recommendQuestionRepository.save(recommendQuestion);
         alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.RECOMMEND_QUESTION, "작성한 질문이 추천받았습니다.", "/questions/" + questionId));
 
-        return question.getLikeCount();
+        return question.getRecommendCount();
     }
 
     @Override
@@ -62,9 +62,9 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
             throw new CustomException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
         }
 
-        question.updateLike(false);
+        question.updateRecommendCount(false);
         recommendQuestionRepository.deleteByUserAndQuestion(user, question);
-        return question.getLikeCount();
+        return question.getRecommendCount();
     }
 
 }

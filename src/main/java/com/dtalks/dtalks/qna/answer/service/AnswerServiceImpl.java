@@ -74,6 +74,8 @@ public class AnswerServiceImpl implements AnswerService {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문이 존재하지 않습니다. ");
         }
         Question question = optionalQuestion.get();
+        question.plusAnswerCount();
+
         Answer answer = Answer.toEntity(answerDto, question, user);
         answerRepository.save(answer);
 
@@ -118,6 +120,9 @@ public class AnswerServiceImpl implements AnswerService {
         Optional<Activity> optionalActivity = activityRepository.findByAnswerIdAndType(id, ActivityType.ANSWER);
         Activity activity = optionalActivity.get();
         activity.setAnswer(null);
+
+        Question question = answer.getQuestion();
+        question.minusAnswerCount();
 
         answerRepository.delete(answer);
     }

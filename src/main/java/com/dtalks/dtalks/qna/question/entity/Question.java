@@ -42,16 +42,21 @@ public class Question extends BaseTimeEntity {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScrapQuestion> scrapQuestionList = new ArrayList<>();
 
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Integer answerCount;
+
     @ColumnDefault("0")
     @Column(nullable = false)
     private Integer viewCount;
     @ColumnDefault("0")
     @Column(nullable = false)
-    private Integer likeCount;
+    private Integer recommendCount;
 
     @ColumnDefault("0")
     @Column(nullable = false)
-    private Integer scrapCount;
+    private Integer favoriteCount;
 
     @Builder
     public static  Question toEntity(QuestionDto questionDto, User user) {
@@ -60,8 +65,8 @@ public class Question extends BaseTimeEntity {
                 .title(questionDto.getTitle())
                 .content(questionDto.getContent())
                 .viewCount(0)
-                .likeCount(0)
-                .scrapCount(0)
+                .recommendCount(0)
+                .favoriteCount(0)
                 .build();
     }
 
@@ -74,20 +79,28 @@ public class Question extends BaseTimeEntity {
         this.viewCount++;
     }
 
-    public void updateLike(boolean like){
+    public void updateRecommendCount(boolean like){
         if(like){
-            this.likeCount ++;
+            this.recommendCount++;
         }
         else{
-            this.likeCount--;
+            this.recommendCount--;
         }
     }
 
-    public void updateScrap(boolean scrap) {
+    public void updateFavoriteCount(boolean scrap) {
         if (scrap) {
-            this.scrapCount++;
+            this.favoriteCount++;
         } else {
-            this.scrapCount--;
+            this.favoriteCount--;
         }
+    }
+
+    public void plusAnswerCount() {
+        this.answerCount++;
+    }
+
+    public void minusAnswerCount() {
+        this.answerCount--;
     }
 }

@@ -33,8 +33,17 @@ public class QuestionResponseDto {
     @Schema(description = "작성한 사용자의 닉네임, 이미지")
     UserSimpleDto userInfo;
 
+    @Schema(description = "질문글 댓글수")
+    private Integer answerCount;
+
+    @Schema(description = "질문글 조회수")
+    private Integer viewCount;
+
+    @Schema(description = "질문글 즐겨찾기수")
+    private Integer favoriteCount;
+
     @Schema(description = "질문글 추천수")
-    private Integer likeCount;
+    private Integer recommendCount;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
@@ -52,7 +61,10 @@ public class QuestionResponseDto {
                 .title(question.getTitle())
                 .content(question.getContent())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
-                .likeCount(question.getLikeCount())
+                .answerCount(question.getAnswerCount())
+                .viewCount(question.getViewCount())
+                .favoriteCount(question.getFavoriteCount())
+                .recommendCount(question.getRecommendCount())
                 .createDate(question.getCreateDate())
                 .modifiedDate(question.getModifiedDate())
                 .build();
