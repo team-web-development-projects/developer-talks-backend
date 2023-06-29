@@ -20,7 +20,6 @@ import com.dtalks.dtalks.user.enums.ActivityType;
 import com.dtalks.dtalks.user.repository.AccessTokenPasswordRepository;
 import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
-import com.nimbusds.oauth2.sdk.token.AccessToken;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -354,7 +352,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updatePrivate(boolean status) {
-        User user = userRepository.findById(SecurityUtil.getUser().getId()).get();
+        User user = userRepository.findByUserid(SecurityUtil.getCurrentUserId()).get();
         user.setIsPrivate(status);
     }
 
