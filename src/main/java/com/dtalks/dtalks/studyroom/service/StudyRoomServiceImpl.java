@@ -43,6 +43,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     private final UserRepository userRepository;
     private final ActivityRepository activityRepository;
     private final AlarmRepository alarmRepository;
+    private final ChatService chatService;
 
     @Override
     @Transactional
@@ -56,6 +57,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         studyRoomUsers.add(studyRoomUser);
         studyRoom.setStudyRoomUsers(studyRoomUsers);
         StudyRoom savedStudyroom = studyRoomRepository.save(studyRoom);
+        chatService.createRoom(savedStudyroom.getId());
 
         activityRepository.save(Activity.createStudy(user, studyRoom, ActivityType.STUDY_CREATE));
         StudyRoomResponseDto studyRoomResponseDto = StudyRoomResponseDto.toDto(savedStudyroom);
