@@ -22,7 +22,7 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @MessageMapping("/{chatRoomId}")
+    @MessageMapping("/rooms/{chatRoomId}")
     @SendTo("/rooms/{chatRoomId}")
     public ChatMessageDto message(@DestinationVariable Long chatRoomId, ChatMessageRequestDto chatMessageRequestDto) {
         return chatService.createChatMessage(chatRoomId, chatMessageRequestDto.getMessage());
