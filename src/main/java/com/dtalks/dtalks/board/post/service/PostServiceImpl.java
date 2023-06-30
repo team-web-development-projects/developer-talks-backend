@@ -161,12 +161,15 @@ public class PostServiceImpl implements PostService {
             String documentUrl = document.getUrl();
             // 넘어온 기존 게시글 이미지 url이 없다면 기존 이미지 다 삭제
             boolean isDeleted = true;
-            for (String url : imgUrls) {
-                if (url.equals(documentUrl)) {
-                    isDeleted = false;
-                    break;
+            if (imgUrls != null) {
+                for (String url : imgUrls) {
+                    if (url.equals(documentUrl)) {
+                        isDeleted = false;
+                        break;
+                    }
                 }
             }
+
             if (isDeleted) {
                 imageRepository.delete(dbFile);
                 s3Uploader.deleteFile(document.getPath());
