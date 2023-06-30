@@ -5,6 +5,7 @@ import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
 import com.dtalks.dtalks.board.comment.repository.CommentRepository;
+import com.dtalks.dtalks.board.post.dto.PutRequestDto;
 import com.dtalks.dtalks.board.post.entity.FavoritePost;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.entity.PostImage;
@@ -138,65 +139,42 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long updatePost(PostRequestDto postDto, Long postId) {
+    public Long updatePost(PutRequestDto putRequestDto, Long postId) {
         Post post = findPost(postId);
         String userId = post.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
         }
 
-        post.update(postDto.getTitle(), postDto.getContent());
+        post.update(putRequestDto.getTitle(), putRequestDto.getContent());
 
-        List<MultipartFile> files = postDto.getFiles();
+        List<String> imgUrls = putRequestDto.getImgUrls();
+        List<MultipartFile> files = putRequestDto.getFiles();
+
         List<PostImage> dbFiles = imageRepository.findByPostId(postId);
-        List<MultipartFile> newDBFiles = new ArrayList<>();
-        if (dbFiles == null) {
-            if (files != null) {
-                for (MultipartFile file : files) {
-                    newDBFiles.add(file);
+
+        // db 값에서 이미지 url로 넘어온 값 중에 같은 url이 없으면 삭제된 파일이므로 db에서 삭제
+        for (PostImage dbFile : dbFiles) {
+            Document document = documentRepository.findById(dbFile.getDocument().getId()).orElseThrow(() -> {
+                throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
+            });
+            String documentUrl = document.getUrl();
+            // 넘어온 기존 게시글 이미지 url이 없다면 기존 이미지 다 삭제
+            boolean isDeleted = true;
+            for (String url : imgUrls) {
+                if (url.equals(documentUrl)) {
+                    isDeleted = false;
+                    break;
                 }
             }
-        } else {
-            if (files == null) {
-                for (PostImage image : dbFiles) {
-                    post.setThumbnailUrl(null);
-                    imageRepository.delete(image);
-                    s3Uploader.deleteFile(image.getDocument().getPath());
-                }
-            } else {
-                List<String> dbInputNameList = new ArrayList<>();
-                for (PostImage dbFile : dbFiles) {
-                    Optional<Document> document = documentRepository.findById(dbFile.getDocument().getId());
-                    if (document.isEmpty()) {
-                        throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
-                    }
-                    String inputName = document.get().getInputName();
-                    boolean isDeleted = true;
-                    for (MultipartFile file : files) {
-                        if (file.getOriginalFilename().equals(inputName)) {
-                            isDeleted = false;
-                            break;
-                        }
-                    }
-                    if (isDeleted) {
-                        imageRepository.delete(dbFile);
-                        s3Uploader.deleteFile(dbFile.getDocument().getPath());
-                    } else {
-                        dbInputNameList.add(inputName);
-                    }
-                }
-
-                for (MultipartFile file : files) {
-                    String originalFilename = file.getOriginalFilename();
-                    if (!dbInputNameList.contains(originalFilename)) {
-                        newDBFiles.add(file);
-                    }
-                }
+            if (isDeleted) {
+                imageRepository.delete(dbFile);
+                s3Uploader.deleteFile(document.getPath());
             }
         }
 
-        if (!newDBFiles.isEmpty()) {
-            for (MultipartFile file : newDBFiles) {
+        if (files != null) {
+            for (MultipartFile file : files) {
                 FileValidation.imageValidation(file.getOriginalFilename());
                 String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
 
@@ -215,10 +193,13 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-        if (files != null && dbFiles != null) {
+        String thumbnail = null;
+        // 기존 이미지가 있거나 새롭게 저장된 이미지가 있으면 썸네일 확인 및 변경
+        if (imgUrls != null || files != null) {
             Optional<PostImage> top1Image = imageRepository.findTop1ByPostId(postId);
-            post.setThumbnailUrl(top1Image.get().getDocument().getUrl());
+            thumbnail = top1Image.get().getDocument().getUrl();
         }
+        post.setThumbnailUrl(thumbnail);
         return postId;
     }
 

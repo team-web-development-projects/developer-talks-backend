@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.board.post.controller;
 
 import com.dtalks.dtalks.board.post.dto.FavoriteAndRecommendStatusDto;
+import com.dtalks.dtalks.board.post.dto.PutRequestDto;
 import com.dtalks.dtalks.board.post.service.FavoritePostService;
 import com.dtalks.dtalks.board.post.service.PostService;
 import com.dtalks.dtalks.board.post.dto.PostDto;
@@ -86,9 +87,9 @@ public class PostController {
 
     @Operation(summary = "게시글 수정")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Long> updatePost(@Valid PostRequestDto postDto,
+    public ResponseEntity<Long> updatePost(@Valid PutRequestDto putRequestDto,
                                            @PathVariable Long id) {
-        return ResponseEntity.ok(postService.updatePost(postDto, id));
+        return ResponseEntity.ok(postService.updatePost(putRequestDto, id));
     }
 
 
