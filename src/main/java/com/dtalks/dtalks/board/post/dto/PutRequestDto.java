@@ -10,13 +10,16 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class PostRequestDto {
+public class PutRequestDto {
     @NotBlank
     private String title;
 
     @NotBlank
     private String content;
 
-    @Schema(description = "게시글 첨부파일(이미지), 없어도 됨.", example = "[첨부파일, 첨부파일]", nullable = true)
+    @Schema(description = "기존 게시글 이미지 url. 없었으면 값 없이 title, content만 주면 됨", nullable = true)
+    private List<String> imgUrls;
+
+    @Schema(description = "새로운 첨부파일(이미지), 없어도 됨.", example = "[첨부파일, 첨부파일]", nullable = true)
     private List<MultipartFile> files;
 }

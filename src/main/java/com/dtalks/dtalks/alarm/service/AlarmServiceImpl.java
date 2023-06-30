@@ -11,6 +11,7 @@ import com.dtalks.dtalks.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ public class AlarmServiceImpl implements AlarmService {
     private final AlarmRepository alarmRepository;
 
     @Override
+    @Transactional
     public void updateStatus(Long id) {
         Optional<Alarm> optionalAlarm = alarmRepository.findById(id);
         if (optionalAlarm.isEmpty()) {
@@ -33,6 +35,7 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
+    @Transactional
     public void updateAllStatus() {
         User user = SecurityUtil.getUser();
         List<Alarm> alarmList = alarmRepository.findByReceiverIdAndAlarmStatus(user.getId(), AlarmStatus.WAIT);
@@ -42,6 +45,7 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AlarmDto> findAllAlarmByUserid() {
         User user = SecurityUtil.getUser();
         List<Alarm> alarmList = alarmRepository.findByReceiverId(user.getId());
@@ -49,6 +53,7 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AlarmDto> findAllAlarmByUseridAndStatus(AlarmStatus status) {
         User user = SecurityUtil.getUser();
         List<Alarm> alarmList = alarmRepository.findByReceiverIdAndAlarmStatus(user.getId(), status);
@@ -56,12 +61,14 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long countUnreadAlarm() {
         User user = SecurityUtil.getUser();
         return alarmRepository.countByReceiverIdAndAlarmStatus(user.getId(), AlarmStatus.WAIT);
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         User user = SecurityUtil.getUser();
         alarmRepository.deleteById(id);
