@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -22,12 +24,37 @@ public class Message extends BaseTimeEntity {
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    private User sender;
 
-    public static Message toEntity(MessageDto messageDto, User user) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    private User receiver;
+
+    private boolean deletedBySender;
+
+    private boolean deletedByReceiver;
+
+
+
+    public static Message toEntity(MessageDto messageDto, User sender, User receiver) {
         return Message.builder()
                 .text(messageDto.getText())
-                .user(user)
+                .sender(sender)
+                .receiver(receiver)
+                .deletedBySender(false)
+                .deletedByReceiver(false)
                 .build();
+    }
+
+    public void setDeletedBySender() {
+        this.deletedBySender = true;
+    }
+
+    public void setDeletedByReceiver() {
+        this.deletedByReceiver = true;
+    }
+    public boolean isDeleted() {
+        return isDeletedByReceiver() && isDeletedBySender();
     }
 }

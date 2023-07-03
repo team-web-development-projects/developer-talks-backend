@@ -1,12 +1,18 @@
 package com.dtalks.dtalks.message.service;
 
 import com.dtalks.dtalks.message.dto.MessageDto;
-import com.dtalks.dtalks.message.dto.MessageResponseDto;
+
+import java.util.List;
 
 public interface MessageService {
 
-    MessageResponseDto searchById(Long id);
-    Long createMessage (MessageDto messageDto);
+    MessageDto searchById(Long id);
 
-    void deleteMessage(Long id);
+    List<MessageDto> searchSentMessage();
+
+    List<MessageDto> searchReceiveMessage();
+    Long sendMessage(MessageDto messageDto);
+
+    void deleteMessageBySender(Long id);
+    void deleteMessageByReceiver(Long id);
 }
