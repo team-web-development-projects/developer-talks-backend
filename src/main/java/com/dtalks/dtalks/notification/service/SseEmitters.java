@@ -24,8 +24,8 @@ public class SseEmitters {
     private final Map<String, Object> eventCache = new ConcurrentHashMap<>();
     private final NotificationRepository notificationRepository;
 
-//    private Long TIMEOUT = 1000L * 60L * 20L;
-    private Long TIMEOUT = 1000L * 40L;
+    private Long TIMEOUT = 1000L * 60L * 20L;
+//    private Long TIMEOUT = 1000L * 40L;
 
     public SseEmitter subscribe(String userid, String lastEventId) {
         String emitterId = makeTimeIncludeId(userid);
