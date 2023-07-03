@@ -1,17 +1,21 @@
 package com.dtalks.dtalks.board.post.service;
 
-import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmType;
-import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.entity.RecommendPost;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.board.post.repository.RecommendPostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.*;
+import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
+import com.dtalks.dtalks.notification.entity.Notification;
+import com.dtalks.dtalks.notification.enums.NotificationType;
+import com.dtalks.dtalks.notification.enums.ReadStatus;
+import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +27,10 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
     private final RecommendPostRepository recommendPostRepository;
     private final PostRepository postRepository;
-    private final AlarmRepository alarmRepository;
+    private final NotificationRepository notificationRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    private final MessageSource messageSource;
 
     @Override
     @Transactional
@@ -49,8 +56,8 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
         post.setRecommendCount(post.getRecommendCount() + 1);
 
-        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.RECOMMEND_POST, "작성한 게시글이 추천되었습니다.", "/post/" + postId));
-
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendPost.getId(), post.getId(), post.getUser(),
+                NotificationType.RECOMMEND_POST, messageSource.getMessage("notification.post.recommend", new Object[]{post.getTitle()}, null)));
         return post.getRecommendCount();
     }
 
@@ -73,6 +80,15 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
         Post post = optionalPost.get();
         post.setRecommendCount(post.getRecommendCount() - 1);
+
+        Notification notification = notificationRepository.findByRefIdAndType(recommendPost.getId(), NotificationType.RECOMMEND_POST)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+        if (notification.getReadStatus().equals(ReadStatus.READ)) {
+            notification.readDataDeleteSetting();
+        } else {
+            notificationRepository.deleteById(notification.getId());
+        }
+
         return post.getRecommendCount();
     }
 

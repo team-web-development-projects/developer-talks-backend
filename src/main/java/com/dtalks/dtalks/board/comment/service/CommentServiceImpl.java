@@ -1,8 +1,5 @@
 package com.dtalks.dtalks.board.comment.service;
 
-import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmType;
-import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.board.comment.dto.CommentInfoDto;
 import com.dtalks.dtalks.board.comment.dto.UserCommentDto;
 import com.dtalks.dtalks.board.comment.entity.Comment;
@@ -12,6 +9,11 @@ import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
+import com.dtalks.dtalks.notification.entity.Notification;
+import com.dtalks.dtalks.notification.enums.NotificationType;
+import com.dtalks.dtalks.notification.enums.ReadStatus;
+import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
@@ -20,6 +22,8 @@ import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +38,10 @@ public class CommentServiceImpl implements CommentService{
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final ActivityRepository activityRepository;
-    private final AlarmRepository alarmRepository;
+    private final NotificationRepository notificationRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    private final MessageSource messageSource;
 
     @Override
     @Transactional(readOnly = true)
@@ -108,8 +115,8 @@ public class CommentServiceImpl implements CommentService{
 
         commentRepository.save(comment);
         activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
-
-        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "작성한 게시글에 댓글이 달렸습니다.", "/post/" + postId));
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
+                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
     }
 
     @Override
@@ -135,9 +142,10 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
         activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
 
-        alarmRepository.save(Alarm.createAlarm(post.getUser(), AlarmType.COMMENT, "작성한 게시글에 댓글이 달렸습니다.", "/post/" + postId));
-        alarmRepository.save(Alarm.createAlarm(parentComment.getUser(), AlarmType.RECOMMENT, "작성한 댓글에 댓글이 달렸습니다." , "/post/" + postId));
-
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
+                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), parentComment.getUser(),
+                NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle()}, null)));
     }
 
 
@@ -175,6 +183,23 @@ public class CommentServiceImpl implements CommentService{
 
         Post post = comment.getPost();
         post.minusCommentCount();
+
+        Notification notification = notificationRepository.findByRefIdAndType(comment.getId(), NotificationType.COMMENT)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+        if (notification.getReadStatus().equals(ReadStatus.READ)) {
+            notification.readDataDeleteSetting();
+        } else {
+            notificationRepository.deleteById(notification.getId());
+        }
+
+        Optional<Notification> recommentNoti = notificationRepository.findByRefIdAndType(comment.getId(), NotificationType.RECOMMENT);
+        if (recommentNoti.isPresent()) {
+            if (notification.getReadStatus().equals(ReadStatus.READ)) {
+                notification.readDataDeleteSetting();
+            } else {
+                notificationRepository.deleteById(notification.getId());
+            }
+        }
 
         /**
          * 삭제하려는 댓글의 자식 댓글이 있는 경우

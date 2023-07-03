@@ -1,10 +1,12 @@
 package com.dtalks.dtalks.qna.recommendation.service;
 
-import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmType;
-import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
+import com.dtalks.dtalks.notification.entity.Notification;
+import com.dtalks.dtalks.notification.enums.NotificationType;
+import com.dtalks.dtalks.notification.enums.ReadStatus;
+import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.qna.recommendation.entitiy.RecommendQuestion;
@@ -12,6 +14,8 @@ import com.dtalks.dtalks.qna.recommendation.repository.RecommendQuestionReposito
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +26,10 @@ import java.util.Optional;
 public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     private final RecommendQuestionRepository recommendQuestionRepository;
     private final QuestionRepository questionRepository;
-    private final AlarmRepository alarmRepository;
+    private final NotificationRepository notificationRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    private final MessageSource messageSource;
 
     @Override
     public Integer recommendQuestion(Long questionId) {
@@ -42,8 +49,8 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         question.updateRecommendCount(true);
         recommendQuestionRepository.save(recommendQuestion);
-        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.RECOMMEND_QUESTION, "작성한 질문이 추천받았습니다.", "/questions/" + questionId));
-
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendQuestion.getId(), question.getId(), question.getUser(),
+                NotificationType.RECOMMEND_POST, messageSource.getMessage("notification.question.recommend", new Object[]{question.getTitle()}, null)));
         return question.getRecommendCount();
     }
 
@@ -52,7 +59,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     public Integer unRecommendQuestion(Long questionId) {
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if(optionalQuestion.isEmpty()){
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
+            throw new CustomException(ErrorCode.QUESTION_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
         }
 
         Question question = optionalQuestion.get();
