@@ -1,13 +1,13 @@
-package com.dtalks.dtalks.alarm.service;
+package com.dtalks.dtalks.notification.service;
 
-import com.dtalks.dtalks.alarm.dto.AlarmDto;
-import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmStatus;
-import com.dtalks.dtalks.alarm.enums.AlarmType;
-import com.dtalks.dtalks.alarm.repository.AlarmRepository;
+import com.dtalks.dtalks.notification.dto.NotificationDto;
+import com.dtalks.dtalks.notification.entity.Notification;
+import com.dtalks.dtalks.notification.enums.NotificationType;
+import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -22,15 +22,16 @@ import java.util.stream.Collectors;
 public class SseEmitters {
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final Map<String, Object> eventCache = new ConcurrentHashMap<>();
-    private final AlarmRepository alarmRepository;
+    private final NotificationRepository notificationRepository;
 
     private Long TIMEOUT = 1000L * 60L * 20L;
+//    private Long TIMEOUT = 1000L * 40L;
 
     public SseEmitter subscribe(String userid, String lastEventId) {
         String emitterId = makeTimeIncludeId(userid);
         SseEmitter emitter = save(emitterId, new SseEmitter(TIMEOUT));
         emitter.onCompletion(() -> this.emitters.remove(emitterId));
-        emitter.onTimeout(() -> this.emitters.remove(emitterId));
+        emitter.onTimeout(() -> emitter.complete());
         emitter.onError(throwable -> {
             log.error("[SSE] - subscribe error");
             log.error("", throwable);
@@ -57,7 +58,8 @@ public class SseEmitters {
         try {
             emitter.send(SseEmitter.event()
                     .id(eventId)
-                    .data(data));
+                    .data(data, MediaType.APPLICATION_JSON)
+                    .reconnectTime(0));
         } catch (IOException exception) {
             emitters.remove(emitterId);
         }
@@ -74,8 +76,8 @@ public class SseEmitters {
                 .forEach(entry -> sendNotification(emitter, entry.getKey(), emitterId, entry.getValue()));
     }
 
-    public void send(User receiver, AlarmType alarmType, String url) {
-        Alarm alarm = alarmRepository.save(createAlarm(receiver, alarmType, url));
+    public void send(Long refId, User receiver, NotificationType type, String message, String url) {
+        Notification notification = notificationRepository.save(Notification.createNotification(refId, receiver, type, message, url));
 
         String receiverid = receiver.getUserid();
         String eventId = receiverid + "_" + System.currentTimeMillis();
@@ -83,19 +85,10 @@ public class SseEmitters {
         Map<String, SseEmitter> emitters = findAllEmitterStartWithByUserid(receiverid);
         emitters.forEach(
                 (key, emitter) -> {
-                    saveEventCache(key, alarm);
-                    sendNotification(emitter, eventId, key, AlarmDto.toDto(alarm));
+                    saveEventCache(key, notification);
+                    sendNotification(emitter, eventId, key, NotificationDto.toDto(notification));
                 }
         );
-    }
-
-    private Alarm createAlarm(User receiver, AlarmType alarmType, String url) {
-        return Alarm.builder()
-                .receiver(receiver)
-                .type(alarmType)
-                .url(url)
-                .alarmStatus(AlarmStatus.WAIT)
-                .build();
     }
 
     public SseEmitter save(String emitterId, SseEmitter sseEmitter) {

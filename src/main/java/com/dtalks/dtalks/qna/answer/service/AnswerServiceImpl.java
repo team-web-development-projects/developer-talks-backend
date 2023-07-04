@@ -1,9 +1,11 @@
 package com.dtalks.dtalks.qna.answer.service;
 
-import com.dtalks.dtalks.alarm.entity.Alarm;
-import com.dtalks.dtalks.alarm.enums.AlarmType;
-import com.dtalks.dtalks.alarm.repository.AlarmRepository;
 import com.dtalks.dtalks.exception.exception.*;
+import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
+import com.dtalks.dtalks.notification.entity.Notification;
+import com.dtalks.dtalks.notification.enums.NotificationType;
+import com.dtalks.dtalks.notification.enums.ReadStatus;
+import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.qna.answer.dto.AnswerDto;
 import com.dtalks.dtalks.qna.answer.dto.AnswerResponseDto;
 import com.dtalks.dtalks.qna.answer.entity.Answer;
@@ -16,8 +18,9 @@ import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActivityType;
 import com.dtalks.dtalks.user.repository.ActivityRepository;
-import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +31,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AnswerServiceImpl implements AnswerService {
-    private final UserRepository userRepository;
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final ActivityRepository activityRepository;
-    private final AlarmRepository alarmRepository;
+    private final NotificationRepository notificationRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final MessageSource messageSource;
     @Override
     @Transactional(readOnly = true)
     public AnswerResponseDto searchById(Long id) {
@@ -80,7 +84,8 @@ public class AnswerServiceImpl implements AnswerService {
         answerRepository.save(answer);
 
         activityRepository.save(Activity.createQA(user, question, answer, ActivityType.ANSWER));
-        alarmRepository.save(Alarm.createAlarm(question.getUser(), AlarmType.ANSWER, "작성한 질문에 답변이 달렸습니다.", "/questions/" + questionId));
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), question.getUser(),
+                NotificationType.ANSWER, messageSource.getMessage("notification.answer", new Object[]{question.getTitle()}, null)));
 
         return answer.getId();
     }
@@ -124,6 +129,14 @@ public class AnswerServiceImpl implements AnswerService {
         Question question = answer.getQuestion();
         question.minusAnswerCount();
 
+        Notification notification = notificationRepository.findByRefIdAndType(answer.getId(), NotificationType.ANSWER)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+        if (notification.getReadStatus().equals(ReadStatus.READ)) {
+            notification.readDataDeleteSetting();
+        } else {
+            notificationRepository.deleteById(notification.getId());
+        }
+
         answerRepository.delete(answer);
     }
 
@@ -151,8 +164,9 @@ public class AnswerServiceImpl implements AnswerService {
         answer.setSelected(true);
 
         activityRepository.save(Activity.createQA(selectUser, question, answer, ActivityType.SELECT_ANSWER));
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), answer.getUser(),
+                NotificationType.ANSWER_SELECTED, messageSource.getMessage("notification.answer.selected", new Object[]{question.getTitle()}, null)));
 
-        alarmRepository.save(Alarm.createAlarm(answer.getUser(), AlarmType.ANSWER_SELECTED, "작성한 답변이 채택되었습니다.", "/question/" + question.getId()));
         answerRepository.save(answer);
     }
 }
