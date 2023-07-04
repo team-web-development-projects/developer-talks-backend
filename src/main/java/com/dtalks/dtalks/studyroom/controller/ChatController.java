@@ -5,6 +5,7 @@ import com.dtalks.dtalks.studyroom.dto.ChatMessageRequestDto;
 import com.dtalks.dtalks.studyroom.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,18 +15,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 public class ChatController {
 
     private final ChatService chatService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @MessageMapping("/rooms/{chatRoomId}")
-    @SendTo("/rooms/{chatRoomId}")
-    public ChatMessageDto message(@DestinationVariable Long chatRoomId, ChatMessageRequestDto chatMessageRequestDto) {
-        return chatService.createChatMessage(chatRoomId, chatMessageRequestDto.getMessage());
+    public void message(@DestinationVariable Long chatRoomId, ChatMessageRequestDto chatMessageRequestDto) {
+        log.info(chatMessageRequestDto.getMessage());
+        ChatMessageDto chatMessageDto = ChatMessageDto.builder()
+                .id(chatRoomId)
+                .message(chatMessageRequestDto.getMessage())
+                .sender("you")
+                .createDate(LocalDateTime.now())
+                .build();
+        simpMessagingTemplate.convertAndSend("/sub/rooms/" + chatRoomId, chatMessageDto);
     }
 
     @Operation(summary = "채팅 가져오기")

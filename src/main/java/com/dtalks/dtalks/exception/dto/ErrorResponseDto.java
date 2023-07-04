@@ -1,11 +1,11 @@
 package com.dtalks.dtalks.exception.dto;
 
 import com.dtalks.dtalks.exception.ErrorCode;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class ErrorResponseDto {
 
     private int status;
