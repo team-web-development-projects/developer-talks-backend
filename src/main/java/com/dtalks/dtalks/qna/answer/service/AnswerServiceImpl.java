@@ -14,10 +14,7 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.qna.question.entity.Question;
 import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
-import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enums.ActivityType;
-import com.dtalks.dtalks.user.repository.ActivityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -33,7 +30,6 @@ import java.util.stream.Collectors;
 public class AnswerServiceImpl implements AnswerService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
-    private final ActivityRepository activityRepository;
     private final NotificationRepository notificationRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -83,7 +79,6 @@ public class AnswerServiceImpl implements AnswerService {
         Answer answer = Answer.toEntity(answerDto, question, user);
         answerRepository.save(answer);
 
-        activityRepository.save(Activity.createQA(user, question, answer, ActivityType.ANSWER));
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), question.getUser(),
                 NotificationType.ANSWER, messageSource.getMessage("notification.answer", new Object[]{question.getTitle()}, null)));
 
@@ -122,10 +117,6 @@ public class AnswerServiceImpl implements AnswerService {
             throw new CustomException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "채택된 답변은 삭제할 수 없습니다. ");
         }
 
-        Optional<Activity> optionalActivity = activityRepository.findByAnswerIdAndType(id, ActivityType.ANSWER);
-        Activity activity = optionalActivity.get();
-        activity.setAnswer(null);
-
         Question question = answer.getQuestion();
         question.minusAnswerCount();
 
@@ -163,7 +154,6 @@ public class AnswerServiceImpl implements AnswerService {
 
         answer.setSelected(true);
 
-        activityRepository.save(Activity.createQA(selectUser, question, answer, ActivityType.SELECT_ANSWER));
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), answer.getUser(),
                 NotificationType.ANSWER_SELECTED, messageSource.getMessage("notification.answer.selected", new Object[]{question.getTitle()}, null)));
 

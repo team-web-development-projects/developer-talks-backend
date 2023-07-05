@@ -5,34 +5,25 @@ import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
-import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
-import com.dtalks.dtalks.qna.question.entity.Question;
-import com.dtalks.dtalks.studyroom.entity.StudyRoom;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
-import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enums.ActivityType;
 import com.dtalks.dtalks.user.repository.AccessTokenPasswordRepository;
-import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -46,7 +37,6 @@ public class UserServiceImpl implements UserService {
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
     private final DocumentRepository documentRepository;
-    private final ActivityRepository activityRepository;
     private final S3Uploader s3Uploader;
     private final EmailService emailService;
     private final AccessTokenPasswordRepository accessTokenPasswordRepository;
@@ -288,65 +278,6 @@ public class UserServiceImpl implements UserService {
 
         Document savedDocument = documentRepository.save(document);
         return DocumentResponseDto.toDto(savedDocument);
-    }
-
-    @Override
-    @Transactional
-    public Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable) {
-        Optional<User> optionalUser = userRepository.findByNickname(nickname);
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-
-        User user = optionalUser.get();
-        if (user.getIsPrivate()) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "비공개 설정으로 사용자의 최근활동 조회가 불가능합니다.");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime goe = now.minusDays(30);
-
-        Page<Activity> page = activityRepository.findByUserIdAndCreateDateBetween(user.getId(), goe, now, pageable);
-        return page.map(p -> {
-            Long id = null;
-            Long subId = null;
-            ActivityType type = p.getType();
-            String title = "";
-            String writer = "";
-            switch (type) {
-                case POST, COMMENT:
-                    Post post = p.getPost();
-                    if (post != null) {
-                        id = post.getId();
-                        title = post.getTitle();
-                        writer = post.getUser().getNickname();
-                    }
-                    if (type.equals(ActivityType.COMMENT) && p.getComment() != null) {
-                        subId = p.getComment().getId();
-                    }
-                    break;
-                case QUESTION, ANSWER, SELECT_ANSWER:
-                    Question question = p.getQuestion();
-                    if (question != null) {
-                        id = question.getId();
-                        title = question.getTitle();
-                        writer = question.getUser().getNickname();
-                    }
-                    if (p.getAnswer() != null) {
-                        subId = p.getAnswer().getId();
-                    }
-                    break;
-                case STUDY_CREATE, STUDY_JOIN_REQUEST, QUIT_STUDY:
-                    StudyRoom studyRoom = p.getStudyRoom();
-                    if (studyRoom != null) {
-                        id = studyRoom.getId();
-                        title = studyRoom.getTitle();
-                    }
-                    break;
-            }
-            return RecentActivityDto.toDto(id, subId, type, title, writer, p.getCreateDate());
-        });
-
     }
 
     @Override

@@ -15,10 +15,7 @@ import com.dtalks.dtalks.notification.enums.NotificationType;
 import com.dtalks.dtalks.notification.enums.ReadStatus;
 import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
-import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enums.ActivityType;
-import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +34,6 @@ public class CommentServiceImpl implements CommentService{
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final ActivityRepository activityRepository;
     private final NotificationRepository notificationRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -114,7 +110,6 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
-        activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
                 NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
     }
@@ -140,7 +135,6 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
-        activityRepository.save(Activity.createBoard(user, post, comment, ActivityType.COMMENT));
 
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
                 NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
@@ -173,13 +167,6 @@ public class CommentServiceImpl implements CommentService{
         if (!comment.getUser().getUserid().equals(currentUserId)) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 댓글을 수정할 권한이 없습니다.");
         }
-
-        Optional<Activity> optionalActivity = activityRepository.findByCommentId(comment.getId());
-        if (optionalActivity.isEmpty()) {
-            throw new CustomException(ErrorCode.ACTIVITY_NOT_FOUND_ERROR, "해당 댓글 활동을 찾을 수 없습니다.");
-        }
-        Activity activity = optionalActivity.get();
-        activity.setComment(null);
 
         Post post = comment.getPost();
         post.minusCommentCount();

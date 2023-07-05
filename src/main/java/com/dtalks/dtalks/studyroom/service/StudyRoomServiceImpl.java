@@ -16,10 +16,7 @@ import com.dtalks.dtalks.studyroom.enums.StudyRoomLevel;
 import com.dtalks.dtalks.studyroom.repository.StudyRoomRepository;
 import com.dtalks.dtalks.studyroom.repository.StudyRoomUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
-import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enums.ActivityType;
-import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -46,7 +43,6 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     private final StudyRoomRepository studyRoomRepository;
     private final StudyRoomUserRepository studyRoomUserRepository;
     private final UserRepository userRepository;
-    private final ActivityRepository activityRepository;
     private final NotificationRepository notificationRepository;
     private final ChatService chatService;
 
@@ -67,7 +63,6 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         StudyRoom savedStudyroom = studyRoomRepository.save(studyRoom);
         chatService.createRoom(savedStudyroom.getId());
 
-        activityRepository.save(Activity.createStudy(user, studyRoom, ActivityType.STUDY_CREATE));
         StudyRoomResponseDto studyRoomResponseDto = StudyRoomResponseDto.toDto(savedStudyroom);
 
         return studyRoomResponseDto;
@@ -139,11 +134,6 @@ public class StudyRoomServiceImpl implements StudyRoomService{
             if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER)) {
                 if(studyRoomUser.getUser().getUserid().equals(SecurityUtil.getUser().getUserid())) {
                     studyRoomRepository.delete(studyRoom);
-
-                    List<Activity> studyActivities = activityRepository.findByStudyRoomId(id);
-                    for (Activity activity : studyActivities) {
-                        activity.setStudyRoom(null);
-                    }
                     return;
                 }
             }
@@ -188,7 +178,6 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         studyRoom.addStudyRoomUser(studyRoomUser);
 
         StudyRoom savedStudyRoom = studyRoomRepository.save(studyRoom);
-        activityRepository.save(Activity.createStudy(user, studyRoom, ActivityType.STUDY_JOIN_REQUEST));
 
         Optional<StudyRoomUser> leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.LEADER);
         Optional<StudyRoomUser> sub_leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.SUB_LEADER);
@@ -300,7 +289,6 @@ public class StudyRoomServiceImpl implements StudyRoomService{
                     studyRoomUsers.remove(studyRoomUser);
                     studyRoom.setStudyRoomUsers(studyRoomUsers);
 
-                    activityRepository.save(Activity.createStudy(user, studyRoom, ActivityType.QUIT_STUDY));
                     Optional<StudyRoomUser> leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.LEADER);
                     Optional<StudyRoomUser> sub_leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.SUB_LEADER);
 

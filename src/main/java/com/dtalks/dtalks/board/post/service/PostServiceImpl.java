@@ -19,10 +19,7 @@ import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
-import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enums.ActivityType;
-import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,7 +39,6 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final FavoritePostRepository favoritePostRepository;
     private final RecommendPostRepository recommendPostRepository;
-    private final ActivityRepository activityRepository;
     private final CommentRepository commentRepository;
 
     private final PostImageRepository imageRepository;
@@ -132,8 +128,6 @@ public class PostServiceImpl implements PostService {
                 imageRepository.save(postImage);
             }
         }
-
-        activityRepository.save(Activity.createBoard(user, post, null, ActivityType.POST));
         return post.getId();
     }
 
@@ -228,15 +222,6 @@ public class PostServiceImpl implements PostService {
         List<RecommendPost> recommendPostList = recommendPostRepository.findByPostId(post.getId());
         for (RecommendPost recommendPost : recommendPostList) {
             recommendPostRepository.delete(recommendPost);
-        }
-
-        // 게시글이면 삭제, 댓글이면 연관관계들만 끊고 기록에는 남아있도록. 프론트에서 활동 클릭시 없는 게시글이라고 뜨게 하면 됨
-        List<Activity> postList = activityRepository.findByPostId(post.getId());
-        for (Activity activity : postList) {
-            if (activity.getType().equals(ActivityType.COMMENT)) {
-                activity.setComment(null);
-            }
-            activity.setPost(null);
         }
 
         List<PostImage> imageList = imageRepository.findByPostId(postId);
