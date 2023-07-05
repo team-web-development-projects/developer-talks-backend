@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -26,7 +27,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        LOGGER.info("doFilterInternal 호출됨");
+        LOGGER.info("doFilterInternal 호출됨 " + request.getRequestURI());
+        Enumeration<String> headers = request.getHeaderNames();
+        LOGGER.info("헤더: ");
+        while(headers.hasMoreElements()) {
+            String name = (String) headers.nextElement();
+            String value = request.getHeader(name);
+            LOGGER.info(name + ": " + value);
+        }
         String token = tokenService.resolveToken(request);
 
         if(token != null && tokenService.validateToken(token)) {

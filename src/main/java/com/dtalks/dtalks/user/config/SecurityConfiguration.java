@@ -38,7 +38,7 @@ public class SecurityConfiguration {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
-                        ,"/token/refresh", "ws/chat/**", "/notifications/subscribe").permitAll()
+                        ,"/token/refresh", "/ws/chat/**", "/sub/**", "/pub/**", "/notifications/subscribe").permitAll()
                 .requestMatchers("**exception**").permitAll()
                 .requestMatchers("/users/recent/activity/**", "/users/private/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/post/**", "/comment/**").permitAll()
