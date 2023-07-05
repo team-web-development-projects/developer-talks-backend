@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -110,6 +111,9 @@ public class UserServiceImpl implements UserService {
         if(!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
             throw new RuntimeException();
         }
+
+        if(!user.getIsActive())
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "비활성화된 계정입니다.");
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
                 .accessToken(tokenService.createAccessToken(userTokenDto))
@@ -197,6 +201,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public SignInResponseDto updateNickname(UserNicknameDto userNicknameDto) {
         User user = SecurityUtil.getUser();
+        Optional<User> optionalUser = userRepository.findByNickname(userNicknameDto.getNickname());
+        if(!optionalUser.isEmpty())
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "이미 존재하는 닉네임 입니다.");
         user.setNickname(userNicknameDto.getNickname());
 
         User savedUser = userRepository.save(user);
@@ -492,6 +499,20 @@ public class UserServiceImpl implements UserService {
 
         User user = SecurityUtil.getUser();
         user.setPassword(passwordEncoder.encode(userPasswordFindDto.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void quitUser(UserSimplePasswordDto passwordDto) {
+        User user = SecurityUtil.getUser();
+        if(!passwordEncoder.matches(passwordDto.getPassword(), user.getPassword()))
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "비밀번호가 올바르지 않습니다.");
+        user.setEmail(null);
+        user.setUserid(null);
+        user.setNickname("(알수없음)");
+        user.setIsActive(false);
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
         userRepository.save(user);
     }
 

@@ -54,4 +54,6 @@ public interface UserService {
     void findUserid(String email);
 
     void findUserPassword(HttpServletRequest request, UserPasswordFindDto userPasswordFindDto);
+
+    void quitUser(UserSimplePasswordDto passwordDto);
 }
