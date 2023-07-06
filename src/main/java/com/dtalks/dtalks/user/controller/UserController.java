@@ -168,4 +168,11 @@ public class UserController {
         userService.findUserPassword(request, userPasswordFindDto);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping()
+    public ResponseEntity quitUser(UserSimplePasswordDto passwordDto) {
+        userService.quitUser(passwordDto);
+        return ResponseEntity.ok().build();
+    }
 }
