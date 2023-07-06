@@ -146,6 +146,7 @@ public class PostServiceImpl implements PostService {
         List<MultipartFile> files = putRequestDto.getFiles();
 
         List<PostImage> dbFiles = imageRepository.findByPostId(postId);
+        List<String> deletableUrls = new ArrayList<>();
 
         // db 값에서 이미지 url로 넘어온 값 중에 같은 url이 없으면 삭제된 파일이므로 db에서 삭제
         for (PostImage dbFile : dbFiles) {
@@ -166,7 +167,7 @@ public class PostServiceImpl implements PostService {
 
             if (isDeleted) {
                 imageRepository.delete(dbFile);
-                s3Uploader.deleteFile(document.getPath());
+                deletableUrls.add(document.getPath());
             }
         }
 
@@ -197,6 +198,11 @@ public class PostServiceImpl implements PostService {
             thumbnail = top1Image.get().getDocument().getUrl();
         }
         post.setThumbnailUrl(thumbnail);
+
+        for (String url : deletableUrls) {
+            s3Uploader.deleteFile(url);
+        }
+
         return postId;
     }
 
@@ -225,11 +231,11 @@ public class PostServiceImpl implements PostService {
         }
 
         List<PostImage> imageList = imageRepository.findByPostId(postId);
+        postRepository.delete(post);
+
         for (PostImage image : imageList) {
             s3Uploader.deleteFile(image.getDocument().getPath());
         }
-
-        postRepository.delete(post);
     }
 
     @Transactional(readOnly = true)
