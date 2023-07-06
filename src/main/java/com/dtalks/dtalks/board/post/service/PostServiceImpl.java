@@ -91,7 +91,7 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> search5BestPosts() {
         LocalDateTime time = LocalDateTime.now().minusDays(7);
         LocalDateTime goe = time.withHour(0).withMinute(0).withSecond(0);
-        List<Post> top5Posts = postRepository.findTop5ByCreateDateGreaterThanEqualOrderByRecommendCountDesc(goe);
+        List<Post> top5Posts = postRepository.findTop5ByCreateDateGreaterThanEqualAndRecommendCountGreaterThanOrderByRecommendCountDesc(goe, 0);
         return top5Posts.stream().map(PostDto::toDto).toList();
     }
 
