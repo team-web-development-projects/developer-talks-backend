@@ -21,7 +21,7 @@ public class NotificationRequestDto {
         switch (type) {
             case COMMENT, RECOMMENT, RECOMMEND_POST: url = "/post/" + urlId; break;
             case RECOMMEND_QUESTION, ANSWER, ANSWER_SELECTED: url = "/questions/" + urlId; break;
-            case STUDY_JOIN_REQUEST, STUDY_MEMBER_QUIT, STUDY_LEVEL_UPDATE, STUDY_REQUEST_ACCEPTED: url = "/study-rooms/" + urlId; break;
+            case STUDY_JOIN_REQUEST, STUDY_MEMBER_AUTO_JOIN, STUDY_MEMBER_QUIT, STUDY_LEVEL_UPDATE, STUDY_REQUEST_ACCEPTED: url = "/study-rooms/" + urlId; break;
         }
         return NotificationRequestDto.builder()
                 .refId(refId)
