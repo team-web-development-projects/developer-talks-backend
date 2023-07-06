@@ -3,6 +3,7 @@ package com.dtalks.dtalks.user.controller;
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.service.UserActivityService;
 import com.dtalks.dtalks.user.service.UserDetailsService;
 import com.dtalks.dtalks.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +31,13 @@ public class UserController {
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     private final UserDetailsService userDetailsService;
     private final UserService userService;
+    private final UserActivityService userActivityService;
+
     @Autowired
-    public UserController(UserDetailsService userDetailsService, UserService userService) {
+    public UserController(UserDetailsService userDetailsService, UserService userService, UserActivityService userActivityService) {
         this.userDetailsService = userDetailsService;
         this.userService = userService;
+        this.userActivityService = userActivityService;
     }
 
     @Operation(summary = "userid 중복 체크")
@@ -101,8 +104,8 @@ public class UserController {
             @Parameter(name = "nickname", description = "조회할 유저의 닉네임")
     })
     public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@PathVariable String nickname,
-                                                                       @PageableDefault(size = 10, sort = "createDate",  direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(userService.getRecentActivities(nickname, pageable));
+                                                                       @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(userActivityService.getRecentActivities(nickname, pageable));
 
     }
 

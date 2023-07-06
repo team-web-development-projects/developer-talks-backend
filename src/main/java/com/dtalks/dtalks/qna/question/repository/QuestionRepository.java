@@ -17,4 +17,5 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     List<Question> findTop5ByCreateDateGreaterThanEqualOrderByRecommendCountDesc(LocalDateTime startDateTime);
 
+    List<Question> findByUserIdAndCreateDateBetween(Long userId, LocalDateTime goe, LocalDateTime loe);
 }

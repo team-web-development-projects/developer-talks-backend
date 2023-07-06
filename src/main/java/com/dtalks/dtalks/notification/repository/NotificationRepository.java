@@ -5,6 +5,7 @@ import com.dtalks.dtalks.notification.enums.NotificationType;
 import com.dtalks.dtalks.notification.enums.ReadStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     Optional<Notification> findByRefIdAndType(Long refId, NotificationType type);
     List<Notification> findByRefIdAndTypeIn(Long refId, List<NotificationType> type);
+
+    void deleteByCreateDateLessThanAndReadStatus(LocalDateTime deleteDate, ReadStatus readStatus);
 }

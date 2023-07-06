@@ -13,10 +13,7 @@ import com.dtalks.dtalks.qna.question.repository.QuestionRepository;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
-import com.dtalks.dtalks.user.entity.Activity;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enums.ActivityType;
-import com.dtalks.dtalks.user.repository.ActivityRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,7 +34,6 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
-    private final ActivityRepository activityRepository;
     private final DocumentRepository documentRepository;
     private final QuestionImageRepository imageRepository;
     private final S3Uploader s3Uploader;
@@ -134,8 +130,6 @@ public class QuestionServiceImpl implements QuestionService {
                 imageRepository.save(questionImage);
             }
         }
-
-        activityRepository.save(Activity.createQA(user, question, null, ActivityType.QUESTION));
         return question.getId();
     }
 
@@ -227,12 +221,6 @@ public class QuestionServiceImpl implements QuestionService {
         String userId = question.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다. ");
-        }
-
-        // 삭제된 답변의 활동 기록은 남아있고 그 기록에 question이 연결되어있음
-        List<Activity> activityList = activityRepository.findByQuestionId(id);
-        for (Activity activity : activityList) {
-            activity.setQuestion(null);
         }
 
         List<QuestionImage> imageList = imageRepository.findByQuestionId(id);

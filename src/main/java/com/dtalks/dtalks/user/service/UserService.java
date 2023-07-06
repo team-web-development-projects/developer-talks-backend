@@ -37,8 +37,6 @@ public interface UserService {
 
     UserResponseDto updateUserProfile(UserProfileRequestDto userProfileRequestDto);
 
-    Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable);
-
     void updatePrivate(boolean status);
 
     Boolean getPrivateStatus(String id);
