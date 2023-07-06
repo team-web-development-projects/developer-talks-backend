@@ -21,6 +21,8 @@ import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,13 +88,13 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserCommentDto> searchListByUserId(String userId) {
+    public Page<UserCommentDto> searchListByUserId(String userId, Pageable pageable) {
         User user = findUser(userId);
-        List<Comment> commentList = commentRepository.findByUserIdAndRemovedFalse(user.getId());
-        return commentList.stream().map(c -> {
+        Page<Comment> commentList = commentRepository.findByUserIdAndRemovedFalse(user.getId(), pageable);
+        return commentList.map(c -> {
             Post post = c.getPost();
             return UserCommentDto.toDto(c, post.getId(), post.getTitle());
-        }).toList();
+        });
     }
 
     @Override

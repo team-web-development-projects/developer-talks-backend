@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,13 +38,13 @@ public class CommentController {
         return ResponseEntity.ok(list);
     }
 
-    @Operation(summary = "특정 유저의 댓글 리스트 조회" , parameters = {
+    @Operation(summary = "특정 유저의 댓글 리스트 조회 (페이지 사용, size = 10, sort=\"id\" desc 적용)" , parameters = {
             @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
     })
     @GetMapping("/list/user/{userId}")
-    public ResponseEntity<List<UserCommentDto>> searchUserIdCommentList(@PathVariable String userId) {
-        List<UserCommentDto> list = commentService.searchListByUserId(userId);
-        return ResponseEntity.ok(list);
+    public ResponseEntity<Page<UserCommentDto>> searchUserIdCommentList(@PathVariable String userId,
+                                                                        @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(commentService.searchListByUserId(userId, pageable));
     }
 
     @Operation(summary = "특정 게시글에 댓글 저장")
