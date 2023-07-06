@@ -192,7 +192,7 @@ public class PostServiceImpl implements PostService {
 
         String thumbnail = null;
         // 기존 이미지가 있거나 새롭게 저장된 이미지가 있으면 썸네일 확인 및 변경
-        if (imgUrls != null || files != null) {
+        if ((imgUrls != null && !imgUrls.isEmpty()) || files != null) {
             Optional<PostImage> top1Image = imageRepository.findTop1ByPostId(postId);
             thumbnail = top1Image.get().getDocument().getUrl();
         }
