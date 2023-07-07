@@ -5,7 +5,7 @@ import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
 import com.dtalks.dtalks.board.comment.repository.CommentRepository;
-import com.dtalks.dtalks.board.post.dto.PutRequestDto;
+import com.dtalks.dtalks.board.post.dto.*;
 import com.dtalks.dtalks.board.post.entity.FavoritePost;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.entity.PostImage;
@@ -14,8 +14,6 @@ import com.dtalks.dtalks.board.post.repository.FavoritePostRepository;
 import com.dtalks.dtalks.board.post.repository.PostImageRepository;
 import com.dtalks.dtalks.board.post.repository.RecommendPostRepository;
 import com.dtalks.dtalks.exception.exception.CustomException;
-import com.dtalks.dtalks.board.post.dto.PostDto;
-import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
@@ -104,6 +102,7 @@ public class PostServiceImpl implements PostService {
 
         List<MultipartFile> files = postDto.getFiles();
         if (files != null){
+            Long orderNum = 1L;
             boolean setThumbnail = false;
             for (MultipartFile file : files) {
                 FileValidation.imageValidation(file.getOriginalFilename());
@@ -124,6 +123,7 @@ public class PostServiceImpl implements PostService {
                 PostImage postImage = PostImage.builder()
                         .post(post)
                         .document(document)
+                        .orderNum(orderNum++)
                         .build();
                 imageRepository.save(postImage);
             }
@@ -142,8 +142,8 @@ public class PostServiceImpl implements PostService {
 
         post.update(putRequestDto.getTitle(), putRequestDto.getContent());
 
-        List<String> imgUrls = putRequestDto.getImgUrls();
-        List<MultipartFile> files = putRequestDto.getFiles();
+        List<OldImageDto> imgUrls = putRequestDto.getImgUrls();
+        List<NewImageDto> files = putRequestDto.getFiles();
 
         List<PostImage> dbFiles = imageRepository.findByPostId(postId);
         List<String> deletableUrls = new ArrayList<>();
@@ -156,10 +156,12 @@ public class PostServiceImpl implements PostService {
             String documentUrl = document.getUrl();
             // 넘어온 기존 게시글 이미지 url이 없다면 기존 이미지 다 삭제
             boolean isDeleted = true;
+            Long orderNum = dbFile.getOrderNum();
             if (imgUrls != null) {
-                for (String url : imgUrls) {
-                    if (url.equals(documentUrl)) {
+                for (OldImageDto oldImage : imgUrls) {
+                    if (oldImage.getUrl().equals(documentUrl)) {
                         isDeleted = false;
+                        orderNum = oldImage.getOrderNum();
                         break;
                     }
                 }
@@ -168,11 +170,14 @@ public class PostServiceImpl implements PostService {
             if (isDeleted) {
                 imageRepository.delete(dbFile);
                 deletableUrls.add(document.getPath());
+            } else {
+                dbFile.setOrderNum(orderNum);
             }
         }
 
         if (files != null) {
-            for (MultipartFile file : files) {
+            for (NewImageDto newImage : files) {
+                MultipartFile file = newImage.getFile();
                 FileValidation.imageValidation(file.getOriginalFilename());
                 String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
 
@@ -186,6 +191,7 @@ public class PostServiceImpl implements PostService {
                 PostImage postImage = PostImage.builder()
                         .post(post)
                         .document(document)
+                        .orderNum(newImage.getOrderNum())
                         .build();
                 imageRepository.save(postImage);
             }
