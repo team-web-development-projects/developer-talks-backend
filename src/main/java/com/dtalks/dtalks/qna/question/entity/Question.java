@@ -64,6 +64,7 @@ public class Question extends BaseTimeEntity {
                 .user(user)
                 .title(questionDto.getTitle())
                 .content(questionDto.getContent())
+                .answerCount(0)
                 .viewCount(0)
                 .recommendCount(0)
                 .favoriteCount(0)

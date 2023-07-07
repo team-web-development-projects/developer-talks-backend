@@ -32,6 +32,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     private final MessageSource messageSource;
 
     @Override
+    @Transactional
     public Integer recommendQuestion(Long questionId) {
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if(optionalQuestion.isEmpty()){
@@ -46,11 +47,12 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
         }
 
         RecommendQuestion recommendQuestion = RecommendQuestion.toEntity(user, question);
+        recommendQuestionRepository.save(recommendQuestion);
 
         question.updateRecommendCount(true);
-        recommendQuestionRepository.save(recommendQuestion);
+
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendQuestion.getId(), question.getId(), question.getUser(),
-                NotificationType.RECOMMEND_POST, messageSource.getMessage("notification.question.recommend", new Object[]{question.getTitle()}, null)));
+                NotificationType.RECOMMEND_QUESTION, messageSource.getMessage("notification.question.recommend", new Object[]{question.getTitle()}, null)));
         return question.getRecommendCount();
     }
 
@@ -59,18 +61,29 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
     public Integer unRecommendQuestion(Long questionId) {
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if(optionalQuestion.isEmpty()){
-            throw new CustomException(ErrorCode.QUESTION_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
+            throw new CustomException(ErrorCode.QUESTION_NOT_FOUND_ERROR, "해당 질문글이 존재하지 않습니다. ");
         }
 
         Question question = optionalQuestion.get();
         User user = SecurityUtil.getUser();
 
         if(!recommendQuestionRepository.existsByUserAndQuestion(user,question)){
-            throw new CustomException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "이 질문글을 추천한 적이 없습니다 . ");
+            throw new CustomException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "해당 질문글을 추천한 적이 없습니다 . ");
         }
 
         question.updateRecommendCount(false);
+        RecommendQuestion recommendQuestion = recommendQuestionRepository.findByQuestionId(questionId);
+
         recommendQuestionRepository.deleteByUserAndQuestion(user, question);
+
+        Notification notification = notificationRepository.findByRefIdAndType(recommendQuestion.getId(), NotificationType.RECOMMEND_QUESTION)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+        if (notification.getReadStatus().equals(ReadStatus.READ)) {
+            notification.readDataDeleteSetting();
+        } else {
+            notificationRepository.deleteById(notification.getId());
+        }
+
         return question.getRecommendCount();
     }
 
