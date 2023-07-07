@@ -1,5 +1,7 @@
 package com.dtalks.dtalks.user.service;
 
+import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.dto.UserTokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -83,11 +85,10 @@ public class TokenServiceImpl implements TokenService {
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-
             return !claims.getBody().getExpiration().before(new Date());
         }
         catch (Exception e) {
-            return false;
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 토큰입니다.");
         }
     }
 
