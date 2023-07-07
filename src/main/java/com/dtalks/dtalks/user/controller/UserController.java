@@ -20,6 +20,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -103,9 +104,10 @@ public class UserController {
     @Operation(summary = "특정 유저의 최근활동 조회 (페이지 사용, size = 10, sort=\"createDate\" desc 적용)", parameters = {
             @Parameter(name = "nickname", description = "조회할 유저의 닉네임")
     })
-    public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@PathVariable String nickname,
+    public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@AuthenticationPrincipal UserDetails userDetails,
+                                                                       @PathVariable String nickname,
                                                                        @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(userActivityService.getRecentActivities(nickname, pageable));
+        return ResponseEntity.ok(userActivityService.getRecentActivities(userDetails, nickname, pageable));
 
     }
 
