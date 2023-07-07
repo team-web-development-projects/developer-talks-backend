@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,10 +40,13 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     @Transactional
-    public Page<RecentActivityDto> getRecentActivities(String nickname, Pageable pageable) {
+    public Page<RecentActivityDto> getRecentActivities(UserDetails userDetails, String nickname, Pageable pageable) {
         User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
         if (user.getIsPrivate()) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "비공개 설정으로 사용자의 최근활동 조회가 불가능합니다.");
+            User currentUser = (User) userDetails;
+            if (userDetails == null || !currentUser.getNickname().equals(nickname)) {
+                throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "비공개 설정으로 사용자의 최근활동 조회가 불가능합니다.");
+            }
         }
 
         LocalDateTime now = LocalDateTime.now();

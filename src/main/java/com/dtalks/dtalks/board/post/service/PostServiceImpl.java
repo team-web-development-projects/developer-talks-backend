@@ -91,7 +91,7 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> search5BestPosts() {
         LocalDateTime time = LocalDateTime.now().minusDays(7);
         LocalDateTime goe = time.withHour(0).withMinute(0).withSecond(0);
-        List<Post> top5Posts = postRepository.findTop5ByCreateDateGreaterThanEqualOrderByRecommendCountDesc(goe);
+        List<Post> top5Posts = postRepository.findTop5ByCreateDateGreaterThanEqualAndRecommendCountGreaterThanOrderByRecommendCountDesc(goe, 0);
         return top5Posts.stream().map(PostDto::toDto).toList();
     }
 
@@ -146,6 +146,7 @@ public class PostServiceImpl implements PostService {
         List<MultipartFile> files = putRequestDto.getFiles();
 
         List<PostImage> dbFiles = imageRepository.findByPostId(postId);
+        List<String> deletableUrls = new ArrayList<>();
 
         // db 값에서 이미지 url로 넘어온 값 중에 같은 url이 없으면 삭제된 파일이므로 db에서 삭제
         for (PostImage dbFile : dbFiles) {
@@ -166,7 +167,7 @@ public class PostServiceImpl implements PostService {
 
             if (isDeleted) {
                 imageRepository.delete(dbFile);
-                s3Uploader.deleteFile(document.getPath());
+                deletableUrls.add(document.getPath());
             }
         }
 
@@ -192,11 +193,16 @@ public class PostServiceImpl implements PostService {
 
         String thumbnail = null;
         // 기존 이미지가 있거나 새롭게 저장된 이미지가 있으면 썸네일 확인 및 변경
-        if (imgUrls != null || files != null) {
+        if ((imgUrls != null && !imgUrls.isEmpty()) || files != null) {
             Optional<PostImage> top1Image = imageRepository.findTop1ByPostId(postId);
             thumbnail = top1Image.get().getDocument().getUrl();
         }
         post.setThumbnailUrl(thumbnail);
+
+        for (String url : deletableUrls) {
+            s3Uploader.deleteFile(url);
+        }
+
         return postId;
     }
 
@@ -225,11 +231,11 @@ public class PostServiceImpl implements PostService {
         }
 
         List<PostImage> imageList = imageRepository.findByPostId(postId);
+        postRepository.delete(post);
+
         for (PostImage image : imageList) {
             s3Uploader.deleteFile(image.getDocument().getPath());
         }
-
-        postRepository.delete(post);
     }
 
     @Transactional(readOnly = true)
