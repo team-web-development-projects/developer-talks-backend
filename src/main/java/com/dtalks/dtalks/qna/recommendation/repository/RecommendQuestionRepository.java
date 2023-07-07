@@ -9,4 +9,6 @@ public interface RecommendQuestionRepository extends JpaRepository<RecommendQues
     boolean existsByUserAndQuestion(User user, Question question);
 
     void deleteByUserAndQuestion(User user, Question question);
+
+    RecommendQuestion findByQuestionId(Long questionId);
 }
