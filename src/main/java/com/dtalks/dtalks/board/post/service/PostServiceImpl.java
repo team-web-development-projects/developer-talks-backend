@@ -50,7 +50,7 @@ public class PostServiceImpl implements PostService {
         Post post = findPost(id);
         post.setViewCount(post.getViewCount() + 1);
 
-        List<PostImage> imageList = imageRepository.findByPostId(id);
+        List<PostImage> imageList = imageRepository.findByPostIdOrderByOrderNum(id);
         List<String> urls = new ArrayList<>();
         if (imageList != null) {
             for (PostImage image : imageList) {
