@@ -95,21 +95,23 @@ public class PostController {
 
     @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "게시글에 대한 사용자의 즐겨찾기, 추천 여부 확인, 로그인한 사용자일 경우에만 api 보내면 됨"
     , description = "게시글은 로그인 없이 조회가 가능하지만 로그인한 사용자의 경우에는 즐겨찾기, 추천 여부가 필요. 두 가지가 boolean 타입으로 나온다.")
     @GetMapping("/check/status/{postId}")
-    public FavoriteAndRecommendStatusDto checkFavoriteAndRecommendStatus(@PathVariable Long postId) {
+    public ResponseEntity<FavoriteAndRecommendStatusDto> checkFavoriteAndRecommendStatus(@PathVariable Long postId) {
         boolean favorite = favoritePostService.checkFavorite(postId);
         boolean recommend = recommendPostService.checkRecommend(postId);
 
-        return FavoriteAndRecommendStatusDto.builder()
+        FavoriteAndRecommendStatusDto status = FavoriteAndRecommendStatusDto.builder()
                 .favorite(favorite)
                 .recommend(recommend)
                 .build();
+        return ResponseEntity.ok(status);
     }
 
 
