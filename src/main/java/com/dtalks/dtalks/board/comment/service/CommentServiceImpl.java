@@ -60,7 +60,7 @@ public class CommentServiceImpl implements CommentService{
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
-        List<Comment> commentList = commentRepository.findByPostId(postId);
+        List<Comment> commentList = commentRepository.findByPostIdOrderByCreateDate(postId);
         List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
         Map<Long, CommentInfoDto> map = new HashMap<>();
 
