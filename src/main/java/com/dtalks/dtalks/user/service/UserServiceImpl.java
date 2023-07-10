@@ -102,6 +102,7 @@ public class UserServiceImpl implements UserService {
         User user = findUser(signInDto.getUserid());
 
         UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        log.info(signInDto.getPassword() + " " + user.getPassword());
         passwordValidation(signInDto.getPassword(), user.getPassword());
 
         if(!user.getIsActive())
@@ -400,7 +401,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void passwordValidation(String originalPassword, String inputPassword) {
+    private void passwordValidation(String inputPassword, String originalPassword) {
         if(!passwordEncoder.matches(inputPassword, originalPassword)) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "비밀번호가 일치하지 않습니다.");
         }
