@@ -97,7 +97,7 @@ public class UserController {
     @PutMapping(value = "/profile")
     public ResponseEntity<UserResponseDto> updateUserProfile(@RequestBody UserProfileRequestDto userProfileRequestDto) {
         LOGGER.info("updateUserDescription controller 호출됨");
-        return ResponseEntity.ok(userService.updateUserProfile(userProfileRequestDto));
+        return ResponseEntity.ok(userService.updateProfile(userProfileRequestDto));
     }
 
     @GetMapping(value = "/recent/activity/{nickname}")
@@ -146,7 +146,7 @@ public class UserController {
     public ResponseEntity<SignInResponseDto> updateUserPassword(
             @RequestBody @Valid UserPasswordDto userPasswordDto
     ) {
-        return ResponseEntity.ok(userService.updateUserPassword(userPasswordDto));
+        return ResponseEntity.ok(userService.updatePassword(userPasswordDto));
     }
 
     @Operation(summary = "유저 이메일 변경")
@@ -154,7 +154,7 @@ public class UserController {
     public ResponseEntity<SignInResponseDto> updateUserEmail(
             @RequestBody @Valid UserEmailDto userEmailDto
     ) {
-        return ResponseEntity.ok(userService.updateUserEmail(userEmailDto));
+        return ResponseEntity.ok(userService.updateEmail(userEmailDto));
     }
 
     @Operation(summary = "유저 아이디 찾기")

@@ -13,13 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface UserService {
-    SignUpResponseDto signUp(SignUpDto signUpDto);
+    void signUp(SignUpDto signUpDto);
+
+    SignInResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto);
 
     SignInResponseDto signIn(SignInDto signInDto);
-
-    SignInResponseDto reSignIn(String refreshToken);
-
-    SignInResponseDto updateNickname(UserNicknameDto userNicknameDto);
 
     DuplicateResponseDto useridDuplicated(String userid);
 
@@ -27,27 +25,29 @@ public interface UserService {
 
     DuplicateResponseDto emailDuplicated(String email);
 
+    SignInResponseDto reSignIn(String refreshToken);
+
+    SignInResponseDto updateUserid(UseridDto useridDto);
+
+    SignInResponseDto updateNickname(UserNicknameDto userNicknameDto);
+
+    SignInResponseDto updatePassword(UserPasswordDto userPasswordDto);
+
+    SignInResponseDto updateEmail(UserEmailDto userEmailDto);
+
+    UserResponseDto updateProfile(UserProfileRequestDto userProfileRequestDto);
+
+    DocumentResponseDto updateUserProfileImage(MultipartFile multipartFile);
+
     DocumentResponseDto userProfileImageUpLoad(MultipartFile file);
 
     DocumentResponseDto getUserProfileImage();
 
-    DocumentResponseDto updateUserProfileImage(MultipartFile multipartFile);
-
     UserResponseDto userInfo();
-
-    UserResponseDto updateUserProfile(UserProfileRequestDto userProfileRequestDto);
 
     void updatePrivate(boolean status);
 
     Boolean getPrivateStatus(String id);
-
-    SignInResponseDto oAuthSignUp(OAuthSignUpDto oAuthSignUpDto);
-
-    SignInResponseDto updateUserid(UseridDto useridDto);
-
-    SignInResponseDto updateUserPassword(UserPasswordDto userPasswordDto);
-
-    SignInResponseDto updateUserEmail(UserEmailDto userEmailDto);
 
     void findUserid(String email);
 

@@ -34,10 +34,10 @@ public class SignController {
 
     @Operation(description = "회원가입")
     @PostMapping(value = "/sign-up")
-    public SignUpResponseDto signUp(@Valid @RequestBody SignUpDto signUpDto) {
+    public ResponseEntity signUp(@Valid @RequestBody SignUpDto signUpDto) {
         LOGGER.info("POST /sign-up");
-        SignUpResponseDto signUpResponseDto = userService.signUp(signUpDto);
-        return signUpResponseDto;
+        userService.signUp(signUpDto);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "refresh 토큰을 이용한 토큰 재발급")
