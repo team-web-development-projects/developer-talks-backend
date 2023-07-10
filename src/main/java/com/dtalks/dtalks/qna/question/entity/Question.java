@@ -33,6 +33,8 @@ public class Question extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    private String thumbnailUrl;
+
     @OneToMany(mappedBy = "question", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<QuestionImage> imageList = new ArrayList<>();
 
@@ -104,4 +106,7 @@ public class Question extends BaseTimeEntity {
     public void minusAnswerCount() {
         this.answerCount--;
     }
+
+    public void setThumbnailUrl(String thumbnailUrl){
+        this.thumbnailUrl = thumbnailUrl;}
 }

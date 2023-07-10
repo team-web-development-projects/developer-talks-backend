@@ -112,6 +112,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         List<MultipartFile> files = questionDto.getFiles();
         if (files != null) {
+            boolean setThumbnail = false;
             for (MultipartFile file : files) {
                 FileValidation.imageValidation(file.getOriginalFilename());
                 String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
@@ -122,6 +123,11 @@ public class QuestionServiceImpl implements QuestionService {
                         .path(path)
                         .build();
                 documentRepository.save(document);
+
+                if (!setThumbnail) {
+                    question.setThumbnailUrl(document.getUrl());
+                    setThumbnail = true;
+                }
 
                 QuestionImage questionImage = QuestionImage.builder()
                         .question(question)
