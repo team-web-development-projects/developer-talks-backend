@@ -33,14 +33,16 @@ public class NotificationController {
 
     @Operation(summary = "모든 알람 WAIT -> READ로 상태 변경")
     @PostMapping(value = "/read/all")
-    public void updateReadStatus() {
+    public ResponseEntity<Void> updateReadStatus() {
         notificationService.updateAllStatus();
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "특정 알람 WAIT -> READ로 상태 변경")
     @PostMapping(value = "/read/{id}")
-    public void updateAllStatus(@PathVariable Long id) {
+    public ResponseEntity<Void> updateAllStatus(@PathVariable Long id) {
         notificationService.updateStatus(id);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "사용자에게 온 알람 리스트 전체 보기")
@@ -66,8 +68,9 @@ public class NotificationController {
 
     @Operation(summary = "알람 삭제, db에서 삭제")
     @DeleteMapping(value = "/{id}")
-    public void deleteNotification(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         notificationService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -246,19 +246,11 @@ public class PostServiceImpl implements PostService {
 
     @Transactional(readOnly = true)
     private User findUser(String userid) {
-        Optional<User> user = userRepository.findByUserid(userid);
-        if (user.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-        return user.get();
+        return userRepository.findByUserid(userid).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
     }
 
     @Transactional(readOnly = true)
     private Post findPost(Long postId) {
-        Optional<Post> post = postRepository.findById(postId);
-        if (post.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-        return post.get();
+        return postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다."));
     }
 }

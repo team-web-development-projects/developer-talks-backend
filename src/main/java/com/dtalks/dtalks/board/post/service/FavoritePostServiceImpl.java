@@ -69,11 +69,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
 
     @Override
     public Page<PostDto> searchFavoritePostsByUser(String userId, Pageable pageable) {
-        Optional<User> optionalUser = userRepository.findByUserid(userId);
-        if (optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-        User user = optionalUser.get();
+        User user = userRepository.findByUserid(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
         Page<Post> posts = customPostRepository.searchFavoritePost(user.getId(), pageable);
         return posts.map(PostDto::toDto);
     }
@@ -86,10 +82,6 @@ public class FavoritePostServiceImpl implements FavoritePostService {
 
     @Transactional(readOnly = true)
     private Post findPost(Long postId) {
-        Optional<Post> post = postRepository.findById(postId);
-        if (post.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-        return post.get();
+        return postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다."));
     }
 }
