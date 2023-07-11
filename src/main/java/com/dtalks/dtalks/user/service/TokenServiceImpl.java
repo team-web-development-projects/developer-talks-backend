@@ -3,6 +3,8 @@ package com.dtalks.dtalks.user.service;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.dto.UserTokenDto;
+import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -19,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 
@@ -27,8 +30,7 @@ import java.util.Date;
 public class TokenServiceImpl implements TokenService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
-
-    private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
     @Value("${springboot.jwt.secret}")
     private String secretKey;
 
@@ -83,8 +85,15 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public boolean validateToken(String token) {
+        User user = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
+                () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Date date = Date.from(user.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant());
+            // 토큰 발행일이 유저 데이터 수정일 이전이면 유효하지 않은 토큰임
+            if(claims.getBody().getIssuedAt().before(date)) {
+                throw new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 토큰입니다.");
+            }
             return !claims.getBody().getExpiration().before(new Date());
         }
         catch (Exception e) {
@@ -94,7 +103,8 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByEmail(this.getEmailByToken(token));
+        UserDetails userDetails = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
+                () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
