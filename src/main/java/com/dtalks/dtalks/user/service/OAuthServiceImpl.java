@@ -70,14 +70,12 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
 
     private User saveOrUpdate(UserDto userDto) {
         Optional<User> optionalUser = userRepository.findByEmail(userDto.getEmail());
+        if(optionalUser.isEmpty()) {
+            return userRepository.save(User.toUser(userDto));
+        }
         User user = optionalUser.get();
-        if(user == null) {
-            user = User.toUser(userDto);
-        }
-        else {
-            user.setEmail(userDto.getEmail());
-            user.setUserid(userDto.getEmail());
-        }
+        user.setEmail(userDto.getEmail());
+        user.setUserid(userDto.getEmail());
         return userRepository.save(user);
     }
 }
