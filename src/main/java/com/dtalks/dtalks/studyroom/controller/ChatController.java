@@ -37,6 +37,7 @@ public class ChatController {
                 .sender("you")
                 .createDate(LocalDateTime.now())
                 .build();
+        chatService.createChatMessage(chatRoomId, chatMessageRequestDto.getMessage());
         simpMessagingTemplate.convertAndSend("/sub/rooms/" + chatRoomId, chatMessageDto);
     }
 
