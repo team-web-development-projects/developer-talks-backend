@@ -113,7 +113,7 @@ public class CommentServiceImpl implements CommentService{
 
         commentRepository.save(comment);
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
-                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
+                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
     }
 
     @Override
@@ -139,9 +139,9 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
 
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
-                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
+                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), parentComment.getUser(),
-                NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle()}, null)));
+                NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle(), user.getNickname()}, null)));
     }
 
 

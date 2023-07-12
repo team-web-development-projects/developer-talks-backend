@@ -80,7 +80,7 @@ public class AnswerServiceImpl implements AnswerService {
         answerRepository.save(answer);
 
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), question.getUser(),
-                NotificationType.ANSWER, messageSource.getMessage("notification.answer", new Object[]{question.getTitle()}, null)));
+                NotificationType.ANSWER, messageSource.getMessage("notification.answer", new Object[]{question.getTitle(), user.getNickname()}, null)));
 
         return answer.getId();
     }
