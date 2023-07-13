@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -112,6 +111,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         List<MultipartFile> files = questionDto.getFiles();
         if (files != null) {
+            Long orderNum = 1L;
             boolean setThumbnail = false;
             for (MultipartFile file : files) {
                 FileValidation.imageValidation(file.getOriginalFilename());
@@ -132,6 +132,7 @@ public class QuestionServiceImpl implements QuestionService {
                 QuestionImage questionImage = QuestionImage.builder()
                         .question(question)
                         .document(document)
+                        .orderNum(orderNum++)
                         .build();
                 imageRepository.save(questionImage);
             }
@@ -159,24 +160,25 @@ public class QuestionServiceImpl implements QuestionService {
 
         //기존 파일 inputName 추출
         List<String> existingFileNames = existingImages.stream()
-                .map(image -> image.getDocument().getInputName())
-                .collect(Collectors.toList());
+                .map(image -> image.getDocument().getInputName()).toList();
 
         //새로운 파일 OriginalFilename
-        List<String> newFilesName = newFiles.stream()
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toList());
+        List<String> newFilesNames = newFiles.stream()
+                .map(MultipartFile::getOriginalFilename).toList();
 
         //수정 질문글에 이미지 존재하는 경우
-        //!!추후 수정 필
-        if (newFiles != null) {
+        if (!newFiles.isEmpty()) {
+
+            // 새로운 파일을 순서대로 저장할 리스트 생성
+            List<QuestionImage> updatedImages = new ArrayList<>();
 
             for (MultipartFile file : newFiles) {
                 // 새로운 파일중 기존 파일에 없는 것 추가
+                String fileName = file.getOriginalFilename();
                 boolean fileExists = existingFileNames.contains(file.getOriginalFilename());
 
                 if (!fileExists) {
-                    FileValidation.imageValidation(file.getOriginalFilename());
+                    FileValidation.imageValidation(fileName);
                     String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
 
                     Document document = Document.builder()
@@ -191,14 +193,36 @@ public class QuestionServiceImpl implements QuestionService {
                             .document(document)
                             .build();
                     imageRepository.save(questionImage);
+
+                    updatedImages.add(questionImage);
+
                 }
             }
-            //기존 파일중 새로운 파일에 이름과 일피 하는 파일만 남음
-            existingImages.removeIf(image -> !newFilesName.contains(image.getDocument().getInputName()));
-            for (QuestionImage removedImage : existingImages) {
+            //기존 파일중 삭제된 파일 S3와 DB에서 제거
+            List<QuestionImage> removedImages = existingImages.stream()
+                    .filter(image -> !newFilesNames.contains(image.getDocument().getInputName())).toList();
+
+            for (QuestionImage removedImage : removedImages) {
                 String path = removedImage.getDocument().getPath();
                 s3Uploader.deleteFile(path); // Delete image from S3 storage
                 imageRepository.delete(removedImage); // Delete image from the database
+            }
+
+
+            existingImages.removeIf(image -> !newFilesNames.contains(image.getDocument().getInputName()));
+
+            // 기존 파일 순서 업데이트
+            for (int i = 0; i < existingImages.size(); i++) {
+                QuestionImage existingImage = existingImages.get(i);
+                existingImage.setOrderNum((long) (i + 1)); // 1부터 순서 부여
+                imageRepository.save(existingImage);
+            }
+
+            // 새로운 파일 순서 업데이트
+            for (int i = 0; i < updatedImages.size(); i++) {
+                QuestionImage updatedImage = updatedImages.get(i);
+                updatedImage.setOrderNum((long) (existingImages.size() + i + 1)); // 기존 파일 수 + 1부터 순서 부여
+                imageRepository.save(updatedImage);
             }
 
         } else {

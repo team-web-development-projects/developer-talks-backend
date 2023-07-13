@@ -20,4 +20,6 @@ public class QuestionImage {
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     Document document;
+
+    private Long orderNum;
 }
