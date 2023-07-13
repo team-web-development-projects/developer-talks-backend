@@ -88,8 +88,8 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserCommentDto> searchListByUserId(String userId, Pageable pageable) {
-        User user = findUser(userId);
+    public Page<UserCommentDto> searchListByNickname(String nickname, Pageable pageable) {
+        User user = findUser(nickname);
         Page<Comment> commentList = commentRepository.findByUserIdAndRemovedFalse(user.getId(), pageable);
         return commentList.map(c -> {
             Post post = c.getPost();
@@ -211,8 +211,8 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Transactional(readOnly = true)
-    private User findUser(String userid) {
-        return userRepository.findByUserid(userid).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
+    private User findUser(String nickname) {
+        return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
     }
 
     @Transactional(readOnly = true)
