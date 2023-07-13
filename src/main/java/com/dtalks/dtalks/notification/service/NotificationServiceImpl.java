@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -44,7 +43,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationDto> findAllNotificationByUserid() {
         User user = SecurityUtil.getUser();
-        List<Notification> notificationList = notificationRepository.findByReceiverId(user.getId());
+        List<Notification> notificationList = notificationRepository.findByReceiverIdOrderByCreateDateDesc(user.getId());
         return notificationList.stream().map(NotificationDto::toDto).toList();
     }
 
