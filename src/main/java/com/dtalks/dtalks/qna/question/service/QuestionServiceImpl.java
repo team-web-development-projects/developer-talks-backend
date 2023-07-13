@@ -44,15 +44,12 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public QuestionResponseDto searchById(Long id) {
-        Optional<Question> optionalQuestion = questionRepository.findById(id);
-        if (optionalQuestion.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
-        }
-        Question question = optionalQuestion.get();
+    public QuestionResponseDto searchById(Long questionId) {
+        Question question = findQuestion(questionId);
+
         question.updateViewCount();
 
-        List<QuestionImage> imageList = imageRepository.findByQuestionIdOrderByOrderNum(id);
+        List<QuestionImage> imageList = imageRepository.findByQuestionIdOrderByOrderNum(questionId);
         List<String> urls = new ArrayList<>();
 
         if (imageList != null) {
@@ -146,11 +143,8 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public Long updateQuestion(Long questionId, PutRequestDto putRequestDto) {
-        Optional<Question> optionalQuestion = questionRepository.findById(questionId);
-        if (optionalQuestion.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
-        }
-        Question question = optionalQuestion.get();
+        Question question = findQuestion(questionId);
+
         String userId = question.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다. ");
@@ -232,12 +226,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public void deleteQuestion(Long id) {
-        Optional<Question> optionalQuestion = questionRepository.findById(id);
-        if (optionalQuestion.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
-        }
-        Question question = optionalQuestion.get();
+    public void deleteQuestion(Long questionId) {
+        Question question = findQuestion(questionId);
+
         if (!question.getAnswerList().isEmpty()) {
             throw new CustomException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "답변이 달린 질문은 삭제할 수 없습니다. ");
         }
@@ -246,12 +237,21 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다. ");
         }
 
-        List<QuestionImage> imageList = imageRepository.findByQuestionId(id);
+        List<QuestionImage> imageList = imageRepository.findByQuestionId(questionId);
         for (QuestionImage image : imageList) {
             s3Uploader.deleteFile(image.getDocument().getPath());
         }
 
         questionRepository.delete(question);
+    }
+
+    @Transactional(readOnly = true)
+    protected Question findQuestion(Long questionId){
+        Optional<Question> question = questionRepository.findById(questionId);
+        if (question.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
+        }
+        return question.get();
     }
 
 }
