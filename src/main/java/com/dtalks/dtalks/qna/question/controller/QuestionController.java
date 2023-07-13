@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.qna.question.controller;
 
+import com.dtalks.dtalks.board.post.dto.PutRequestDto;
 import com.dtalks.dtalks.qna.question.service.QuestionService;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
@@ -74,8 +75,8 @@ public class QuestionController {
 
     @Operation(summary = "질문글 수정")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Long> updateQuestion(@Valid QuestionDto questionDto, @PathVariable Long id) {
-        return ResponseEntity.ok(questionService.updateQuestion(id, questionDto));
+    public ResponseEntity<Long> updateQuestion(@Valid PutRequestDto putRequestDto, @PathVariable Long id) {
+        return ResponseEntity.ok(questionService.updateQuestion(id, putRequestDto));
     }
 
     @Operation(summary = "질문글 삭제")

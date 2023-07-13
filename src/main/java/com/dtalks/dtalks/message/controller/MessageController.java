@@ -42,6 +42,7 @@ public class MessageController {
     public void deleteMessageBySender(@PathVariable Long id) {
         messageService.deleteMessageBySender(id);
     }
+    @Operation(summary = "받은 쪽지 삭제")
     @DeleteMapping("/received/{id}")
     public void deleteMessageByReceiver(@PathVariable Long id) {
         messageService.deleteMessageByReceiver(id);

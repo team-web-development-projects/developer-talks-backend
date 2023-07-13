@@ -27,6 +27,9 @@ public class QuestionResponseDto {
     @NotBlank
     private String content;
 
+    @Schema(description = "게시글 썸네일")
+    private String thumbnailUrl;
+
     @Schema(description = "이미지 urls")
     private List<String> imageUrls;
 
@@ -60,6 +63,7 @@ public class QuestionResponseDto {
                 .id(question.getId())
                 .title(question.getTitle())
                 .content(question.getContent())
+                .thumbnailUrl(question.getThumbnailUrl())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .answerCount(question.getAnswerCount())
                 .viewCount(question.getViewCount())

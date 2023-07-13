@@ -13,8 +13,10 @@ import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +50,7 @@ public class MessageServiceImpl implements MessageService{
         List<Message> messageList = messageRepository.findBySender(user);
 
         if (messageList.isEmpty()) {
-            throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND_ERROR, "보낸 쪽지가 존재하지 않습니다. ");
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "보낸 쪽지가 존재하지 않습니다.");
         }
 
         List<MessageDto>  sentMessages = messageList.stream()

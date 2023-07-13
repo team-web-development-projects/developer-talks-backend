@@ -4,6 +4,9 @@ import com.dtalks.dtalks.base.component.S3Uploader;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
+import com.dtalks.dtalks.board.post.dto.NewImageDto;
+import com.dtalks.dtalks.board.post.dto.OldImageDto;
+import com.dtalks.dtalks.board.post.dto.PutRequestDto;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.qna.question.entity.Question;
@@ -26,7 +29,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,15 +44,12 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public QuestionResponseDto searchById(Long id) {
-        Optional<Question> optionalQuestion = questionRepository.findById(id);
-        if (optionalQuestion.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
-        }
-        Question question = optionalQuestion.get();
+    public QuestionResponseDto searchById(Long questionId) {
+        Question question = findQuestion(questionId);
+
         question.updateViewCount();
 
-        List<QuestionImage> imageList = imageRepository.findByQuestionId(id);
+        List<QuestionImage> imageList = imageRepository.findByQuestionIdOrderByOrderNum(questionId);
         List<String> urls = new ArrayList<>();
 
         if (imageList != null) {
@@ -112,6 +111,8 @@ public class QuestionServiceImpl implements QuestionService {
 
         List<MultipartFile> files = questionDto.getFiles();
         if (files != null) {
+            Long orderNum = 1L;
+            boolean setThumbnail = false;
             for (MultipartFile file : files) {
                 FileValidation.imageValidation(file.getOriginalFilename());
                 String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
@@ -123,9 +124,15 @@ public class QuestionServiceImpl implements QuestionService {
                         .build();
                 documentRepository.save(document);
 
+                if (!setThumbnail) {
+                    question.setThumbnailUrl(document.getUrl());
+                    setThumbnail = true;
+                }
+
                 QuestionImage questionImage = QuestionImage.builder()
                         .question(question)
                         .document(document)
+                        .orderNum(orderNum++)
                         .build();
                 imageRepository.save(questionImage);
             }
@@ -135,73 +142,83 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Long updateQuestion(Long questionId, QuestionDto questionDto) {
-        Optional<Question> optionalQuestion = questionRepository.findById(questionId);
-        if (optionalQuestion.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
-        }
-        Question question = optionalQuestion.get();
+    public Long updateQuestion(Long questionId, PutRequestDto putRequestDto) {
+        Question question = findQuestion(questionId);
+
         String userId = question.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다. ");
         }
         //제목, 내용 update
-        question.update(questionDto.getTitle(), questionDto.getContent());
+        question.update(putRequestDto.getTitle(), putRequestDto.getContent());
 
-        List<QuestionImage> existingImages = question.getImageList();
-        List<MultipartFile> newFiles = questionDto.getFiles();
+        List<OldImageDto> imgUrls = putRequestDto.getImgUrls();
+        List<NewImageDto> files = putRequestDto.getFiles();
 
-        //기존 파일 inputName 추출
-        List<String> existingFileNames = existingImages.stream()
-                .map(image -> image.getDocument().getInputName())
-                .collect(Collectors.toList());
+        List<QuestionImage> dbFiles = imageRepository.findByQuestionId(questionId);
+        List<String> deletableUrls = new ArrayList<>();
 
-        //새로운 파일 OriginalFilename
-        List<String> newFilesName = newFiles.stream()
-                .map(MultipartFile::getOriginalFilename)
-                .collect(Collectors.toList());
-
-        //수정 질문글에 이미지 존재하는 경우
-        //!!추후 수정 필
-        if (newFiles != null) {
-
-            for (MultipartFile file : newFiles) {
-                // 새로운 파일중 기존 파일에 없는 것 추가
-                boolean fileExists = existingFileNames.contains(file.getOriginalFilename());
-
-                if (!fileExists) {
-                    FileValidation.imageValidation(file.getOriginalFilename());
-                    String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
-
-                    Document document = Document.builder()
-                            .inputName(file.getOriginalFilename())
-                            .url(s3Uploader.fileUpload(file, path))
-                            .path(path)
-                            .build();
-                    documentRepository.save(document);
-
-                    QuestionImage questionImage = QuestionImage.builder()
-                            .question(question)
-                            .document(document)
-                            .build();
-                    imageRepository.save(questionImage);
+        // db 값에서 이미지 url로 넘어온 값 중에 같은 url이 없으면 삭제된 파일이므로 db에서 삭제
+        for (QuestionImage dbFile : dbFiles) {
+            Document document = documentRepository.findById(dbFile.getDocument().getId()).orElseThrow(() -> {
+                throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
+            });
+            String documentUrl = document.getUrl();
+            // 넘어온 기존 게시글 이미지 url이 없다면 기존 이미지 다 삭제
+            boolean isDeleted = true;
+            Long orderNum = dbFile.getOrderNum();
+            if (imgUrls != null) {
+                for (OldImageDto oldImage : imgUrls) {
+                    if (oldImage.getUrl().equals(documentUrl)) {
+                        isDeleted = false;
+                        orderNum = oldImage.getOrderNum();
+                        break;
+                    }
                 }
             }
-            //기존 파일중 새로운 파일에 이름과 일피 하는 파일만 남음
-            existingImages.removeIf(image -> !newFilesName.contains(image.getDocument().getInputName()));
-            for (QuestionImage removedImage : existingImages) {
-                String path = removedImage.getDocument().getPath();
-                s3Uploader.deleteFile(path); // Delete image from S3 storage
-                imageRepository.delete(removedImage); // Delete image from the database
-            }
 
-        } else {
-            // 새로운 파일이 제공되지 않은 경우, 모든 기존 이미지 제거
-            existingImages.forEach(image -> {
-                String path = image.getDocument().getPath();
-                s3Uploader.deleteFile(path); // S3에서 이미지 삭제
-                imageRepository.delete(image); // 데이터베이스에서 이미지 삭제
-            });
+            if (isDeleted) {
+                imageRepository.delete(dbFile);
+                deletableUrls.add(document.getPath());
+            } else {
+                dbFile.setOrderNum(orderNum);
+            }
+        }
+
+        if (files != null) {
+            for (NewImageDto newImage : files) {
+                MultipartFile file = newImage.getFile();
+                FileValidation.imageValidation(file.getOriginalFilename());
+                String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
+
+                Document document = Document.builder()
+                        .inputName(file.getOriginalFilename())
+                        .url(s3Uploader.fileUpload(file, path))
+                        .path(path)
+                        .build();
+                documentRepository.save(document);
+
+
+
+                QuestionImage questionImage = QuestionImage.builder()
+                        .question(question)
+                        .document(document)
+                        .orderNum(newImage.getOrderNum())
+                        .build();
+                imageRepository.save(questionImage);
+            }
+        }
+
+        String thumbnail = null;
+        // 기존 이미지가 있거나 새롭게 저장된 이미지가 있으면 썸네일 확인 및 변경
+        if ((imgUrls != null && !imgUrls.isEmpty()) || files != null) {
+            Optional<QuestionImage> top1Image = imageRepository.findTop1ByQuestionId(questionId);
+            thumbnail = top1Image.get().getDocument().getUrl();
+        }
+        question.setThumbnailUrl(thumbnail);
+
+        for (String url : deletableUrls) {
+            s3Uploader.deleteFile(url);
         }
 
         return questionId;
@@ -209,12 +226,9 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public void deleteQuestion(Long id) {
-        Optional<Question> optionalQuestion = questionRepository.findById(id);
-        if (optionalQuestion.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
-        }
-        Question question = optionalQuestion.get();
+    public void deleteQuestion(Long questionId) {
+        Question question = findQuestion(questionId);
+
         if (!question.getAnswerList().isEmpty()) {
             throw new CustomException(ErrorCode.DELETE_NOT_PERMITTED_ERROR, "답변이 달린 질문은 삭제할 수 없습니다. ");
         }
@@ -223,12 +237,21 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 삭제할 수 있는 권한이 없습니다. ");
         }
 
-        List<QuestionImage> imageList = imageRepository.findByQuestionId(id);
+        List<QuestionImage> imageList = imageRepository.findByQuestionId(questionId);
         for (QuestionImage image : imageList) {
             s3Uploader.deleteFile(image.getDocument().getPath());
         }
 
         questionRepository.delete(question);
+    }
+
+    @Transactional(readOnly = true)
+    protected Question findQuestion(Long questionId){
+        Optional<Question> question = questionRepository.findById(questionId);
+        if (question.isEmpty()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
+        }
+        return question.get();
     }
 
 }

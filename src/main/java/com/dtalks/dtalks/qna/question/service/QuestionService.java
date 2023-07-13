@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.qna.question.service;
 
+import com.dtalks.dtalks.board.post.dto.PutRequestDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
 import com.dtalks.dtalks.qna.question.dto.QuestionResponseDto;
 import org.springframework.data.domain.Page;
@@ -16,8 +17,7 @@ public interface QuestionService {
 
     Long createQuestion(QuestionDto questionDto);
 
-    Long updateQuestion(Long id, QuestionDto questionDto);
-
+    Long updateQuestion(Long questionId, PutRequestDto putRequestDto);
     void deleteQuestion(Long id);
 
 }
