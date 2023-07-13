@@ -66,7 +66,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional(readOnly = true)
     public Page<QuestionResponseDto> searchAllQuestion(Pageable pageable) {
-        Page<Question> questionPage = questionRepository.findAllByOrderByIdDesc(pageable);
+        Page<Question> questionPage = questionRepository.findAll(pageable);
         return questionPage.map(QuestionResponseDto::toDto);
     }
 
