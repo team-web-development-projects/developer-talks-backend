@@ -68,8 +68,8 @@ public class FavoritePostServiceImpl implements FavoritePostService {
     }
 
     @Override
-    public Page<PostDto> searchFavoritePostsByUser(String userId, Pageable pageable) {
-        User user = userRepository.findByUserid(userId).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
+    public Page<PostDto> searchFavoritePostsByUser(String nickname, Pageable pageable) {
+        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
         Page<Post> posts = customPostRepository.searchFavoritePost(user.getId(), pageable);
         return posts.map(PostDto::toDto);
     }

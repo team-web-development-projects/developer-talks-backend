@@ -71,8 +71,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto> searchPostsByUser(String userId, Pageable pageable) {
-        User user = findUser(userId);
+    public Page<PostDto> searchPostsByUser(String nickname, Pageable pageable) {
+        User user = findUser(nickname);
         Page<Post> posts = postRepository.findByUserId(user.getId(), pageable);
         return posts.map(PostDto::toDto);
     }
@@ -245,8 +245,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Transactional(readOnly = true)
-    private User findUser(String userid) {
-        return userRepository.findByUserid(userid).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
+    private User findUser(String nickname) {
+        return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
     }
 
     @Transactional(readOnly = true)

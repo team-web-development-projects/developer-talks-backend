@@ -11,7 +11,7 @@ import java.util.List;
 public interface PostService {
     PostDto searchById(Long id);
     Page<PostDto> searchAllPost(Pageable pageable);
-    Page<PostDto> searchPostsByUser(String userId, Pageable pageable);
+    Page<PostDto> searchPostsByUser(String nickname, Pageable pageable);
     Page<PostDto> searchByWord(String keyword, Pageable pageable);
 
     List<PostDto> search5BestPosts();

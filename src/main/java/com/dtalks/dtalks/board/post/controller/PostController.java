@@ -45,22 +45,22 @@ public class PostController {
 
 
     @Operation(summary = "특정 유저의 게시글 조회 (페이지 사용, size = 10, sort=\"id\" desc 적용)", parameters = {
-            @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
+            @Parameter(name = "nickname", description = "조회할 유저의 nickname")
     })
-    @GetMapping("/list/user/{userId}")
-    public ResponseEntity<Page<PostDto>> searchPostsByUser(@PathVariable String userId,
+    @GetMapping("/list/user/{nickname}")
+    public ResponseEntity<Page<PostDto>> searchPostsByUser(@PathVariable String nickname,
                                                            @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(postService.searchPostsByUser(userId, pageable));
+        return ResponseEntity.ok(postService.searchPostsByUser(nickname, pageable));
     }
 
 
     @Operation(summary = "특정 유저의 즐겨찾기 게시글 조회 (페이지 사용, size = 10, sort=\"id\" desc 적용)", parameters = {
-            @Parameter(name = "userId", description = "조회할 유저의 id (userId, 로그인할때 사용하는 아이디)")
+            @Parameter(name = "nickname", description = "조회할 유저의 nickname")
     })
-    @GetMapping("/list/favorite/{userId}")
-    public ResponseEntity<Page<PostDto>> searchFavoritePostsByUser(@PathVariable String userId,
+    @GetMapping("/list/favorite/{nickname}")
+    public ResponseEntity<Page<PostDto>> searchFavoritePostsByUser(@PathVariable String nickname,
                                                            @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(favoritePostService.searchFavoritePostsByUser(userId, pageable));
+        return ResponseEntity.ok(favoritePostService.searchFavoritePostsByUser(nickname, pageable));
     }
 
 

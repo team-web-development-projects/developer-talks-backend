@@ -9,7 +9,7 @@ public interface FavoritePostService {
     Integer favorite(Long postId);
     Integer unFavorite(Long postId);
 
-    Page<PostDto> searchFavoritePostsByUser(String userId, Pageable pageable);
+    Page<PostDto> searchFavoritePostsByUser(String nickname, Pageable pageable);
 
     boolean checkFavorite(Long postId);
 }
