@@ -4,6 +4,9 @@ import com.dtalks.dtalks.base.component.S3Uploader;
 import com.dtalks.dtalks.base.entity.Document;
 import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
+import com.dtalks.dtalks.board.post.dto.NewImageDto;
+import com.dtalks.dtalks.board.post.dto.OldImageDto;
+import com.dtalks.dtalks.board.post.dto.PutRequestDto;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.qna.question.entity.Question;
@@ -49,7 +52,7 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = optionalQuestion.get();
         question.updateViewCount();
 
-        List<QuestionImage> imageList = imageRepository.findByQuestionId(id);
+        List<QuestionImage> imageList = imageRepository.findByQuestionIdOrderByOrderNum(id);
         List<String> urls = new ArrayList<>();
 
         if (imageList != null) {
@@ -142,7 +145,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public Long updateQuestion(Long questionId, QuestionDto questionDto) {
+    public Long updateQuestion(Long questionId, PutRequestDto putRequestDto) {
         Optional<Question> optionalQuestion = questionRepository.findById(questionId);
         if (optionalQuestion.isEmpty()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 질문글이 존재하지 않습니다. ");
@@ -153,85 +156,75 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 질문글을 수정할 수 있는 권한이 없습니다. ");
         }
         //제목, 내용 update
-        question.update(questionDto.getTitle(), questionDto.getContent());
+        question.update(putRequestDto.getTitle(), putRequestDto.getContent());
 
-        List<QuestionImage> existingImages = question.getImageList();
-        List<MultipartFile> newFiles = questionDto.getFiles();
+        List<OldImageDto> imgUrls = putRequestDto.getImgUrls();
+        List<NewImageDto> files = putRequestDto.getFiles();
 
-        //기존 파일 inputName 추출
-        List<String> existingFileNames = existingImages.stream()
-                .map(image -> image.getDocument().getInputName()).toList();
+        List<QuestionImage> dbFiles = imageRepository.findByQuestionId(questionId);
+        List<String> deletableUrls = new ArrayList<>();
 
-        //새로운 파일 OriginalFilename
-        List<String> newFilesNames = newFiles.stream()
-                .map(MultipartFile::getOriginalFilename).toList();
-
-        //수정 질문글에 이미지 존재하는 경우
-        if (!newFiles.isEmpty()) {
-
-            // 새로운 파일을 순서대로 저장할 리스트 생성
-            List<QuestionImage> updatedImages = new ArrayList<>();
-
-            for (MultipartFile file : newFiles) {
-                // 새로운 파일중 기존 파일에 없는 것 추가
-                String fileName = file.getOriginalFilename();
-                boolean fileExists = existingFileNames.contains(file.getOriginalFilename());
-
-                if (!fileExists) {
-                    FileValidation.imageValidation(fileName);
-                    String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
-
-                    Document document = Document.builder()
-                            .inputName(file.getOriginalFilename())
-                            .url(s3Uploader.fileUpload(file, path))
-                            .path(path)
-                            .build();
-                    documentRepository.save(document);
-
-                    QuestionImage questionImage = QuestionImage.builder()
-                            .question(question)
-                            .document(document)
-                            .build();
-                    imageRepository.save(questionImage);
-
-                    updatedImages.add(questionImage);
-
+        // db 값에서 이미지 url로 넘어온 값 중에 같은 url이 없으면 삭제된 파일이므로 db에서 삭제
+        for (QuestionImage dbFile : dbFiles) {
+            Document document = documentRepository.findById(dbFile.getDocument().getId()).orElseThrow(() -> {
+                throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "저장된 파일을 찾을수 없습니다.");
+            });
+            String documentUrl = document.getUrl();
+            // 넘어온 기존 게시글 이미지 url이 없다면 기존 이미지 다 삭제
+            boolean isDeleted = true;
+            Long orderNum = dbFile.getOrderNum();
+            if (imgUrls != null) {
+                for (OldImageDto oldImage : imgUrls) {
+                    if (oldImage.getUrl().equals(documentUrl)) {
+                        isDeleted = false;
+                        orderNum = oldImage.getOrderNum();
+                        break;
+                    }
                 }
             }
-            //기존 파일중 삭제된 파일 S3와 DB에서 제거
-            List<QuestionImage> removedImages = existingImages.stream()
-                    .filter(image -> !newFilesNames.contains(image.getDocument().getInputName())).toList();
 
-            for (QuestionImage removedImage : removedImages) {
-                String path = removedImage.getDocument().getPath();
-                s3Uploader.deleteFile(path); // Delete image from S3 storage
-                imageRepository.delete(removedImage); // Delete image from the database
+            if (isDeleted) {
+                imageRepository.delete(dbFile);
+                deletableUrls.add(document.getPath());
+            } else {
+                dbFile.setOrderNum(orderNum);
             }
+        }
+
+        if (files != null) {
+            for (NewImageDto newImage : files) {
+                MultipartFile file = newImage.getFile();
+                FileValidation.imageValidation(file.getOriginalFilename());
+                String path = S3Uploader.createFilePath(file.getOriginalFilename(), imagePath);
+
+                Document document = Document.builder()
+                        .inputName(file.getOriginalFilename())
+                        .url(s3Uploader.fileUpload(file, path))
+                        .path(path)
+                        .build();
+                documentRepository.save(document);
 
 
-            existingImages.removeIf(image -> !newFilesNames.contains(image.getDocument().getInputName()));
 
-            // 기존 파일 순서 업데이트
-            for (int i = 0; i < existingImages.size(); i++) {
-                QuestionImage existingImage = existingImages.get(i);
-                existingImage.setOrderNum((long) (i + 1)); // 1부터 순서 부여
-                imageRepository.save(existingImage);
+                QuestionImage questionImage = QuestionImage.builder()
+                        .question(question)
+                        .document(document)
+                        .orderNum(newImage.getOrderNum())
+                        .build();
+                imageRepository.save(questionImage);
             }
+        }
 
-            // 새로운 파일 순서 업데이트
-            for (int i = 0; i < updatedImages.size(); i++) {
-                QuestionImage updatedImage = updatedImages.get(i);
-                updatedImage.setOrderNum((long) (existingImages.size() + i + 1)); // 기존 파일 수 + 1부터 순서 부여
-                imageRepository.save(updatedImage);
-            }
+        String thumbnail = null;
+        // 기존 이미지가 있거나 새롭게 저장된 이미지가 있으면 썸네일 확인 및 변경
+        if ((imgUrls != null && !imgUrls.isEmpty()) || files != null) {
+            Optional<QuestionImage> top1Image = imageRepository.findTop1ByQuestionId(questionId);
+            thumbnail = top1Image.get().getDocument().getUrl();
+        }
+        question.setThumbnailUrl(thumbnail);
 
-        } else {
-            // 새로운 파일이 제공되지 않은 경우, 모든 기존 이미지 제거
-            existingImages.forEach(image -> {
-                String path = image.getDocument().getPath();
-                s3Uploader.deleteFile(path); // S3에서 이미지 삭제
-                imageRepository.delete(image); // 데이터베이스에서 이미지 삭제
-            });
+        for (String url : deletableUrls) {
+            s3Uploader.deleteFile(url);
         }
 
         return questionId;
