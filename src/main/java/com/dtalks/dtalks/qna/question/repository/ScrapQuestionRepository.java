@@ -12,4 +12,6 @@ public interface ScrapQuestionRepository extends JpaRepository<ScrapQuestion, Lo
     Optional<ScrapQuestion> findByQuestionIdAndUserId(Long questionId, Long UserId);
 
     Page<ScrapQuestion> findByUserId(String userId, Pageable pageable);
+
+    boolean existsByQuestionIdAndUserId(Long questionId, Long userId);
 }

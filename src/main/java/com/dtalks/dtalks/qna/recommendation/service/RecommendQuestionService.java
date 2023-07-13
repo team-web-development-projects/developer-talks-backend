@@ -4,4 +4,6 @@ public interface RecommendQuestionService {
     Integer recommendQuestion(Long questionId);
 
     Integer unRecommendQuestion(Long questionId);
+
+    boolean checkRecommend(Long questionId);
 }

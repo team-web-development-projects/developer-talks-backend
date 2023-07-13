@@ -6,7 +6,9 @@ import com.dtalks.dtalks.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RecommendQuestionRepository extends JpaRepository<RecommendQuestion,Long> {
-    boolean existsByUserAndQuestion(User user, Question question);
+
+    boolean existsByUserIdAndQuestionId(Long userId, Long questionId);
+
 
     void deleteByUserAndQuestion(User user, Question question);
 

@@ -1,5 +1,6 @@
 package com.dtalks.dtalks.qna.question.controller;
 
+import com.dtalks.dtalks.board.post.dto.FavoriteAndRecommendStatusDto;
 import com.dtalks.dtalks.board.post.dto.PutRequestDto;
 import com.dtalks.dtalks.qna.question.service.QuestionService;
 import com.dtalks.dtalks.qna.question.dto.QuestionDto;
@@ -107,5 +108,18 @@ public class QuestionController {
     @DeleteMapping("/scrap/{id}")
     public ResponseEntity<Integer> removeScrap(@PathVariable Long id) {
         return ResponseEntity.ok(scrapQuestionService.removeScrap(id));
+    }
+
+    @GetMapping("/check/status/{questionId}")
+    public ResponseEntity<FavoriteAndRecommendStatusDto> checkFavoriteAndRecommendStatus(@PathVariable Long questionId) {
+        boolean favorite = scrapQuestionService.checkScrap(questionId);
+        boolean recommend = recommendQuestionService.checkRecommend(questionId);
+
+
+        FavoriteAndRecommendStatusDto status = FavoriteAndRecommendStatusDto.builder()
+                .favorite(favorite)
+                .recommend(recommend)
+                .build();
+        return ResponseEntity.ok(status);
     }
 }
