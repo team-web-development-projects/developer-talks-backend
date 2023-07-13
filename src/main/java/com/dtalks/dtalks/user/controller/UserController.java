@@ -4,13 +4,13 @@ import com.dtalks.dtalks.base.dto.DocumentResponseDto;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserActivityService;
-import com.dtalks.dtalks.user.service.UserDetailsService;
 import com.dtalks.dtalks.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +26,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "users")
 @RestController
+@AllArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
     private final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-    private final UserDetailsService userDetailsService;
     private final UserService userService;
     private final UserActivityService userActivityService;
 
-    @Autowired
-    public UserController(UserDetailsService userDetailsService, UserService userService, UserActivityService userActivityService) {
-        this.userDetailsService = userDetailsService;
-        this.userService = userService;
-        this.userActivityService = userActivityService;
-    }
 
     @Operation(summary = "userid 중복 체크")
     @GetMapping(value = "/check/userid/{userid}")

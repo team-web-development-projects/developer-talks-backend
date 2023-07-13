@@ -183,10 +183,10 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         Optional<StudyRoomUser> sub_leader = studyRoomUserRepository.findByStudyRoomIdAndStudyRoomLevel(studyRoom.getId(), StudyRoomLevel.SUB_LEADER);
 
         NotificationType type = NotificationType.STUDY_JOIN_REQUEST;;
-        String message = messageSource.getMessage("notification.study.request", new Object[]{studyRoom.getTitle()}, null);
+        String message = messageSource.getMessage("notification.study.request", new Object[]{studyRoom.getTitle(), user.getNickname()}, null);
         if (studyRoom.isAutoJoin()) {
             type = NotificationType.STUDY_MEMBER_AUTO_JOIN;
-            message = messageSource.getMessage("notification.study.join", new Object[]{studyRoom.getTitle()}, null);
+            message = messageSource.getMessage("notification.study.join", new Object[]{studyRoom.getTitle(), user.getNickname()}, null);
         }
 
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(studyRoom.getId(), studyRoom.getId(), leader.get().getUser(),

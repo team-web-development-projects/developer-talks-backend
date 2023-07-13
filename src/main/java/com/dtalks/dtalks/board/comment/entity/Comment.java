@@ -4,6 +4,7 @@ import com.dtalks.dtalks.base.entity.BaseTimeEntity;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class Comment extends BaseTimeEntity {
     private Post post;
 
     @Column(columnDefinition = "TEXT", nullable = false)
+    @NotNull
     private String content;
 
     private boolean secret;

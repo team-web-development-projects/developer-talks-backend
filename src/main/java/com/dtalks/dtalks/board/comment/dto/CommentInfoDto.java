@@ -56,6 +56,7 @@ public class CommentInfoDto {
     public static CommentInfoDto toDto(Comment comment) {
         User user = comment.getUser();
         String profile = (user.getProfileImage() != null ? user.getProfileImage().getUrl() : null);
+        Comment parent = comment.getParent();
 
         return CommentInfoDto.builder()
                 .id(comment.getId())
@@ -64,9 +65,9 @@ public class CommentInfoDto {
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .secret(comment.isSecret())
                 .remove(comment.isRemoved())
-                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
-                .parentNickname(comment.getParent() != null ? comment.getParent().getUser().getNickname() : null)
-                .childrenList(new ArrayList<>())
+                .parentId(parent != null ? parent.getId() : null)
+                .parentNickname(parent != null ? parent.getUser().getNickname() : null)
+                .childrenList(parent == null ? new ArrayList<>() : null)
                 .createDate(comment.getCreateDate())
                 .modifiedDate(comment.getModifiedDate())
                 .build();

@@ -60,7 +60,7 @@ public class CommentServiceImpl implements CommentService{
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
-        List<Comment> commentList = commentRepository.findByPostId(postId);
+        List<Comment> commentList = commentRepository.findByPostIdOrderByCreateDate(postId);
         List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
         Map<Long, CommentInfoDto> map = new HashMap<>();
 
@@ -113,7 +113,7 @@ public class CommentServiceImpl implements CommentService{
 
         commentRepository.save(comment);
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
-                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
+                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
     }
 
     @Override
@@ -139,9 +139,9 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
 
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
-                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle()}, null)));
+                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), parentComment.getUser(),
-                NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle()}, null)));
+                NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle(), user.getNickname()}, null)));
     }
 
 
@@ -212,29 +212,17 @@ public class CommentServiceImpl implements CommentService{
 
     @Transactional(readOnly = true)
     private User findUser(String userid) {
-        Optional<User> user = userRepository.findByUserid(userid);
-        if (user.isEmpty()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다.");
-        }
-        return user.get();
+        return userRepository.findByUserid(userid).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 사용자입니다."));
     }
 
     @Transactional(readOnly = true)
     private Post findPost(Long postId) {
-        Optional<Post> post = postRepository.findById(postId);
-        if (post.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-        return post.get();
+        return postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다."));
     }
 
     @Transactional(readOnly = true)
     private Comment findComment(Long commentId) {
-        Optional<Comment> comment = commentRepository.findById(commentId);
-        if (comment.isEmpty()) {
-            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다.");
-        }
-        return comment.get();
+        return commentRepository.findById(commentId).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다."));
     }
 
 }

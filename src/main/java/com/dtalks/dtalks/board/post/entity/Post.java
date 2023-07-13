@@ -5,6 +5,7 @@ import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -27,9 +28,11 @@ public class Post extends BaseTimeEntity {
     private User user;
 
     @Column(nullable = false)
+    @NotNull
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @NotNull
     private String content;
 
     private String thumbnailUrl;
