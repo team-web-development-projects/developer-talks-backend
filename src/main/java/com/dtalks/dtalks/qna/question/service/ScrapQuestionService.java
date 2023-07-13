@@ -10,4 +10,6 @@ public interface ScrapQuestionService {
 
     Integer removeScrap(Long questionId);
     Page<QuestionResponseDto> searchScrapQuestionsByUser(String userId, Pageable pageable);
+
+    boolean checkScrap(Long questionId);
 }

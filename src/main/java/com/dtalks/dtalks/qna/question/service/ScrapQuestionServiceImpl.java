@@ -90,4 +90,11 @@ public class ScrapQuestionServiceImpl implements ScrapQuestionService {
 
         return new PageImpl<>(questionResponseDtos, pageable, scrapQuestions.getTotalElements());
     }
+
+    @Override
+    public boolean checkScrap(Long questionId) {
+        User user = SecurityUtil.getUser();
+        return scrapQuestionRepository.existsByQuestionIdAndUserId(questionId, user.getId());
+    }
+
 }
