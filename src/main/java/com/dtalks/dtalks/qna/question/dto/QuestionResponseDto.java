@@ -37,7 +37,7 @@ public class QuestionResponseDto {
     UserSimpleDto userInfo;
 
     @Schema(description = "질문글 댓글수")
-    private Integer answerCount;
+    private Integer commentCount;
 
     @Schema(description = "질문글 조회수")
     private Integer viewCount;
@@ -65,7 +65,7 @@ public class QuestionResponseDto {
                 .content(question.getContent())
                 .thumbnailUrl(question.getThumbnailUrl())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
-                .answerCount(question.getAnswerCount())
+                .commentCount(question.getAnswerCount())
                 .viewCount(question.getViewCount())
                 .favoriteCount(question.getFavoriteCount())
                 .recommendCount(question.getRecommendCount())

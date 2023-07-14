@@ -42,7 +42,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
         Question question = optionalQuestion.get();
         User user = SecurityUtil.getUser();
 
-        if(recommendQuestionRepository.existsByUserAndQuestion(user,question)){
+        if(recommendQuestionRepository.existsByUserIdAndQuestionId(user.getId(),questionId)){
             throw new CustomException(ErrorCode.RECOMMENDATION_ALREADY_EXIST_ERROR, "이미 해당 질문글을 추천하였습니다. ");
         }
 
@@ -67,7 +67,7 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
         Question question = optionalQuestion.get();
         User user = SecurityUtil.getUser();
 
-        if(!recommendQuestionRepository.existsByUserAndQuestion(user,question)){
+        if(!recommendQuestionRepository.existsByUserIdAndQuestionId(user.getId(),questionId)){
             throw new CustomException(ErrorCode.RECOMMENDATION_NOT_FOUND_ERROR, "해당 질문글을 추천한 적이 없습니다 . ");
         }
 
@@ -85,6 +85,12 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
         }
 
         return question.getRecommendCount();
+    }
+
+    @Override
+    public boolean checkRecommend(Long questionId) {
+        User user = SecurityUtil.getUser();
+        return recommendQuestionRepository.existsByUserIdAndQuestionId(user.getId(), questionId);
     }
 
 }
