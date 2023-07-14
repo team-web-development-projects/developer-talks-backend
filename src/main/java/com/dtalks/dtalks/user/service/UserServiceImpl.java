@@ -376,7 +376,7 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "비밀번호가 올바르지 않습니다.");
         user.setEmail(null);
         user.setUserid(null);
-        user.setNickname("(알수없음)");
+        user.setNickname(null);
         user.setIsActive(false);
         user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
 
