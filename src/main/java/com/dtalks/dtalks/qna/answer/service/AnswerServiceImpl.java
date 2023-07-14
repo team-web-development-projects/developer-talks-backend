@@ -79,9 +79,10 @@ public class AnswerServiceImpl implements AnswerService {
         Answer answer = Answer.toEntity(answerDto, question, user);
         answerRepository.save(answer);
 
-        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), question.getUser(),
-                NotificationType.ANSWER, messageSource.getMessage("notification.answer", new Object[]{question.getTitle(), user.getNickname()}, null)));
-
+        if (answer.getUser().getIsActive()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), question.getUser(),
+                    NotificationType.ANSWER, messageSource.getMessage("notification.answer", new Object[]{question.getTitle(), user.getNickname()}, null)));
+        }
         return answer.getId();
     }
 
@@ -120,12 +121,14 @@ public class AnswerServiceImpl implements AnswerService {
         Question question = answer.getQuestion();
         question.minusAnswerCount();
 
-        Notification notification = notificationRepository.findByRefIdAndType(answer.getId(), NotificationType.ANSWER)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
-        if (notification.getReadStatus().equals(ReadStatus.READ)) {
-            notification.readDataDeleteSetting();
-        } else {
-            notificationRepository.deleteById(notification.getId());
+        if (question.getUser().getIsActive()) {
+            Notification notification = notificationRepository.findByRefIdAndType(answer.getId(), NotificationType.ANSWER)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+            if (notification.getReadStatus().equals(ReadStatus.READ)) {
+                notification.readDataDeleteSetting();
+            } else {
+                notificationRepository.deleteById(notification.getId());
+            }
         }
 
         answerRepository.delete(answer);
@@ -154,9 +157,10 @@ public class AnswerServiceImpl implements AnswerService {
 
         answer.setSelected(true);
 
-        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), answer.getUser(),
-                NotificationType.ANSWER_SELECTED, messageSource.getMessage("notification.answer.selected", new Object[]{question.getTitle()}, null)));
-
+        if (answer.getUser().getIsActive()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), answer.getUser(),
+                    NotificationType.ANSWER_SELECTED, messageSource.getMessage("notification.answer.selected", new Object[]{question.getTitle()}, null)));
+        }
         answerRepository.save(answer);
     }
 }
