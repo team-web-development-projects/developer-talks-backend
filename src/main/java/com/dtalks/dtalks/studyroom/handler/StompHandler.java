@@ -2,6 +2,7 @@ package com.dtalks.dtalks.studyroom.handler;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.studyroom.service.ChatService;
 import com.dtalks.dtalks.user.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +19,16 @@ import org.springframework.stereotype.Component;
 public class StompHandler implements ChannelInterceptor {
 
     private final TokenService tokenService;
+    private final ChatService chatService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         log.info("stomp handler: " + accessor.getCommand() + "\n" + accessor.getFirstNativeHeader("X-AUTH-TOKEN"));
+        log.info(accessor.getDestination() + "\n" + accessor.getMessage());
+        String destination[] = accessor.getDestination().split("/");
+        if(accessor.getMessage() == null) throw new CustomException(ErrorCode.VALIDATION_ERROR, "메세지가 비었습니다.");
+        chatService.createChatMessage(Long.parseLong(destination[destination.length-1]), accessor.getMessage());
         if(accessor.getCommand() == StompCommand.CONNECT) {
             if(!tokenService.validateToken(accessor.getFirstNativeHeader("X-AUTH-TOKEN"))) {
                 throw new CustomException(ErrorCode.VALIDATION_ERROR, "토큰값이 올바르지 않습니다.");

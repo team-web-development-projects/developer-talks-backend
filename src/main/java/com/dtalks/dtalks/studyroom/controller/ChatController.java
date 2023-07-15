@@ -14,7 +14,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,14 +29,13 @@ public class ChatController {
 
     @MessageMapping("/rooms/{chatRoomId}")
     public void message(@DestinationVariable Long chatRoomId, ChatMessageRequestDto chatMessageRequestDto) {
-        log.info(chatMessageRequestDto.getMessage());
+        log.info("채팅 저장: " + chatMessageRequestDto.getMessage());
         ChatMessageDto chatMessageDto = ChatMessageDto.builder()
                 .id(chatRoomId)
                 .message(chatMessageRequestDto.getMessage())
                 .sender("you")
                 .createDate(LocalDateTime.now())
                 .build();
-        chatService.createChatMessage(chatRoomId, chatMessageRequestDto.getMessage());
         simpMessagingTemplate.convertAndSend("/sub/rooms/" + chatRoomId, chatMessageDto);
     }
 
