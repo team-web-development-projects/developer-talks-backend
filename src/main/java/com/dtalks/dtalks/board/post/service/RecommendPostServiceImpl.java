@@ -35,12 +35,7 @@ public class RecommendPostServiceImpl implements RecommendPostService {
     @Override
     @Transactional
     public Integer recommend(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
-        Post post = optionalPost.get();
+        Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다."));
         User user = SecurityUtil.getUser();
 
         if (user == post.getUser()) {
@@ -56,37 +51,33 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
         post.setRecommendCount(post.getRecommendCount() + 1);
 
-        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendPost.getId(), post.getId(), post.getUser(),
-                NotificationType.RECOMMEND_POST, messageSource.getMessage("notification.post.recommend", new Object[]{post.getTitle()}, null)));
-        return post.getRecommendCount();
+        if (post.getUser().getIsActive()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendPost.getId(), post.getId(), post.getUser(),
+                    NotificationType.RECOMMEND_POST, messageSource.getMessage("notification.post.recommend", new Object[]{post.getTitle()}, null)));
+        }
+         return post.getRecommendCount();
     }
 
     @Override
     @Transactional
     public Integer cancelRecommend(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
-        }
-
         User user = SecurityUtil.getUser();
-        Optional<RecommendPost> optionalRecommendPost = recommendPostRepository.findByPostIdAndUserId(postId, user.getId());
-        if (optionalRecommendPost.isEmpty()) {
-            throw new CustomException(ErrorCode.FAVORITE_POST_NOT_FOUND_ERROR, "해당 게시글은 추천 상태가 아닙니다.");
-        }
 
-        RecommendPost recommendPost = optionalRecommendPost.get();
+        RecommendPost recommendPost = recommendPostRepository.findByPostIdAndUserId(postId, user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.FAVORITE_POST_NOT_FOUND_ERROR, "해당 게시글은 추천 상태가 아닙니다."));
         recommendPostRepository.delete(recommendPost);
 
-        Post post = optionalPost.get();
+        Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다."));
         post.setRecommendCount(post.getRecommendCount() - 1);
 
-        Notification notification = notificationRepository.findByRefIdAndType(recommendPost.getId(), NotificationType.RECOMMEND_POST)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
-        if (notification.getReadStatus().equals(ReadStatus.READ)) {
-            notification.readDataDeleteSetting();
-        } else {
-            notificationRepository.deleteById(notification.getId());
+        if (post.getUser().getIsActive()) {
+            Notification notification = notificationRepository.findByRefIdAndType(recommendPost.getId(), NotificationType.RECOMMEND_POST)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+            if (notification.getReadStatus().equals(ReadStatus.READ)) {
+                notification.readDataDeleteSetting();
+            } else {
+                notificationRepository.deleteById(notification.getId());
+            }
         }
 
         return post.getRecommendCount();

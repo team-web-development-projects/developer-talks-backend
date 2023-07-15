@@ -51,8 +51,10 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         question.updateRecommendCount(true);
 
-        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendQuestion.getId(), question.getId(), question.getUser(),
-                NotificationType.RECOMMEND_QUESTION, messageSource.getMessage("notification.question.recommend", new Object[]{question.getTitle()}, null)));
+        if (question.getUser().getIsActive()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendQuestion.getId(), question.getId(), question.getUser(),
+                    NotificationType.RECOMMEND_QUESTION, messageSource.getMessage("notification.question.recommend", new Object[]{question.getTitle()}, null)));
+        }
         return question.getRecommendCount();
     }
 
@@ -76,12 +78,14 @@ public class RecommendQuestionServiceImpl implements RecommendQuestionService {
 
         recommendQuestionRepository.deleteByUserAndQuestion(user, question);
 
-        Notification notification = notificationRepository.findByRefIdAndType(recommendQuestion.getId(), NotificationType.RECOMMEND_QUESTION)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
-        if (notification.getReadStatus().equals(ReadStatus.READ)) {
-            notification.readDataDeleteSetting();
-        } else {
-            notificationRepository.deleteById(notification.getId());
+        if (question.getUser().getIsActive()) {
+            Notification notification = notificationRepository.findByRefIdAndType(recommendQuestion.getId(), NotificationType.RECOMMEND_QUESTION)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+            if (notification.getReadStatus().equals(ReadStatus.READ)) {
+                notification.readDataDeleteSetting();
+            } else {
+                notificationRepository.deleteById(notification.getId());
+            }
         }
 
         return question.getRecommendCount();

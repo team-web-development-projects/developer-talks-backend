@@ -112,8 +112,10 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
-        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
-                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
+        if (post.getUser().getIsActive()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
+                    NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
+        }
     }
 
     @Override
@@ -138,12 +140,15 @@ public class CommentServiceImpl implements CommentService{
 
         commentRepository.save(comment);
 
-        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
-                NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
-        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), parentComment.getUser(),
-                NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle(), user.getNickname()}, null)));
+        if (post.getUser().getIsActive()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
+                    NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
+        }
+        if (!parentComment.isRemoved()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), parentComment.getUser(),
+                    NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle(), user.getNickname()}, null)));
+        }
     }
-
 
     @Override
     @Transactional
@@ -173,16 +178,19 @@ public class CommentServiceImpl implements CommentService{
         Post post = comment.getPost();
         post.minusCommentCount();
 
-        Notification notification = notificationRepository.findByRefIdAndType(comment.getId(), NotificationType.COMMENT)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
-        if (notification.getReadStatus().equals(ReadStatus.READ)) {
-            notification.readDataDeleteSetting();
-        } else {
-            notificationRepository.deleteById(notification.getId());
+        if (post.getUser().getIsActive()) {
+            Notification notification = notificationRepository.findByRefIdAndType(comment.getId(), NotificationType.COMMENT)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
+            if (notification.getReadStatus().equals(ReadStatus.READ)) {
+                notification.readDataDeleteSetting();
+            } else {
+                notificationRepository.deleteById(notification.getId());
+            }
         }
 
         Optional<Notification> recommentNoti = notificationRepository.findByRefIdAndType(comment.getId(), NotificationType.RECOMMENT);
         if (recommentNoti.isPresent()) {
+            Notification notification = recommentNoti.get();
             if (notification.getReadStatus().equals(ReadStatus.READ)) {
                 notification.readDataDeleteSetting();
             } else {

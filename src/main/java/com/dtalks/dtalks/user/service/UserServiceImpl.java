@@ -7,6 +7,8 @@ import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.notification.entity.Notification;
+import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +45,8 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final AccessTokenPasswordRepository accessTokenPasswordRepository;
     private final String imagePath =  "profiles";
+
+    private final NotificationRepository notificationRepository;
 
     @Override
     @Transactional
@@ -371,9 +376,14 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "비밀번호가 올바르지 않습니다.");
         user.setEmail(null);
         user.setUserid(null);
-        user.setNickname("(알수없음)");
+        user.setNickname(null);
         user.setIsActive(false);
         user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+
+        List<Notification> notificationList = notificationRepository.findByReceiverId(user.getId());
+        for (Notification noti : notificationList) {
+            notificationRepository.delete(noti);
+        }
         userRepository.save(user);
     }
 
