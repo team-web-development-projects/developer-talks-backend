@@ -28,7 +28,7 @@ public class NotificationController {
     @Operation(description = "알람 구독")
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails,
-                                @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId,
+                                @RequestParam(required = false, defaultValue = "") String lastEventId,
                                 HttpServletResponse response) {
         response.setHeader("X-Accel-Buffering", "no");
         return sseEmitters.subscribe(userDetails.getUsername(), lastEventId);
