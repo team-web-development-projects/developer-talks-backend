@@ -6,6 +6,7 @@ import com.dtalks.dtalks.notification.service.NotificationService;
 import com.dtalks.dtalks.notification.service.SseEmitters;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,9 @@ public class NotificationController {
     @Operation(description = "알람 구독")
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails,
-                                @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
+                                @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId,
+                                HttpServletResponse response) {
+        response.setHeader("X-Accel-Buffering", "no");
         return sseEmitters.subscribe(userDetails.getUsername(), lastEventId);
     }
 
