@@ -24,14 +24,15 @@ public class SseEmitters {
     private final Map<String, Object> eventCache = new ConcurrentHashMap<>();
     private final NotificationRepository notificationRepository;
 
-    private Long TIMEOUT = 1000L * 60L * 20L;
-//    private Long TIMEOUT = 1000L * 40L;
+//    private Long TIMEOUT = 1000L * 60L * 20L;
+    private Long TIMEOUT = 1000L * 60L * 3;
 
     public SseEmitter subscribe(String userid, String lastEventId) {
+        log.info("[SSE] - subscribe: " + userid);
         String emitterId = makeTimeIncludeId(userid);
         SseEmitter emitter = save(emitterId, new SseEmitter(TIMEOUT));
-        emitter.onCompletion(() -> this.emitters.remove(emitterId));
-        emitter.onTimeout(() -> emitter.complete());
+        emitter.onCompletion(() -> deleteAllEmitterStartWithId(userid));
+        emitter.onTimeout(() -> this.emitters.remove(emitterId));
         emitter.onError(throwable -> {
             log.error("[SSE] - subscribe error");
             log.error("", throwable);
@@ -113,6 +114,7 @@ public class SseEmitters {
     }
 
     public void deleteAllEmitterStartWithId(String userid) {
+        log.info("[SSE] - deleteAllEmitterStartWithId: " + userid);
         emitters.forEach(
                 (key, emitter) -> {
                     if (key.startsWith(userid)) {
