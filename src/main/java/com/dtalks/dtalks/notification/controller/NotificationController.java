@@ -3,7 +3,7 @@ package com.dtalks.dtalks.notification.controller;
 import com.dtalks.dtalks.notification.dto.NotificationDto;
 import com.dtalks.dtalks.notification.enums.ReadStatus;
 import com.dtalks.dtalks.notification.service.NotificationService;
-import com.dtalks.dtalks.notification.service.SseEmitters;
+//import com.dtalks.dtalks.notification.service.SseEmitters;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,16 +23,16 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
-    private final SseEmitters sseEmitters;
-
-    @Operation(description = "알람 구독")
-    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails,
-                                @RequestParam(required = false, defaultValue = "") String lastEventId,
-                                HttpServletResponse response) {
-        response.setHeader("X-Accel-Buffering", "no");
-        return sseEmitters.subscribe(userDetails.getUsername(), lastEventId);
-    }
+//    private final SseEmitters sseEmitters;
+//
+//    @Operation(description = "알람 구독")
+//    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public SseEmitter subscribe(@AuthenticationPrincipal UserDetails userDetails,
+//                                @RequestParam(required = false, defaultValue = "") String lastEventId,
+//                                HttpServletResponse response) {
+//        response.setHeader("X-Accel-Buffering", "no");
+//        return sseEmitters.subscribe(userDetails.getUsername(), lastEventId);
+//    }
 
     @Operation(summary = "모든 알람 WAIT -> READ로 상태 변경")
     @PostMapping(value = "/read/all")
