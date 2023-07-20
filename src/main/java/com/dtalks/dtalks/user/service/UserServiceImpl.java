@@ -7,10 +7,10 @@ import com.dtalks.dtalks.base.repository.DocumentRepository;
 import com.dtalks.dtalks.base.validation.FileValidation;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.fcm.FCMTokenManager;
 import com.dtalks.dtalks.notification.entity.Notification;
 import com.dtalks.dtalks.notification.repository.NotificationRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
-import com.dtalks.dtalks.user.common.CommonResponse;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
 import com.dtalks.dtalks.user.entity.User;
@@ -20,8 +20,6 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +45,7 @@ public class UserServiceImpl implements UserService {
     private final String imagePath =  "profiles";
 
     private final NotificationRepository notificationRepository;
+    private final FCMTokenManager fcmTokenManager;
 
     @Override
     @Transactional
@@ -113,6 +112,9 @@ public class UserServiceImpl implements UserService {
         if(!user.getIsActive())
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "비활성화된 계정입니다.");
 
+        if (signInDto.getFcmToken() != null) {
+            deleteAndSaveFCMToken(user.getId(), signInDto.getFcmToken());
+        }
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
                 .accessToken(tokenService.createAccessToken(userTokenDto))
                 .refreshToken(tokenService.createRefreshToken(userTokenDto))
@@ -435,5 +437,11 @@ public class UserServiceImpl implements UserService {
 
         Document savedDocument = documentRepository.save(document);
         return savedDocument;
+    }
+
+    // 기존에 존재하는 Fcm 토큰 삭제
+    // Redis에 사용자 아이디를 Key로 Fcm 토큰 저장
+    private void deleteAndSaveFCMToken(Long authenticatedUserId, String fcmToken) {
+        fcmTokenManager.deleteAndSaveFCMToken(String.valueOf(authenticatedUserId), fcmToken);
     }
 }
