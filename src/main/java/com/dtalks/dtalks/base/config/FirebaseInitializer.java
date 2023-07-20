@@ -35,10 +35,10 @@ public class FirebaseInitializer {
                     .build();
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
-                log.info("Firebase init start");
+                log.info("[FCM] - Firebase init start");
             }
         } catch (IOException ex){
-            throw new CustomException(ErrorCode.FIREBASE_INIT_ERROR, "firebase init error");
+            throw new CustomException(ErrorCode.FIREBASE_INIT_ERROR, "[FCM] - firebase init error");
         }
     }
 }
