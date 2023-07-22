@@ -147,7 +147,7 @@ public class AnswerServiceImpl implements AnswerService {
         User currentUser = SecurityUtil.getUser();
         User selectUser = question.getUser();
 
-        if (!selectUser.equals(currentUser)) {
+        if (!currentUser.getUserid().equals(selectUser.getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "질문글 작성자만 채택할 수 있습니다. ");
         }
 
