@@ -28,13 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         LOGGER.info("doFilterInternal 호출됨 " + request.getRequestURI());
-        Enumeration<String> headers = request.getHeaderNames();
-        LOGGER.info("헤더: ");
-        while(headers.hasMoreElements()) {
-            String name = (String) headers.nextElement();
-            String value = request.getHeader(name);
-            LOGGER.info(name + ": " + value);
-        }
+//        Enumeration<String> headers = request.getHeaderNames();
+//        LOGGER.info("헤더: ");
+//        while(headers.hasMoreElements()) {
+//            String name = (String) headers.nextElement();
+//            String value = request.getHeader(name);
+//            LOGGER.info(name + ": " + value);
+//        }
         String token = tokenService.resolveToken(request);
 
         if(token != null && tokenService.validateToken(token)) {
