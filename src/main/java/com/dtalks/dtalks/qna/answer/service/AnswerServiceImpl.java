@@ -37,11 +37,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional(readOnly = true)
     public AnswerResponseDto searchById(Long id) {
-        Optional<Answer> optionalAnswer = answerRepository.findById(id);
-        if (optionalAnswer.isEmpty()) {
-            throw new CustomException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "존재하지 않는 답변입니다. ");
-        }
-        Answer answer = optionalAnswer.get();
+        Answer answer = findAnswer(id);
         return AnswerResponseDto.toDto(answer);
     }
 
@@ -89,11 +85,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional
     public Long updateAnswer(Long answerId, AnswerDto answerDto) {
-        Optional<Answer> optionalAnswer = answerRepository.findById(answerId);
-        if (optionalAnswer.isEmpty()) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
-        }
-        Answer answer = optionalAnswer.get();
+        Answer answer = findAnswer(answerId);
         String userId = answer.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 답변을 수정할 수 있는 권한이 없습니다.");
@@ -105,11 +97,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional
     public void deleteAnswer(Long id) {
-        Optional<Answer> optionalAnswer = answerRepository.findById(id);
-        if(optionalAnswer.isEmpty()){
-            throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
-        }
-        Answer answer = optionalAnswer.get();
+        Answer answer = findAnswer(id);
         String userId = answer.getUser().getUserid();
         if (!userId.equals(SecurityUtil.getUser().getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 답변을 삭제할 수 있는 권한이 없습니다.");
@@ -137,12 +125,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     @Transactional
     public void selectAnswer(Long id) {
-        Optional<Answer> optionalAnswer = answerRepository.findById(id);
-        if (optionalAnswer.isEmpty()) {
-            throw new CustomException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
-        }
-
-        Answer answer = optionalAnswer.get();
+        Answer answer = findAnswer(id);
         Question question = answer.getQuestion();
         User currentUser = SecurityUtil.getUser();
         User selectUser = question.getUser();
@@ -162,5 +145,14 @@ public class AnswerServiceImpl implements AnswerService {
                     NotificationType.ANSWER_SELECTED, messageSource.getMessage("notification.answer.selected", new Object[]{question.getTitle()}, null)));
         }
         answerRepository.save(answer);
+    }
+
+    @Transactional(readOnly = true)
+    protected Answer findAnswer(Long answerId){
+        Optional<Answer> answer = answerRepository.findById(answerId);
+        if (answer.isEmpty()) {
+            throw new CustomException(ErrorCode.ANSWER_NOT_FOUND_ERROR, "해당하는 답변이 존재하지 않습니다. ");
+        }
+        return answer.get();
     }
 }
