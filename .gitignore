@@ -47,3 +47,6 @@ src/main/generated/
 
 ### files ###
 files/
+
+### firebase ###
+src/main/resources/firebase
