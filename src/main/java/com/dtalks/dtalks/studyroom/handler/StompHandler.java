@@ -3,6 +3,7 @@ package com.dtalks.dtalks.studyroom.handler;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.studyroom.service.ChatService;
+import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,18 +25,20 @@ public class StompHandler implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        String token = accessor.getFirstNativeHeader("X-AUTH-TOKEN");
         log.info("stomp handler: " + accessor.getCommand() + "\n" + accessor.getFirstNativeHeader("X-AUTH-TOKEN"));
         log.info(accessor.getDestination() + "\n" + accessor.getMessage());
 
-        if(!tokenService.validateToken(accessor.getFirstNativeHeader("X-AUTH-TOKEN"))) {
+        if(accessor.getCommand() != StompCommand.DISCONNECT && !tokenService.validateToken(token)) {
+            log.info("토큰값이 올바르지 않습니다.");
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "토큰값이 올바르지 않습니다.");
         }
 
-        if(accessor.getCommand() == StompCommand.SEND && accessor.getDestination() != null && accessor.getMessage() != null) {
+        if(accessor.getCommand() == StompCommand.SEND && accessor.getDestination() != null) {
             String destination[] = accessor.getDestination().split("/");
-            chatService.createChatMessage(Long.parseLong(destination[destination.length-1]), accessor.getMessage());
+            User user = tokenService.getUserByToken(token);
+            chatService.createChatMessage(Long.parseLong(destination[destination.length-1]), new String((byte[]) message.getPayload()), user);
         }
-
 
         return message;
     }

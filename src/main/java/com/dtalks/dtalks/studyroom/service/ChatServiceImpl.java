@@ -46,15 +46,14 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public ChatMessageDto createChatMessage(Long chatRoomId, String message) {
-        User user = SecurityUtil.getUser();
+    public ChatMessageDto createChatMessage(Long chatRoomId, String message, User user) {
         ChatRoom chatRoom = checkChatRoom(chatRoomId);
         checkStudyRoomMember(chatRoom.getStudyRoom(), user);
-
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setChatRoom(chatRoom);
         chatMessage.setSender(user);
         chatMessage.setMessage(message);
+        log.info("메세지 저장: " + message);
         chatMessageRepository.save(chatMessage);
 
         return ChatMessageDto.toDto(chatMessage);
