@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AdminUserServiceImpl implements AdminUserService {
+public class UserManageServiceImpl implements UserManageService {
 
     private final UserRepository userRepository;
 
