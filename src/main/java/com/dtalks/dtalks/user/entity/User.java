@@ -12,6 +12,7 @@ import com.dtalks.dtalks.qna.question.entity.ScrapQuestion;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
 import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.dto.UserDto;
+import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -69,7 +70,9 @@ public class User extends BaseTimeEntity implements UserDetails{
     @Column(nullable = false)
     private Boolean isActive;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ActiveStatus status;
 
     @Column(nullable = false)
     private Boolean isPrivate;

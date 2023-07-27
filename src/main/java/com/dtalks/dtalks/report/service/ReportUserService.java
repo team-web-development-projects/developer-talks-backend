@@ -1,7 +1,7 @@
-package com.dtalks.dtalks.admin.report.service;
+package com.dtalks.dtalks.report.service;
 
-import com.dtalks.dtalks.admin.report.dto.ReportDetailDto;
-import com.dtalks.dtalks.admin.report.dto.ReportDetailRequestDto;
+import com.dtalks.dtalks.report.dto.ReportDetailDto;
+import com.dtalks.dtalks.report.dto.ReportDetailRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

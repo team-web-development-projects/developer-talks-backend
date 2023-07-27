@@ -1,10 +1,10 @@
-package com.dtalks.dtalks.admin.report.service;
+package com.dtalks.dtalks.report.service;
 
-import com.dtalks.dtalks.admin.report.dto.ReportDetailDto;
-import com.dtalks.dtalks.admin.report.dto.ReportDetailRequestDto;
-import com.dtalks.dtalks.admin.report.entity.ReportedUser;
-import com.dtalks.dtalks.admin.report.enums.ResultType;
-import com.dtalks.dtalks.admin.report.repository.ReportedUserRepository;
+import com.dtalks.dtalks.report.dto.ReportDetailDto;
+import com.dtalks.dtalks.report.dto.ReportDetailRequestDto;
+import com.dtalks.dtalks.report.entity.ReportedUser;
+import com.dtalks.dtalks.report.enums.ResultType;
+import com.dtalks.dtalks.report.repository.ReportedUserRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.Util.SecurityUtil;

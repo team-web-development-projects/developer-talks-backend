@@ -1,8 +1,8 @@
-package com.dtalks.dtalks.admin.report.controller;
+package com.dtalks.dtalks.report.controller;
 
-import com.dtalks.dtalks.admin.report.dto.ReportDetailDto;
-import com.dtalks.dtalks.admin.report.dto.ReportDetailRequestDto;
-import com.dtalks.dtalks.admin.report.service.ReportUserService;
+import com.dtalks.dtalks.report.dto.ReportDetailDto;
+import com.dtalks.dtalks.report.dto.ReportDetailRequestDto;
+import com.dtalks.dtalks.report.service.ReportUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
