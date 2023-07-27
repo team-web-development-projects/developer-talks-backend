@@ -24,7 +24,8 @@ public abstract class Report extends ReportTimeEntity {
     @OneToOne
     private User reportUser;
 
-    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ReportType reportType;
 
     private String detail;
@@ -32,5 +33,7 @@ public abstract class Report extends ReportTimeEntity {
     @NotNull
     private boolean processed;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ResultType resultType;
 }
