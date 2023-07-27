@@ -35,7 +35,7 @@ public class Question extends BaseTimeEntity {
 
     @ColumnDefault("false")
     @Column(nullable = false)
-    private boolean isSelectAnswer;
+    private boolean selectedAnswer;
 
     private String thumbnailUrl;
 
@@ -73,7 +73,7 @@ public class Question extends BaseTimeEntity {
                 .viewCount(0)
                 .recommendCount(0)
                 .favoriteCount(0)
-                .isSelectAnswer(false)
+                .selectedAnswer(false)
                 .build();
     }
 
@@ -114,7 +114,7 @@ public class Question extends BaseTimeEntity {
     public void setThumbnailUrl(String thumbnailUrl){
         this.thumbnailUrl = thumbnailUrl;}
 
-    public void setSelectAnswer(boolean select) {
-        this.isSelectAnswer = select;
+    public void setSelectedAnswer(boolean select) {
+        this.selectedAnswer = select;
     }
 }

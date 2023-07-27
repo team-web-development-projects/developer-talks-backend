@@ -66,7 +66,7 @@ public class QuestionResponseDto {
                 .id(question.getId())
                 .title(question.getTitle())
                 .content(question.getContent())
-                .isSelectAnswer(question.isSelectAnswer())
+                .isSelectAnswer(question.isSelectedAnswer())
                 .thumbnailUrl(question.getThumbnailUrl())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .commentCount(question.getAnswerCount())
