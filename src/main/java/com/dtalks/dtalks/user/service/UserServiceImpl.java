@@ -14,6 +14,7 @@ import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.AccessTokenPasswordRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
@@ -61,6 +62,7 @@ public class UserServiceImpl implements UserService {
         user.setSkills(oAuthSignUpDto.getSkills());
         user.setDescription(oAuthSignUpDto.getDescription());
         user.setIsActive(true);
+        user.setStatus(ActiveStatus.ACTIVE);
         user.setIsPrivate(false);
 
         User savedUser = userRepository.save(user);
@@ -88,6 +90,7 @@ public class UserServiceImpl implements UserService {
                 .description(signUpDto.getDescription())
                 .roles(Collections.singletonList("USER"))
                 .isActive(true)
+                .status(ActiveStatus.ACTIVE)
                 .isPrivate(false)
                 .build();
 
@@ -380,6 +383,7 @@ public class UserServiceImpl implements UserService {
         user.setUserid(null);
         user.setNickname(null);
         user.setIsActive(false);
+        user.setStatus(ActiveStatus.QUIT);
         user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
 
         List<Notification> notificationList = notificationRepository.findByReceiverId(user.getId());
