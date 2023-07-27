@@ -1,4 +1,4 @@
-package com.dtalks.dtalks.admin.report.entity;
+package com.dtalks.dtalks.report.entity;
 
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;

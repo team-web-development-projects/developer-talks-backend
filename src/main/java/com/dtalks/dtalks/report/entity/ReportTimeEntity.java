@@ -1,4 +1,4 @@
-package com.dtalks.dtalks.admin.report.entity;
+package com.dtalks.dtalks.report.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

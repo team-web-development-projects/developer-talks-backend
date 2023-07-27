@@ -1,6 +1,6 @@
-package com.dtalks.dtalks.admin.report.repository;
+package com.dtalks.dtalks.report.repository;
 
-import com.dtalks.dtalks.admin.report.entity.ReportedUser;
+import com.dtalks.dtalks.report.entity.ReportedUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

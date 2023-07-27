@@ -1,8 +1,8 @@
-package com.dtalks.dtalks.admin.report.dto;
+package com.dtalks.dtalks.report.dto;
 
-import com.dtalks.dtalks.admin.report.entity.ReportedUser;
-import com.dtalks.dtalks.admin.report.enums.ReportType;
-import com.dtalks.dtalks.admin.report.enums.ResultType;
+import com.dtalks.dtalks.report.entity.ReportedUser;
+import com.dtalks.dtalks.report.enums.ReportType;
+import com.dtalks.dtalks.report.enums.ResultType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

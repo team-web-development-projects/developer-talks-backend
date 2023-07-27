@@ -1,6 +1,6 @@
-package com.dtalks.dtalks.admin.report.dto;
+package com.dtalks.dtalks.report.dto;
 
-import com.dtalks.dtalks.admin.report.enums.ReportType;
+import com.dtalks.dtalks.report.enums.ReportType;
 import lombok.Getter;
 
 @Getter

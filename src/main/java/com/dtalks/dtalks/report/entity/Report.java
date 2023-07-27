@@ -1,7 +1,7 @@
-package com.dtalks.dtalks.admin.report.entity;
+package com.dtalks.dtalks.report.entity;
 
-import com.dtalks.dtalks.admin.report.enums.ReportType;
-import com.dtalks.dtalks.admin.report.enums.ResultType;
+import com.dtalks.dtalks.report.enums.ReportType;
+import com.dtalks.dtalks.report.enums.ResultType;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
