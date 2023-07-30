@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class ReportUserServiceImpl implements ReportUserService {
     private final MessageSource messageSource;
 
     @Override
+    @Transactional
     public void report(String nickname, ReportDetailRequestDto dto) {
         User reportUser = SecurityUtil.getUser();
         User reportedUser = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 사용자를 찾을 수 없습니다."));

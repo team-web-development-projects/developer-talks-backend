@@ -21,7 +21,7 @@ public abstract class Report extends ReportTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(cascade = CascadeType.MERGE, optional = false)
     private User reportUser;
 
     @Enumerated(EnumType.STRING)
