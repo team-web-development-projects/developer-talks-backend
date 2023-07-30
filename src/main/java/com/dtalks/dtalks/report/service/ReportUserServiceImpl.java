@@ -1,6 +1,7 @@
 package com.dtalks.dtalks.report.service;
 
-import com.dtalks.dtalks.report.dto.ReportDetailDto;
+import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
+import com.dtalks.dtalks.notification.enums.NotificationType;
 import com.dtalks.dtalks.report.dto.ReportDetailRequestDto;
 import com.dtalks.dtalks.report.entity.ReportedUser;
 import com.dtalks.dtalks.report.enums.ResultType;
@@ -11,9 +12,10 @@ import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,39 +23,30 @@ public class ReportUserServiceImpl implements ReportUserService {
 
     private final UserRepository userRepository;
     private final ReportedUserRepository reportedUserRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final MessageSource messageSource;
 
     @Override
-    public Page<ReportDetailDto> searchAllUserReports(Pageable pageable) {
-        User user = SecurityUtil.getUser();
-        Page<ReportedUser> page = reportedUserRepository.findByReportUserId(user.getId(), pageable);
-        return page.map(ReportDetailDto::toDto);
-    }
-
-    @Override
+    @Transactional
     public void report(String nickname, ReportDetailRequestDto dto) {
         User reportUser = SecurityUtil.getUser();
         User reportedUser = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 사용자를 찾을 수 없습니다."));
 
-        ReportedUser report = ReportedUser.builder()
-                .reportUser(reportUser)
-                .reportType(dto.getReportType())
-                .detail(dto.getDetail())
-                .processed(false)
-                .resultType(ResultType.WAIT)
-                .reportedUser(reportedUser)
-                .build();
-        reportedUserRepository.save(report);
-    }
+        if (reportedUser.getIsActive()) {
+            ReportedUser report = ReportedUser.builder()
+                    .reportUser(reportUser)
+                    .reportType(dto.getReportType())
+                    .detail(dto.getDetail())
+                    .processed(false)
+                    .resultType(ResultType.WAIT)
+                    .reportedUser(reportedUser)
+                    .build();
+            reportedUserRepository.save(report);
 
-    @Override
-    public void cancelReport(Long id) {
-        ReportedUser report = reportedUserRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND_ERROR, "신고 내역이 없습니다."));
-
-        if (report.isProcessed()) {
-            throw new CustomException(ErrorCode.VALIDATION_ERROR, "이미 처리된 신고 사항입니다.");
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, reportedUser,
+                    NotificationType.REPORTED, messageSource.getMessage("notification.reported", new Object[]{dto.getReportType()}, null)));
+        } else {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "탈퇴한 사용자입니다.");
         }
-
-        reportedUserRepository.delete(report);
     }
 }
