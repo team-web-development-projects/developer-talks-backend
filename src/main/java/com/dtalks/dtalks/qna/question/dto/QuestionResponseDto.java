@@ -27,6 +27,9 @@ public class QuestionResponseDto {
     @NotBlank
     private String content;
 
+    @Schema(description = "답변 채택 유무")
+    private boolean isSelectAnswer;
+
     @Schema(description = "게시글 썸네일")
     private String thumbnailUrl;
 
@@ -34,7 +37,7 @@ public class QuestionResponseDto {
     private List<String> imageUrls;
 
     @Schema(description = "작성한 사용자의 닉네임, 이미지")
-    UserSimpleDto userInfo;
+    private UserSimpleDto userInfo;
 
     @Schema(description = "질문글 댓글수")
     private Integer commentCount;
@@ -63,6 +66,7 @@ public class QuestionResponseDto {
                 .id(question.getId())
                 .title(question.getTitle())
                 .content(question.getContent())
+                .isSelectAnswer(question.isSelectedAnswer())
                 .thumbnailUrl(question.getThumbnailUrl())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .commentCount(question.getAnswerCount())

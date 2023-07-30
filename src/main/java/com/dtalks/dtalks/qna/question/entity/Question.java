@@ -33,17 +33,11 @@ public class Question extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @ColumnDefault("false")
+    @Column(nullable = false)
+    private boolean selectedAnswer;
+
     private String thumbnailUrl;
-
-    @OneToMany(mappedBy = "question", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<QuestionImage> imageList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Answer> answerList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ScrapQuestion> scrapQuestionList = new ArrayList<>();
-
 
     @ColumnDefault("0")
     @Column(nullable = false)
@@ -60,6 +54,15 @@ public class Question extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer favoriteCount;
 
+    @OneToMany(mappedBy = "question", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    private List<QuestionImage> imageList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Answer> answerList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ScrapQuestion> scrapQuestionList = new ArrayList<>();
+
     @Builder
     public static  Question toEntity(QuestionDto questionDto, User user) {
         return Question.builder()
@@ -70,6 +73,7 @@ public class Question extends BaseTimeEntity {
                 .viewCount(0)
                 .recommendCount(0)
                 .favoriteCount(0)
+                .selectedAnswer(false)
                 .build();
     }
 
@@ -109,4 +113,8 @@ public class Question extends BaseTimeEntity {
 
     public void setThumbnailUrl(String thumbnailUrl){
         this.thumbnailUrl = thumbnailUrl;}
+
+    public void setSelectedAnswer(boolean select) {
+        this.selectedAnswer = select;
+    }
 }

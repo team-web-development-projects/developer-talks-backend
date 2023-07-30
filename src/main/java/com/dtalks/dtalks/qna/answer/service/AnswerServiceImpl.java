@@ -133,12 +133,15 @@ public class AnswerServiceImpl implements AnswerService {
         if (!currentUser.getUserid().equals(selectUser.getUserid())) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "질문글 작성자만 채택할 수 있습니다. ");
         }
-
         if (answer.isSelected()) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_ERROR, "답변이 이미 채택되어 있습니다. ");
         }
+        if (question.isSelectedAnswer()) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_ERROR, "질문자는 하나의 답변만 채택할 수 있습니다. ");
+        }
 
         answer.setSelected(true);
+        question.setSelectedAnswer(true);
 
         if (answer.getUser().getIsActive()) {
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(answer.getId(), question.getId(), answer.getUser(),

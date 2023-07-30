@@ -23,6 +23,9 @@ public class AnswerResponseDto {
     @NotBlank
     private String content;
 
+    @Schema(description = "채택 여부")
+    private boolean isSelected;
+    
     @NotBlank
     private String nickname;
 
@@ -43,6 +46,7 @@ public class AnswerResponseDto {
         return AnswerResponseDto.builder()
                 .id(answer.getId())
                 .content(answer.getContent())
+                .isSelected(answer.isSelected())
                 .nickname(answer.getUser().getNickname())
                 .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .createDate(answer.getCreateDate())

@@ -50,7 +50,7 @@ public class QuestionController {
     }
 
     @Operation(summary = "특정 유저의 스크랩 질문글 조회")
-    @GetMapping("/list/scrap/{userId}")
+    @GetMapping("/list/favorite/{userId}")
     public ResponseEntity<Page<QuestionResponseDto>> searchScrapQuestionsByUser(@PathVariable String userId,
                                                                                 @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(scrapQuestionService.searchScrapQuestionsByUser(userId, pageable));
@@ -99,13 +99,13 @@ public class QuestionController {
     }
 
     @Operation(summary = "질문글 스크랩")
-    @PostMapping("/scrap/{id}")
+    @PostMapping("/favorite/{id}")
     public ResponseEntity<Integer> addScrap(@PathVariable Long id) {
         return ResponseEntity.ok(scrapQuestionService.addScrap(id));
     }
 
     @Operation(summary = "질문글 스크랩 취소")
-    @DeleteMapping("/scrap/{id}")
+    @DeleteMapping("/favorite/{id}")
     public ResponseEntity<Integer> removeScrap(@PathVariable Long id) {
         return ResponseEntity.ok(scrapQuestionService.removeScrap(id));
     }
