@@ -4,6 +4,7 @@ import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
 import com.dtalks.dtalks.notification.enums.NotificationType;
 import com.dtalks.dtalks.report.dto.ReportDetailRequestDto;
 import com.dtalks.dtalks.report.entity.ReportedUser;
+import com.dtalks.dtalks.report.enums.ReportType;
 import com.dtalks.dtalks.report.enums.ResultType;
 import com.dtalks.dtalks.report.repository.ReportedUserRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
@@ -51,7 +52,8 @@ public class ReportUserServiceImpl implements ReportUserService {
                 .build();
         reportedUserRepository.save(report);
 
+        String type = dto.getReportType().equals(ReportType.OTHER) ? "기타" : "욕설";
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, reportedUser,
-                NotificationType.REPORTED, messageSource.getMessage("notification.reported", new Object[]{dto.getReportType()}, null)));
+                NotificationType.REPORTED, messageSource.getMessage("notification.reported", new Object[]{type}, null)));
     }
 }
