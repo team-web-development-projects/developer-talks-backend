@@ -1,10 +1,9 @@
 package com.dtalks.dtalks.report.repository;
 
 import com.dtalks.dtalks.report.entity.ReportedUser;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReportedUserRepository extends JpaRepository<ReportedUser, Long> {
-    Page<ReportedUser> findByReportUserId(Long id, Pageable pageable);
+    Long countByReportedUserIdAndProcessed(Long userId, boolean processed);
+    boolean existsByDtypeAndReportUserIdAndReportedUserIdAndProcessed(String dtype, Long reportUserId, Long reportedUserId, boolean processed);
 }

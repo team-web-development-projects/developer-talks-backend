@@ -27,6 +27,7 @@ public class UserManageDto {
         return UserManageDto.builder()
                 .id(user.getId())
                 .userid(user.getUserid())
+                .email(user.getEmail())
                 .nickname(user.getNickname())
                 .isActive(user.getIsActive())
                 .status(user.getStatus())
