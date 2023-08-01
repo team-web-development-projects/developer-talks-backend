@@ -32,21 +32,26 @@ public class ReportUserServiceImpl implements ReportUserService {
         User reportUser = SecurityUtil.getUser();
         User reportedUser = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 사용자를 찾을 수 없습니다."));
 
-        if (reportedUser.getIsActive()) {
-            ReportedUser report = ReportedUser.builder()
-                    .reportUser(reportUser)
-                    .reportType(dto.getReportType())
-                    .detail(dto.getDetail())
-                    .processed(false)
-                    .resultType(ResultType.WAIT)
-                    .reportedUser(reportedUser)
-                    .build();
-            reportedUserRepository.save(report);
-
-            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, reportedUser,
-                    NotificationType.REPORTED, messageSource.getMessage("notification.reported", new Object[]{dto.getReportType()}, null)));
-        } else {
+        if (!reportedUser.getIsActive()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "탈퇴한 사용자입니다.");
         }
+
+        boolean reportExists = reportedUserRepository.existsByDtypeAndReportUserIdAndReportedUserIdAndProcessed("USER", reportUser.getId(), reportedUser.getId(), false);
+        if (reportExists) {
+            throw new CustomException(ErrorCode.ACCEPTED_BUT_ALREADY_EXISTS, "해당 사용자에 대해 처리되지 않은 신고 접수 내역이 존재합니다.");
+        }
+
+        ReportedUser report = ReportedUser.builder()
+                .reportUser(reportUser)
+                .reportType(dto.getReportType())
+                .detail(dto.getDetail())
+                .processed(false)
+                .resultType(ResultType.WAIT)
+                .reportedUser(reportedUser)
+                .build();
+        reportedUserRepository.save(report);
+
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, reportedUser,
+                NotificationType.REPORTED, messageSource.getMessage("notification.reported", new Object[]{dto.getReportType()}, null)));
     }
 }
