@@ -11,6 +11,7 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,6 +36,8 @@ public class ReportUserServiceImpl implements ReportUserService {
 
         if (!reportedUser.getIsActive()) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "탈퇴한 사용자입니다.");
+        } else if (reportedUser.getStatus() != ActiveStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.ACCEPTED_BUT_ALREADY_EXISTS, "신고로 인해 정지된 계정입니다.");
         }
 
         boolean reportExists = reportedUserRepository.existsByDtypeAndReportUserIdAndReportedUserIdAndProcessed("USER", reportUser.getId(), reportedUser.getId(), false);
