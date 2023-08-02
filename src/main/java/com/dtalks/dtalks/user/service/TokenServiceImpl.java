@@ -4,6 +4,7 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.dto.UserTokenDto;
 import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -105,8 +106,12 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
+        User user = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
+        if (user.getStatus() != ActiveStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "현재 정지 상태로 활동이 불가능합니다.");
+        }
+        UserDetails userDetails = user;
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
