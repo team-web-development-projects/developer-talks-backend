@@ -10,6 +10,8 @@ import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.fcm.FCMTokenManager;
 import com.dtalks.dtalks.notification.entity.Notification;
 import com.dtalks.dtalks.notification.repository.NotificationRepository;
+import com.dtalks.dtalks.report.entity.ReportedUser;
+import com.dtalks.dtalks.report.repository.ReportedUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService {
     private final String imagePath =  "profiles";
 
     private final NotificationRepository notificationRepository;
+    private final ReportedUserRepository reportedUserRepository;
     private final FCMTokenManager fcmTokenManager;
 
     @Override
@@ -390,6 +393,11 @@ public class UserServiceImpl implements UserService {
         for (Notification noti : notificationList) {
             notificationRepository.delete(noti);
         }
+        List<ReportedUser> reportedList = reportedUserRepository.findByReportedUserId(user.getId());
+        for (ReportedUser reportedUser : reportedList) {
+            reportedUserRepository.delete(reportedUser);
+        }
+
         userRepository.save(user);
     }
 
