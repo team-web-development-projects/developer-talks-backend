@@ -18,8 +18,13 @@ public class UserManageServiceImpl implements UserManageService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserManageDto> searchAllUsersExceptQuit(Pageable pageable) {
-        Page<User> all = userRepository.findByStatusNot(ActiveStatus.QUIT, pageable);
+    public Page<UserManageDto> searchAllUsersExceptQuit(Pageable pageable, ActiveStatus status) {
+        Page<User> all;
+        if (status == null) {
+            all = userRepository.findByStatusNot(ActiveStatus.QUIT, pageable);
+        } else {
+            all = userRepository.findByStatus(status, pageable);
+        }
         return all.map(UserManageDto::toDto);
     }
 }

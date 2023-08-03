@@ -16,5 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNickname(String nickname);
 
     Page<User> findByStatusNot(ActiveStatus status, Pageable pageable);
+    Page<User> findByStatus(ActiveStatus status, Pageable pageable);
     List<User> findByStatusAndModifiedDateLessThanEqual(ActiveStatus status, LocalDateTime unSuspendDate);
 }
