@@ -19,7 +19,6 @@ public class UserManageDto {
     private String userid;
     private String email;
     private String nickname;
-    private Boolean isActive;
     private ActiveStatus status;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -33,7 +32,6 @@ public class UserManageDto {
                 .userid(user.getUserid())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-                .isActive(user.getIsActive())
                 .status(user.getStatus())
                 .createDate(user.getCreateDate())
                 .modifiedDate(user.getModifiedDate())

@@ -1,10 +1,12 @@
 package com.dtalks.dtalks.admin.user.controller;
 
+import com.dtalks.dtalks.admin.user.dto.UserInfoChangeRequestDto;
 import com.dtalks.dtalks.admin.user.dto.UserManageDto;
 import com.dtalks.dtalks.admin.user.service.UserManageService;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,9 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,5 +31,16 @@ public class AdminUserController {
             @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable,
             @PathVariable(required = false) ActiveStatus status) {
         return ResponseEntity.ok(userManageService.searchAllUsersExceptQuit(pageable, status));
+    }
+
+    @PutMapping("/update/{id}/info")
+    public ResponseEntity<UserManageDto> updateUserInfo(@PathVariable Long id, @RequestBody @Valid UserInfoChangeRequestDto dto) {
+        return ResponseEntity.ok(userManageService.updateUserInfo(id, dto));
+    }
+
+    @PutMapping("/update/{id}/password")
+    public ResponseEntity<Void> updateUserPassword(@PathVariable Long id) {
+        userManageService.updateUserPassword(id);
+        return ResponseEntity.ok().build();
     }
 }
