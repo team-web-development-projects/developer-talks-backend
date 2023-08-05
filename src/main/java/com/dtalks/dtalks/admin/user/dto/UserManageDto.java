@@ -2,6 +2,7 @@ package com.dtalks.dtalks.admin.user.dto;
 
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,9 +19,11 @@ public class UserManageDto {
     private String userid;
     private String email;
     private String nickname;
-    private Boolean isActive;
     private ActiveStatus status;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedDate;
 
     public static UserManageDto toDto(User user) {
@@ -29,7 +32,6 @@ public class UserManageDto {
                 .userid(user.getUserid())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-                .isActive(user.getIsActive())
                 .status(user.getStatus())
                 .createDate(user.getCreateDate())
                 .modifiedDate(user.getModifiedDate())
