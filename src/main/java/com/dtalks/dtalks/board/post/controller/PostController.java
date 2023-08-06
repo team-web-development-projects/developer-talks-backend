@@ -72,7 +72,7 @@ public class PostController {
     }
 
 
-    @Operation(summary = "추천수 베스트 5 게시글 가져오기 (리스트)")
+    @Operation(summary = "추천수 베스트 5 게시글 가져오기 (리스트) - (조회 날짜 - 7일 이내 게시글 중 추천 수 1 이상)")
     @GetMapping("/best")
     public ResponseEntity<List<PostDto>> search5BestPosts() {
         return ResponseEntity.ok(postService.search5BestPosts());
