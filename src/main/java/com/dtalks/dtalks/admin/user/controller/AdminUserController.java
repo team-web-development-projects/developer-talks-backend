@@ -24,7 +24,7 @@ public class AdminUserController {
     private final UserManageService userManageService;
 
     @Operation(summary = "사용자 전체 조회 (탈퇴 사용자 제외)", parameters = {
-            @Parameter(name = "pageable", description = "페이지, size=10, sort=id, desc 적용 중"),
+            @Parameter(name = "pageable", description = "페이지, size=10, sort=id,desc 적용 중"),
     })
     @GetMapping(value = {"/", "/{status}"})
     public ResponseEntity<Page<UserManageDto>> searchAllUsersExceptQuit(
@@ -41,6 +41,18 @@ public class AdminUserController {
     @PutMapping("/update/{id}/password")
     public ResponseEntity<Void> updateUserPassword(@PathVariable Long id) {
         userManageService.updateUserPassword(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/suspend/{id}")
+    public ResponseEntity<Void> suspendUser(@PathVariable Long id) {
+        userManageService.suspendUser(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/unSuspend/{id}")
+    public ResponseEntity<Void> unSuspendUser(@PathVariable Long id) {
+        userManageService.unSuspendUser(id);
         return ResponseEntity.ok().build();
     }
 }

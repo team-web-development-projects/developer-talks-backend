@@ -4,6 +4,8 @@ import com.dtalks.dtalks.admin.user.dto.UserInfoChangeRequestDto;
 import com.dtalks.dtalks.admin.user.dto.UserManageDto;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
+import com.dtalks.dtalks.notification.enums.NotificationType;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.UserRepository;
@@ -12,6 +14,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,6 +33,8 @@ public class UserManageServiceImpl implements UserManageService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final MessageSource messageSource;
 
     @Override
     @Transactional(readOnly = true)
@@ -59,6 +65,31 @@ public class UserManageServiceImpl implements UserManageService {
         String password = createCode();
         user.setPassword(passwordEncoder.encode(password));
         javaMailSender.send(createPasswordChangingMessage(user.getEmail(), password));
+    }
+
+    @Override
+    @Transactional
+    public void suspendUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당 사용자를 찾을 수 없습니다."));
+        if (user.getStatus() != ActiveStatus.ACTIVE) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "정지가 불가능한 상태입니다.");
+        }
+
+        user.setStatus(ActiveStatus.SUSPENSION);
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user,
+                NotificationType.ACCOUNT_SUSPEND, "관리자에 의해 계정이 일시 정지되었습니다. 1주 후 활동이 가능합니다."));
+    }
+
+    @Override
+    @Transactional
+    public void unSuspendUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당 사용자를 찾을 수 없습니다."));
+        if (user.getStatus() != ActiveStatus.SUSPENSION) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "계정이 정지 상태가 아닙니다.");
+        }
+        user.setStatus(ActiveStatus.ACTIVE);
+        applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user,
+                NotificationType.ACCOUNT_UNSUSPEND, "관리자에 의해 계정 정지가 해제되었습니다. 활동이 가능합니다."));
     }
 
     public MimeMessage createPasswordChangingMessage(String email, String password) {
