@@ -26,6 +26,7 @@ public class ChatMessageDto {
                 .id(chatMessage.getId())
                 .sender(chatMessage.getSender().getNickname())
                 .message(chatMessage.getMessage())
+                .createDate(chatMessage.getCreateDate())
                 .build();
     }
 }
