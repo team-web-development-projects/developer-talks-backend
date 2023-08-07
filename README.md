@@ -13,5 +13,5 @@ jdk 17
 http://localhost:8080/swagger-ui/index.html
 
 #
-
-![캡처](https://github.com/team-web-development-projects/developer-talks-backend/assets/39542757/42e4d325-e88e-4a6c-a50e-5a25fd78b966)
+ERD
+![캡처](https://github.com/team-web-development-projects/developer-talks-backend/assets/39542757/c3a29c67-ca3d-4ff3-b604-9e564aff1aea)
