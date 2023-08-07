@@ -56,11 +56,11 @@ public class User extends BaseTimeEntity implements UserDetails{
 
     private String registrationId;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<Skill> skills = new ArrayList<>();
 
