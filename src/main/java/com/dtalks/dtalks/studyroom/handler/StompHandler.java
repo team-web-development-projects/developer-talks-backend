@@ -27,9 +27,6 @@ public class StompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         String token = accessor.getFirstNativeHeader("X-AUTH-TOKEN");
         log.info("stomp handler: " + accessor.getCommand() + "\n" + accessor.getFirstNativeHeader("X-AUTH-TOKEN"));
-        String text = new String((byte[]) message.getPayload());
-        text = text.substring(1, text.length()-1);
-        log.info(accessor.getDestination() + "\n" + text);
 
         if(accessor.getCommand() != StompCommand.DISCONNECT && !tokenService.validateToken(token)) {
             log.info("토큰값이 올바르지 않습니다.");
@@ -37,6 +34,9 @@ public class StompHandler implements ChannelInterceptor {
         }
 
         if(accessor.getCommand() == StompCommand.SEND && accessor.getDestination() != null) {
+            String text = new String((byte[]) message.getPayload());
+            text = text.substring(1, text.length()-1);
+            log.info(accessor.getDestination() + "\n" + text);
             String destination[] = accessor.getDestination().split("/");
             User user = tokenService.getUserByToken(token);
             chatService.createChatMessage(Long.parseLong(destination[destination.length-1]), text, user);
