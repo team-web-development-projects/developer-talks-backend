@@ -112,7 +112,7 @@ public class CommentServiceImpl implements CommentService{
                 .build();
 
         commentRepository.save(comment);
-        if (post.getUser().getIsActive()) {
+        if (post.getUser().getIsActive() && user.getId() != post.getUser().getId()) {
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
                     NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
         }
@@ -140,11 +140,11 @@ public class CommentServiceImpl implements CommentService{
 
         commentRepository.save(comment);
 
-        if (post.getUser().getIsActive()) {
+        if (post.getUser().getIsActive() && user.getId() != post.getUser().getId()) {
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), post.getUser(),
                     NotificationType.COMMENT, messageSource.getMessage("notification.post.comment", new Object[]{post.getTitle(), user.getNickname()}, null)));
         }
-        if (!parentComment.isRemoved()) {
+        if (!parentComment.isRemoved() && user.getId() != post.getUser().getId()) {
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(comment.getId(), post.getId(), parentComment.getUser(),
                     NotificationType.RECOMMENT, messageSource.getMessage("notification.post.recomment", new Object[]{post.getTitle(), user.getNickname()}, null)));
         }

@@ -10,4 +10,7 @@ public interface UserManageService {
     Page<UserManageDto> searchAllUsersExceptQuit(Pageable pageable, ActiveStatus status);
     UserManageDto updateUserInfo(Long id, UserInfoChangeRequestDto dto);
     void updateUserPassword(Long id);
+
+    void suspendUser(Long id);
+    void unSuspendUser(Long id);
 }
