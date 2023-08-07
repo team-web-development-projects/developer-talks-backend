@@ -167,7 +167,7 @@ public class UserController {
 
     @Operation(summary = "회원 탈퇴")
     @DeleteMapping()
-    public ResponseEntity quitUser(UserSimplePasswordDto passwordDto) {
+    public ResponseEntity quitUser(@RequestBody UserSimplePasswordDto passwordDto) {
         userService.quitUser(passwordDto);
         return ResponseEntity.ok().build();
     }
