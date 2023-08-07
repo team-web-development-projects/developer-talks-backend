@@ -33,23 +33,27 @@ public class AdminUserController {
         return ResponseEntity.ok(userManageService.searchAllUsersExceptQuit(pageable, status));
     }
 
+    @Operation(summary = "회원 정보 수정(닉네임, 이메일)")
     @PutMapping("/update/{id}/info")
     public ResponseEntity<UserManageDto> updateUserInfo(@PathVariable Long id, @RequestBody @Valid UserInfoChangeRequestDto dto) {
         return ResponseEntity.ok(userManageService.updateUserInfo(id, dto));
     }
 
+    @Operation(summary = "회원 임시 비밀번호 발급")
     @PutMapping("/update/{id}/password")
     public ResponseEntity<Void> updateUserPassword(@PathVariable Long id) {
         userManageService.updateUserPassword(id);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "관리자에 의한 사용자 계정 일시 정지")
     @PutMapping("/suspend/{id}")
     public ResponseEntity<Void> suspendUser(@PathVariable Long id) {
         userManageService.suspendUser(id);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "일시 정지 상태인 계정 정지 해제")
     @PutMapping("/unSuspend/{id}")
     public ResponseEntity<Void> unSuspendUser(@PathVariable Long id) {
         userManageService.unSuspendUser(id);
