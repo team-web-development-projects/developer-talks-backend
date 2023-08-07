@@ -12,6 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 
 @Slf4j
@@ -25,17 +26,19 @@ public class FirebaseInitializer {
     private String scope;
 
     @PostConstruct
-    public void initialize() throws IOException {
+    public void initialize() {
         try {
             ClassPathResource resource = new ClassPathResource(firebaseConfigPath);
+            try (InputStream is = resource.getInputStream()) {
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(is)
+                                .createScoped(Collections.singleton(scope)))
+                        .build();
 
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(resource.getInputStream())
-                            .createScoped(Collections.singleton(scope)))
-                    .build();
-            if (FirebaseApp.getApps().isEmpty()) {
-                FirebaseApp.initializeApp(options);
-                log.info("[FCM] - Firebase init start");
+                if (FirebaseApp.getApps().isEmpty()) {
+                    FirebaseApp.initializeApp(options);
+                    log.info("[FCM] - Firebase init start");
+                }
             }
         } catch (IOException ex){
             throw new CustomException(ErrorCode.FIREBASE_INIT_ERROR, "[FCM] - firebase init error");
