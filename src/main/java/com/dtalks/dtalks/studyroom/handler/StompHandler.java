@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class StompHandler implements ChannelInterceptor {
     private final ChatService chatService;
 
     @Override
+    @Transactional
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         String token = accessor.getFirstNativeHeader("X-AUTH-TOKEN");

@@ -273,7 +273,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto updateProfile(UserProfileRequestDto userProfileRequestDto) {
-        User user = SecurityUtil.getUser();
+        User user = userRepository.findByUserid(SecurityUtil.getCurrentUserId()).get();
 
         user.setDescription(userProfileRequestDto.getDescription());
         user.setSkills(userProfileRequestDto.getSkills());
@@ -323,8 +323,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponseDto userInfo() {
-        User user = SecurityUtil.getUser();
-
+        User user = userRepository.findByUserid(SecurityUtil.getCurrentUserId()).get();
         UserResponseDto userResponseDto = UserResponseDto.toDto(user);
 
         return userResponseDto;
