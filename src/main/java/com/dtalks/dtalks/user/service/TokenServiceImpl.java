@@ -21,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
@@ -87,6 +88,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean validateToken(String token) {
         User user = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
@@ -105,15 +107,15 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Authentication getAuthentication(String token) {
         User user = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
         if (user.getStatus() != ActiveStatus.ACTIVE) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "현재 정지 상태로 활동이 불가능합니다.");
         }
-        UserDetails userDetails = user;
 
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
     }
 
     @Override

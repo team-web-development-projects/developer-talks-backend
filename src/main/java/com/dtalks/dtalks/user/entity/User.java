@@ -57,7 +57,7 @@ public class User extends BaseTimeEntity implements UserDetails{
     private String registrationId;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @Builder.Default
+    @Builder.Default // 빌더 패턴을 통해 인스턴스를 만들 때 특정 필드값으로 초기화
     private List<String> roles = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
