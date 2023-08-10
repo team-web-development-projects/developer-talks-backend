@@ -314,7 +314,7 @@ public class UserServiceImpl implements UserService {
         User user = SecurityUtil.getUser();
         Document document = user.getProfileImage();
         if(document == null) {
-            throw new CustomException(ErrorCode.FILE_NOT_FOUND_ERROR, "프로필 이미지가 존재하지 않습니다.");
+            return DocumentResponseDto.builder().build();
         }
 
         return DocumentResponseDto.toDto(document);
