@@ -18,6 +18,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,7 +40,8 @@ public class UserManageServiceImpl implements UserManageService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserManageDto> searchAllUsersExceptQuit(Pageable pageable, ActiveStatus status) {
+    public Page<UserManageDto> searchAllUsersExceptQuit(
+            @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable, ActiveStatus status) {
         Page<User> all;
         if (status == null) {
             all = userRepository.findByStatusNot(ActiveStatus.QUIT, pageable);
