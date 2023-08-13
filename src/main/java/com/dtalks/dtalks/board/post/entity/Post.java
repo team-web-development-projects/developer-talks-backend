@@ -59,6 +59,8 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer recommendCount;
 
+    private boolean forbidden;
+
     @Builder
     public static Post toEntity(PostRequestDto postDto, User user) {
         return Post.builder()
@@ -69,6 +71,7 @@ public class Post extends BaseTimeEntity {
                 .favoriteCount(0)
                 .recommendCount(0)
                 .commentCount(0)
+                .forbidden(false)
                 .build();
     }
 

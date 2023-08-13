@@ -48,6 +48,9 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public PostDto searchById(Long id) {
         Post post = findPost(id);
+        if (post.isForbidden()) {
+            throw new CustomException(ErrorCode.ACCEPTED_BUT_FORBIDDEN_BY_ADMIN, "관리자에 의해 접근이 불가능한 게시글입니다.");
+        }
         post.setViewCount(post.getViewCount() + 1);
 
         List<PostImage> imageList = imageRepository.findByPostIdOrderByOrderNum(id);
@@ -65,7 +68,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostDto> searchAllPost(Pageable pageable) {
-        Page<Post> postsPage = postRepository.findAll(pageable);
+        Page<Post> postsPage = postRepository.findByForbiddenFalse(pageable);
         return postsPage.map(PostDto::toDto);
     }
 
@@ -73,14 +76,14 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Page<PostDto> searchPostsByUser(String nickname, Pageable pageable) {
         User user = findUser(nickname);
-        Page<Post> posts = postRepository.findByUserId(user.getId(), pageable);
+        Page<Post> posts = postRepository.findByForbiddenFalseAndUserId(user.getId(), pageable);
         return posts.map(PostDto::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<PostDto> searchByWord(String keyword, Pageable pageable) {
-        Page<Post> posts = postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
+        Page<Post> posts = postRepository.findByForbiddenFalseAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
         return posts.map(PostDto::toDto);
     }
 
@@ -89,7 +92,8 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> search5BestPosts() {
         LocalDateTime time = LocalDateTime.now().minusDays(7);
         LocalDateTime goe = time.withHour(0).withMinute(0).withSecond(0);
-        List<Post> top5Posts = postRepository.findTop5ByCreateDateGreaterThanEqualAndRecommendCountGreaterThanOrderByRecommendCountDesc(goe, 0);
+        List<Post> top5Posts =
+                postRepository.findTop5ByForbiddenFalseAndCreateDateGreaterThanEqualAndRecommendCountGreaterThanOrderByRecommendCountDesc(goe, 0);
         return top5Posts.stream().map(PostDto::toDto).toList();
     }
 
