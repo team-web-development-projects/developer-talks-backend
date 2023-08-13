@@ -3,6 +3,7 @@ package com.dtalks.dtalks.studyroom.controller;
 import com.dtalks.dtalks.studyroom.dto.ChatMessageDto;
 import com.dtalks.dtalks.studyroom.dto.ChatMessageRequestDto;
 import com.dtalks.dtalks.studyroom.service.ChatService;
+import com.dtalks.dtalks.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -28,12 +31,14 @@ public class ChatController {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @MessageMapping("/rooms/{chatRoomId}")
-    public void message(@DestinationVariable Long chatRoomId, ChatMessageRequestDto chatMessageRequestDto) {
-        log.info("채팅 저장: " + chatMessageRequestDto.getMessage());
+    public void message(@DestinationVariable Long chatRoomId, ChatMessageRequestDto chatMessageRequestDto, StompHeaderAccessor stompHeaderAccessor) {
+        Authentication authentication = (Authentication) stompHeaderAccessor.getUser();
+        User user = (User) authentication.getPrincipal();
+        log.info("채팅: " + chatMessageRequestDto.getMessage() + " " + authentication.getName() + " " + user.getNickname());
         ChatMessageDto chatMessageDto = ChatMessageDto.builder()
                 .id(chatRoomId)
                 .message(chatMessageRequestDto.getMessage())
-                .sender("you")
+                .sender(user.getNickname())
                 .createDate(LocalDateTime.now())
                 .build();
         simpMessagingTemplate.convertAndSend("/sub/rooms/" + chatRoomId, chatMessageDto);
