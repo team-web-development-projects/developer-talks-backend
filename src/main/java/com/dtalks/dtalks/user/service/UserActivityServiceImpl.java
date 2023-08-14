@@ -54,7 +54,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 
         List<RecentActivityDto> activityList = new ArrayList<>();
 
-        List<Post> postList = postRepository.findByUserIdAndCreateDateBetween(user.getId(), goe, now);
+        List<Post> postList = postRepository.findByForbiddenFalseAndUserIdAndCreateDateBetween(user.getId(), goe, now);
         for (Post post : postList) {
             activityList.add(RecentActivityDto.toDto(post.getId(), null, ActivityType.POST, post.getTitle(), user.getNickname(), post.getCreateDate()));
         }
