@@ -43,7 +43,7 @@ public class AdminPostServiceImpl implements AdminPostService {
     public void removePost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글을 찾을 수 없습니다."));
         User user = post.getUser();
-        post.setForbidden(true);
+        post.forbiddenSetting();
         if (user.getUserid() != null) {
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user, NotificationType.POST_REMOVED,
                     messageSource.getMessage("notification.admin.post.remove", new Object[]{post.getTitle()}, null)));
@@ -59,7 +59,7 @@ public class AdminPostServiceImpl implements AdminPostService {
         }
 
         User user = post.getUser();
-        post.setForbidden(false);
+        post.restoreSetting();
         if (user.getUserid() != null) {
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user, NotificationType.POST_RESTORED,
                     messageSource.getMessage("notification.admin.post.restore", new Object[]{post.getTitle()}, null)));
