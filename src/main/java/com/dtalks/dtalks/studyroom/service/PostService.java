@@ -9,7 +9,7 @@ public interface PostService {
 
     PostDto addPost(PostRequestDto postRequestDto);
     Page<PostDto> getPostsByStudyRooms(Long studyRoomId, Pageable pageable);
-    PostDto getPost(Long postId);
+    PostDto getPost(Long studyRoomId, Long postId);
     PostDto changePost(PostRequestDto postRequestDto);
     void removePost(Long postId);
 }
