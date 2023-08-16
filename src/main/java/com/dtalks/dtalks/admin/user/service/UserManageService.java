@@ -11,6 +11,6 @@ public interface UserManageService {
     UserManageDto updateUserInfo(Long id, UserInfoChangeRequestDto dto);
     void updateUserPassword(Long id);
 
-    void suspendUser(Long id);
+    void suspendUser(Long id, ActiveStatus type);
     void unSuspendUser(Long id);
 }
