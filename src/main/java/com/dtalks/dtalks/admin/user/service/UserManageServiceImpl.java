@@ -15,7 +15,6 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,7 +35,6 @@ public class UserManageServiceImpl implements UserManageService {
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final MessageSource messageSource;
 
     @Override
     @Transactional(readOnly = true)

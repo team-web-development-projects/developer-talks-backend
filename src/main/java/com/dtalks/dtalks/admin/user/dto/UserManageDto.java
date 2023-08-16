@@ -33,7 +33,7 @@ public class UserManageDto {
                 .userid(user.getUserid())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-                .profileImgUrl(user.getProfileImage().getUrl())
+                .profileImgUrl(user.getProfileImage() != null ? user.getProfileImage().getUrl() : null)
                 .status(user.getStatus())
                 .createDate(user.getCreateDate())
                 .modifiedDate(user.getModifiedDate())
