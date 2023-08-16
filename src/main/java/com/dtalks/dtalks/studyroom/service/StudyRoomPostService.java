@@ -5,11 +5,11 @@ import com.dtalks.dtalks.studyroom.dto.PostRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface PostService {
+public interface StudyRoomPostService {
 
-    PostDto addPost(PostRequestDto postRequestDto);
+    PostDto addPost(Long studyRoomId, PostRequestDto postRequestDto);
     Page<PostDto> getPostsByStudyRooms(Long studyRoomId, Pageable pageable);
     PostDto getPost(Long studyRoomId, Long postId);
-    PostDto changePost(PostRequestDto postRequestDto);
-    void removePost(Long postId);
+    PostDto changePost(Long studyRoomId, Long postId, PostRequestDto postRequestDto);
+    void removePost(Long studyRoomId, Long postId);
 }

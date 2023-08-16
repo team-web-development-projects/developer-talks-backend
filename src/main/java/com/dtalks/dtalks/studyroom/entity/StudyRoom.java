@@ -43,6 +43,9 @@ public class StudyRoom extends BaseTimeEntity {
     @OneToMany(mappedBy = "studyRoom", cascade = CascadeType.ALL)
     private List<StudyRoomUser> studyRoomUsers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "studyRoom", fetch = FetchType.LAZY)
+    private List<StudyRoomPost> studyRoomPosts = new ArrayList<>();
+
     @Builder
     public static StudyRoom toEntity(StudyRoomRequestDto studyRoomRequestDto) {
         return StudyRoom.builder()

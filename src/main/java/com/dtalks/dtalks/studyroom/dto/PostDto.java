@@ -1,6 +1,6 @@
 package com.dtalks.dtalks.studyroom.dto;
 
-import com.dtalks.dtalks.studyroom.entity.Post;
+import com.dtalks.dtalks.studyroom.entity.StudyRoomPost;
 import com.dtalks.dtalks.studyroom.enums.Category;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,15 +37,15 @@ public class PostDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedDate;
 
-    public static PostDto toDto(Post post) {
+    public static PostDto toDto(StudyRoomPost studyRoomPost) {
         return PostDto.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .category(post.getCategory())
-                .viewCount(post.getViewCount())
-                .createDate(post.getCreateDate())
-                .modifiedDate(post.getModifiedDate())
+                .id(studyRoomPost.getId())
+                .title(studyRoomPost.getTitle())
+                .content(studyRoomPost.getContent())
+                .category(studyRoomPost.getCategory())
+                .viewCount(studyRoomPost.getViewCount())
+                .createDate(studyRoomPost.getCreateDate())
+                .modifiedDate(studyRoomPost.getModifiedDate())
                 .build();
     }
 }

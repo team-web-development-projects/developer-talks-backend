@@ -5,14 +5,16 @@ import com.dtalks.dtalks.studyroom.dto.PostRequestDto;
 import com.dtalks.dtalks.studyroom.enums.Category;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
-public class Post extends BaseTimeEntity {
+public class StudyRoomPost extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,8 +37,11 @@ public class Post extends BaseTimeEntity {
     @ManyToOne
     private User user;
 
-    public static Post toEntity(PostRequestDto postRequestDto, User user, StudyRoom studyRoom) {
-        return Post.builder()
+    public void addViewCount() {
+        this.viewCount++;
+    }
+    public static StudyRoomPost toEntity(PostRequestDto postRequestDto, User user, StudyRoom studyRoom) {
+        return StudyRoomPost.builder()
                 .title(postRequestDto.getTitle())
                 .content(postRequestDto.getContent())
                 .viewCount(0)
