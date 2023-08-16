@@ -130,6 +130,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public SignInResponseDto adminSignIn(SignInDto signInDto) {
+        User user = findUser(signInDto.getUserid());
+
+        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
+        passwordValidation(signInDto.getPassword(), user.getPassword());
+
+        if(!user.getIsActive())
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "비활성화된 계정입니다.");
+
+        if (!user.getRoles().contains("ROLE_ADMIN")) {
+            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "관리자가 아닙니다.");
+        }
+
+        SignInResponseDto signInResponseDto = SignInResponseDto.builder()
+                .accessToken(tokenService.createAccessToken(userTokenDto))
+                .refreshToken(tokenService.createRefreshToken(userTokenDto))
+                .build();
+        return signInResponseDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public DuplicateResponseDto useridDuplicated(String userid) {
         log.info("userid 중복체크");
         Optional<User> user = userRepository.findByUserid(userid);
