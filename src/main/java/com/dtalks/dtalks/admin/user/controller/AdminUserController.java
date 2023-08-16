@@ -45,15 +45,15 @@ public class AdminUserController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "관리자에 의한 사용자 계정 일시 정지")
-    @PutMapping("/suspend/{id}")
-    public ResponseEntity<Void> suspendUser(@PathVariable Long id) {
-        userManageService.suspendUser(id);
+    @Operation(summary = "관리자에 의한 사용자 계정 정지")
+    @PutMapping("/suspend/{id}/{type}")
+    public ResponseEntity<Void> suspendUser(@PathVariable Long id, @PathVariable ActiveStatus type) {
+        userManageService.suspendUser(id, type);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "일시 정지 상태인 계정 정지 해제")
-    @PutMapping("/unSuspend/{id}")
+    @Operation(summary = "정지 상태인 계정 정지 해제")
+    @PutMapping("/unsuspend/{id}")
     public ResponseEntity<Void> unSuspendUser(@PathVariable Long id) {
         userManageService.unSuspendUser(id);
         return ResponseEntity.ok().build();

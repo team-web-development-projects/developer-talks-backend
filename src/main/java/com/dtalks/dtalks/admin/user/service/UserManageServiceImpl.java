@@ -15,7 +15,6 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,7 +35,6 @@ public class UserManageServiceImpl implements UserManageService {
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final MessageSource messageSource;
 
     @Override
     @Transactional(readOnly = true)
@@ -72,22 +70,33 @@ public class UserManageServiceImpl implements UserManageService {
 
     @Override
     @Transactional
-    public void suspendUser(Long id) {
+    public void suspendUser(Long id, ActiveStatus type) {
+        if (type.equals(ActiveStatus.ACTIVE) || type.equals(ActiveStatus.QUIT)) {
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "일시 정지 또는 영구 정지 타입만 가능합니다.");
+        }
+
         User user = userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당 사용자를 찾을 수 없습니다."));
         if (user.getStatus() != ActiveStatus.ACTIVE) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "정지가 불가능한 상태입니다.");
         }
 
-        user.setStatus(ActiveStatus.SUSPENSION);
+        user.setStatus(type);
+        String message;
+        if (type.equals(ActiveStatus.SUSPENSION)) {
+            message = "관리자에 의해 계정이 일시 정지되었습니다. 1주 후 활동이 가능합니다.";
+        } else {
+            message = "관리자에 의해 계정이 영구 정지되었습니다. 이 계정으로 활동이 불가능합니다.";
+        }
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user,
-                NotificationType.ACCOUNT_SUSPEND, "관리자에 의해 계정이 일시 정지되었습니다. 1주 후 활동이 가능합니다."));
+                NotificationType.ACCOUNT_SUSPEND, message));
     }
 
     @Override
     @Transactional
     public void unSuspendUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당 사용자를 찾을 수 없습니다."));
-        if (user.getStatus() != ActiveStatus.SUSPENSION) {
+        ActiveStatus status = user.getStatus();
+        if (status == ActiveStatus.ACTIVE || status == ActiveStatus.QUIT) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "계정이 정지 상태가 아닙니다.");
         }
         user.setStatus(ActiveStatus.ACTIVE);
