@@ -38,7 +38,8 @@ public class RecommendPostServiceImpl implements RecommendPostService {
         Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다."));
         User user = SecurityUtil.getUser();
 
-        if (user == post.getUser()) {
+        User postWriter = post.getUser();
+        if (user.getId() == postWriter.getId()) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "작성한 글에는 추천이 불가능합니다.");
         }
         
@@ -46,13 +47,13 @@ public class RecommendPostServiceImpl implements RecommendPostService {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_ERROR, "이미 추천한 게시글입니다.");
         }
 
-        RecommendPost recommendPost = RecommendPost.toEntity(post, user);
+        RecommendPost recommendPost = RecommendPost.builder().post(post).user(user).build();
         recommendPostRepository.save(recommendPost);
 
-        post.setRecommendCount(post.getRecommendCount() + 1);
+        post.plusRecommentCount();
 
-        if (post.getUser().getIsActive()) {
-            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendPost.getId(), post.getId(), post.getUser(),
+        if (postWriter.getIsActive()) {
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(recommendPost.getId(), post.getId(), postWriter,
                     NotificationType.RECOMMEND_POST, messageSource.getMessage("notification.post.recommend", new Object[]{post.getTitle()}, null)));
         }
          return post.getRecommendCount();
@@ -68,7 +69,7 @@ public class RecommendPostServiceImpl implements RecommendPostService {
         recommendPostRepository.delete(recommendPost);
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다."));
-        post.setRecommendCount(post.getRecommendCount() - 1);
+        post.minusRecommentCount();
 
         if (post.getUser().getIsActive()) {
             Notification notification = notificationRepository.findByRefIdAndType(recommendPost.getId(), NotificationType.RECOMMEND_POST)

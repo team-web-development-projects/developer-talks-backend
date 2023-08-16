@@ -38,14 +38,14 @@ public class FavoritePostServiceImpl implements FavoritePostService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "작성한 글에는 즐겨찾기가 불가능합니다.");
         }
 
-        if (favoritePostRepository.findByPostIdAndUserId(postId, user.getId()).isPresent()) {
+        if (favoritePostRepository.existsByPostIdAndUserId(postId, user.getId())) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_ERROR, "이미 즐겨찾기로 지정되어 있습니다.");
         }
 
-        FavoritePost favoritePost = FavoritePost.toEntity(post, user);
+        FavoritePost favoritePost = FavoritePost.builder().post(post).user(user).build();
         favoritePostRepository.save(favoritePost);
 
-        post.setFavoriteCount(post.getFavoriteCount() + 1);
+        post.plusFavoriteCount();
         return post.getFavoriteCount();
     }
 
@@ -63,7 +63,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         FavoritePost favoritePost = optionalFavoritePost.get();
         favoritePostRepository.delete(favoritePost);
 
-        post.setFavoriteCount(post.getFavoriteCount() - 1);
+        post.minusFavoriteCount();
         return post.getFavoriteCount();
     }
 

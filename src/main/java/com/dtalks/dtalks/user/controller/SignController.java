@@ -53,4 +53,10 @@ public class SignController {
     public ResponseEntity<SignInResponseDto> oAuthSignUp(@Valid @RequestBody OAuthSignUpDto oAuthSignUpDto) {
         return ResponseEntity.ok(userService.oAuthSignUp(oAuthSignUpDto));
     }
+
+    @Operation(description = "관리자 로그인")
+    @PostMapping("/admin/sign-in")
+    public ResponseEntity<SignInResponseDto> adminSignIn (@RequestBody SignInDto signInDto) {
+        return ResponseEntity.ok(userService.adminSignIn(signInDto));
+    }
 }

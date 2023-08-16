@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -44,7 +43,7 @@ public class CommentInfoDto {
     String parentNickname;
 
     @Schema(description = "자식 댓글 리스트. 자신이 부모 댓글일 경우 자식 댓글 리스트 필요")
-    List<CommentInfoDto> childrenList = new ArrayList<>();
+    List<CommentInfoDto> childrenList;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
@@ -52,7 +51,6 @@ public class CommentInfoDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedDate;
 
-    @Builder
     public static CommentInfoDto toDto(Comment comment) {
         User user = comment.getUser();
         String profile = (user.getProfileImage() != null ? user.getProfileImage().getUrl() : null);

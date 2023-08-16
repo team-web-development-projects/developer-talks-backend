@@ -38,7 +38,7 @@ public class SecurityConfiguration {
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
-                        ,"/token/refresh", "/ws/chat/**", "/sub/**", "/pub/**", "/notifications/**", "/admin/**").permitAll()
+                        ,"/token/refresh", "/ws/chat/**", "/sub/**", "/pub/**", "/notifications/**", "/admin/sign-in").permitAll()
                 .requestMatchers("**exception**").permitAll()
                 .requestMatchers("/users/recent/activity/**", "/users/private/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/post/**", "/comment/**").permitAll()
@@ -47,6 +47,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/news").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users/userid").permitAll()
                 .requestMatchers(HttpMethod.GET, "/announcements/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedHandler(new CustomAccessDeniedHandler())

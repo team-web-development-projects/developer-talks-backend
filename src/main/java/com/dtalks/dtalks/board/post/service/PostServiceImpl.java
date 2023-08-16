@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
         if (post.isForbidden()) {
             throw new CustomException(ErrorCode.ACCEPTED_BUT_FORBIDDEN_BY_ADMIN, "관리자에 의해 접근이 불가능한 게시글입니다.");
         }
-        post.setViewCount(post.getViewCount() + 1);
+        post.updateViewCount();
 
         List<PostImage> imageList = imageRepository.findByPostIdOrderByOrderNum(id);
         List<String> urls = new ArrayList<>();
@@ -61,7 +61,7 @@ public class PostServiceImpl implements PostService {
             }
         }
         PostDto postDto = PostDto.toDto(post);
-        postDto.setImageUrls(urls);
+        postDto.imageUrlsSetting(urls);
         return postDto;
     }
 
@@ -101,7 +101,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Long createPost(PostRequestDto postDto) {
         User user = SecurityUtil.getUser();
-        Post post = Post.toEntity(postDto, user);
+        Post post = Post.builder().postDto(postDto).user(user).build();
         postRepository.save(post);
 
         List<MultipartFile> files = postDto.getFiles();
@@ -120,7 +120,7 @@ public class PostServiceImpl implements PostService {
                 documentRepository.save(document);
 
                 if (!setThumbnail) {
-                    post.setThumbnailUrl(document.getUrl());
+                    post.updateThumbnail(document.getUrl());
                     setThumbnail = true;
                 }
 
@@ -144,7 +144,7 @@ public class PostServiceImpl implements PostService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 수정할 수 있는 권한이 없습니다.");
         }
 
-        post.update(putRequestDto.getTitle(), putRequestDto.getContent());
+        post.updateTitleAndContent(putRequestDto.getTitle(), putRequestDto.getContent());
 
         List<OldImageDto> imgUrls = putRequestDto.getImgUrls();
         List<NewImageDto> files = putRequestDto.getFiles();
@@ -175,7 +175,7 @@ public class PostServiceImpl implements PostService {
                 imageRepository.delete(dbFile);
                 deletableUrls.add(document.getPath());
             } else {
-                dbFile.setOrderNum(orderNum);
+                dbFile.updateOrderNum(orderNum);
             }
         }
 
@@ -204,10 +204,9 @@ public class PostServiceImpl implements PostService {
         String thumbnail = null;
         // 기존 이미지가 있거나 새롭게 저장된 이미지가 있으면 썸네일 확인 및 변경
         if ((imgUrls != null && !imgUrls.isEmpty()) || files != null) {
-            Optional<PostImage> top1Image = imageRepository.findTop1ByPostId(postId);
-            thumbnail = top1Image.get().getDocument().getUrl();
+            thumbnail = imageRepository.findTop1ByPostId(postId).get().getDocument().getUrl();
         }
-        post.setThumbnailUrl(thumbnail);
+        post.updateThumbnail(thumbnail);
 
         for (String url : deletableUrls) {
             s3Uploader.deleteFile(url);
@@ -225,8 +224,7 @@ public class PostServiceImpl implements PostService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "해당 게시글을 삭제할 수 있는 권한이 없습니다.");
         }
 
-        boolean commentExists = commentRepository.existsByPostId(postId);
-        if (commentExists) {
+        if (commentRepository.existsByPostId(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_DELETABLE, "댓글이 존재하는 게시글은 삭제할 수 없습니다.");
         }
 
@@ -240,7 +238,7 @@ public class PostServiceImpl implements PostService {
             recommendPostRepository.delete(recommendPost);
         }
 
-        List<PostImage> imageList = imageRepository.findByPostId(postId);
+        List<PostImage> imageList = post.getImageList();
         postRepository.delete(post);
 
         for (PostImage image : imageList) {

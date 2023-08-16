@@ -19,6 +19,8 @@ public interface UserService {
 
     SignInResponseDto signIn(SignInDto signInDto);
 
+    SignInResponseDto adminSignIn(SignInDto signInDto);
+
     DuplicateResponseDto useridDuplicated(String userid);
 
     DuplicateResponseDto nicknameDuplicated(String nickname);

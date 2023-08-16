@@ -1,23 +1,21 @@
 package com.dtalks.dtalks.board.post.entity;
 
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
-import com.dtalks.dtalks.board.comment.entity.Comment;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseTimeEntity {
 
     @Id
@@ -38,10 +36,7 @@ public class Post extends BaseTimeEntity {
     private String thumbnailUrl;
 
     @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    List<PostImage> imageList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Comment> commentList = new ArrayList<>();
+    List<PostImage> imageList;
 
     @ColumnDefault("0")
     @Column(nullable = false)
@@ -62,22 +57,28 @@ public class Post extends BaseTimeEntity {
     private boolean forbidden;
 
     @Builder
-    public static Post toEntity(PostRequestDto postDto, User user) {
-        return Post.builder()
-                .title(postDto.getTitle())
-                .content(postDto.getContent())
-                .user(user)
-                .viewCount(0)
-                .favoriteCount(0)
-                .recommendCount(0)
-                .commentCount(0)
-                .forbidden(false)
-                .build();
+    public Post(PostRequestDto postDto, User user) {
+        this.title = postDto.getTitle();
+        this.content = postDto.getContent();
+        this.user = user;
+        this.commentCount = 0;
+        this.viewCount = 0;
+        this.favoriteCount = 0;
+        this.recommendCount = 0;
+        this.forbidden = false;
     }
 
-    public void update(String title, String content) {
+    public void updateTitleAndContent(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void updateViewCount() {
+        this.viewCount++;
+    }
+
+    public void updateThumbnail(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public void plusCommentCount() {
@@ -86,5 +87,29 @@ public class Post extends BaseTimeEntity {
 
     public void minusCommentCount() {
         this.commentCount--;
+    }
+
+    public void plusRecommentCount() {
+        this.recommendCount++;
+    }
+
+    public void minusRecommentCount() {
+        this.recommendCount--;
+    }
+
+    public void plusFavoriteCount() {
+        this.favoriteCount++;
+    }
+
+    public void minusFavoriteCount() {
+        this.favoriteCount--;
+    }
+
+    public void forbiddenSetting() {
+        this.forbidden = true;
+    }
+
+    public void restoreSetting() {
+        this.forbidden = false;
     }
 }
