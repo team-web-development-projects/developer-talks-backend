@@ -1,9 +1,9 @@
 package com.dtalks.dtalks.board.comment.service;
 
 import com.dtalks.dtalks.board.comment.dto.CommentInfoDto;
+import com.dtalks.dtalks.board.comment.dto.CommentRequestDto;
 import com.dtalks.dtalks.board.comment.dto.UserCommentDto;
 import com.dtalks.dtalks.board.comment.entity.Comment;
-import com.dtalks.dtalks.board.comment.dto.CommentRequestDto;
 import com.dtalks.dtalks.board.comment.repository.CommentRepository;
 import com.dtalks.dtalks.board.post.entity.Post;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
@@ -44,19 +44,14 @@ public class CommentServiceImpl implements CommentService{
     @Override
     @Transactional(readOnly = true)
     public CommentInfoDto searchById(Long id) {
-        Optional<Comment> optionalComment = commentRepository.findById(id);
-        if (optionalComment.isEmpty()) {
-            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다.");
-        }
-        Comment comment = optionalComment.get();
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND_ERROR, "존재하지 않는 댓글입니다."));
         return CommentInfoDto.toDto(comment);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CommentInfoDto> searchListByPostId(Long postId) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
+        if (!postRepository.existsById(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "존재하지 않는 게시글입니다.");
         }
 
@@ -105,8 +100,7 @@ public class CommentServiceImpl implements CommentService{
         post.plusCommentCount();
 
         Comment comment = Comment.builder()
-                .content(dto.getContent())
-                .secret(dto.isSecret())
+                .commentRequestDto(dto)
                 .user(user)
                 .post(post)
                 .build();
@@ -130,13 +124,12 @@ public class CommentServiceImpl implements CommentService{
         Post post = findPost(postId);
         post.plusCommentCount();
 
-        Comment comment = Comment.builder()
-                .content(dto.getContent())
-                .secret(dto.isSecret())
+        Comment comment = Comment.recommentBuilder()
+                .commentRequestDto(dto)
                 .user(user)
                 .post(post)
                 .parent(parentComment)
-                .build();
+                .recommentBuild();
 
         commentRepository.save(comment);
 
@@ -178,7 +171,8 @@ public class CommentServiceImpl implements CommentService{
         Post post = comment.getPost();
         post.minusCommentCount();
 
-        if (post.getUser().getIsActive()) {
+        User postWriter = post.getUser();
+        if (postWriter.getIsActive() && postWriter.getId() != comment.getUser().getId()) {
             Notification notification = notificationRepository.findByRefIdAndType(comment.getId(), NotificationType.COMMENT)
                     .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알림이 존재하지 않습니다."));
             if (notification.getReadStatus().equals(ReadStatus.READ)) {
@@ -203,7 +197,7 @@ public class CommentServiceImpl implements CommentService{
          * db에서 삭제가 아닌 '삭제된 댓글입니다.'로 표시하기 위해 removed = true로 변경
          */
         if (comment.getChildList().size() != 0) {
-            comment.setRemoved(true);
+            comment.updateRemove();
         }
         else {
             commentRepository.delete(getDeletableParentComment(comment));

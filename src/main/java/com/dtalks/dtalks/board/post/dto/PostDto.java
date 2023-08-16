@@ -12,9 +12,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Schema(description = "게시글 응답 DTO")
 public class PostDto {
@@ -55,7 +54,6 @@ public class PostDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedDate;
 
-    @Builder
     public static PostDto toDto(Post post) {
         User user = post.getUser();
         String profile = (user.getProfileImage() != null ? user.getProfileImage().getUrl() : null);
@@ -74,4 +72,9 @@ public class PostDto {
                 .modifiedDate(post.getModifiedDate())
                 .build();
     }
+
+    public void imageUrlsSetting(List<String> urls) {
+        this.imageUrls = urls;
+    }
+
 }

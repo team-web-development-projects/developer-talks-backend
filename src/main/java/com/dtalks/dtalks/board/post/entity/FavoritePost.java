@@ -2,14 +2,14 @@ package com.dtalks.dtalks.board.post.entity;
 
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FavoritePost {
 
     @Id
@@ -23,10 +23,8 @@ public class FavoritePost {
     private User user;
 
     @Builder
-    public static FavoritePost toEntity(Post post, User user) {
-        return FavoritePost.builder()
-                .post(post)
-                .user(user)
-                .build();
+    public FavoritePost (Post post, User user) {
+        this.post = post;
+        this.user = user;
     }
 }

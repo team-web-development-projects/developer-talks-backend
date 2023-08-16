@@ -2,14 +2,14 @@ package com.dtalks.dtalks.board.post.entity;
 
 import com.dtalks.dtalks.base.entity.Document;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +22,15 @@ public class PostImage {
     Document document;
 
     private Long orderNum;
+
+    @Builder
+    public PostImage(Post post, Document document, Long orderNum) {
+        this.post = post;
+        this.document = document;
+        this.orderNum = orderNum;
+    }
+
+    public void updateOrderNum(Long orderNum) {
+        this.orderNum = orderNum;
+    }
 }
