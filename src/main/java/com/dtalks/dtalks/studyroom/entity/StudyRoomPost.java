@@ -1,7 +1,7 @@
 package com.dtalks.dtalks.studyroom.entity;
 
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
-import com.dtalks.dtalks.studyroom.dto.PostRequestDto;
+import com.dtalks.dtalks.studyroom.dto.StudyRoomPostRequestDto;
 import com.dtalks.dtalks.studyroom.enums.Category;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
@@ -40,12 +40,12 @@ public class StudyRoomPost extends BaseTimeEntity {
     public void addViewCount() {
         this.viewCount++;
     }
-    public static StudyRoomPost toEntity(PostRequestDto postRequestDto, User user, StudyRoom studyRoom) {
+    public static StudyRoomPost toEntity(StudyRoomPostRequestDto studyRoomPostRequestDto, User user, StudyRoom studyRoom) {
         return StudyRoomPost.builder()
-                .title(postRequestDto.getTitle())
-                .content(postRequestDto.getContent())
+                .title(studyRoomPostRequestDto.getTitle())
+                .content(studyRoomPostRequestDto.getContent())
                 .viewCount(0)
-                .category(postRequestDto.getCategory())
+                .category(studyRoomPostRequestDto.getCategory())
                 .studyRoom(studyRoom)
                 .user(user)
                 .build();

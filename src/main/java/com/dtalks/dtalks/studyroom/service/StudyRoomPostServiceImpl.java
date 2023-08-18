@@ -2,8 +2,8 @@ package com.dtalks.dtalks.studyroom.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
-import com.dtalks.dtalks.studyroom.dto.PostDto;
-import com.dtalks.dtalks.studyroom.dto.PostRequestDto;
+import com.dtalks.dtalks.studyroom.dto.StudyRoomPostDto;
+import com.dtalks.dtalks.studyroom.dto.StudyRoomPostRequestDto;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomPost;
 import com.dtalks.dtalks.studyroom.entity.StudyRoom;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
@@ -19,8 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -31,50 +29,66 @@ public class StudyRoomPostServiceImpl implements StudyRoomPostService {
     private final UserRepository userRepository;
     @Override
     @Transactional
-    public PostDto addPost(Long studyRoomId, PostRequestDto postRequestDto) {
-        HashMap<String, Object> map = checkValidation(studyRoomId);
-        StudyRoomPost studyRoomPost = StudyRoomPost.toEntity(postRequestDto, (User) map.get("user"), (StudyRoom) map.get("studyRoom"));
+    public StudyRoomPostDto addPost(Long studyRoomId, StudyRoomPostRequestDto studyRoomPostRequestDto) {
+        User user = checkUser();
+        StudyRoom studyRoom = checkStudyRoom(studyRoomId);
+        checkUserJoinedStudyRoom(user, studyRoom);
+
+        StudyRoomPost studyRoomPost = StudyRoomPost.toEntity(studyRoomPostRequestDto, user, studyRoom);
         StudyRoomPost savedStudyRoomPost = studyRoomPostRepository.save(studyRoomPost);
 
-        return PostDto.toDto(savedStudyRoomPost);
+        return StudyRoomPostDto.toDto(savedStudyRoomPost);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PostDto> getPostsByStudyRooms(Long studyRoomId, Pageable pageable) {
-        HashMap<String, Object> map = checkValidation(studyRoomId);
-        Page<StudyRoomPost> post = studyRoomPostRepository.findByStudyRoom((StudyRoom) map.get("studyRoom"), pageable);
-        return post.map(PostDto::toDto);
+    public Page<StudyRoomPostDto> getPostsByStudyRooms(Long studyRoomId, Pageable pageable) {
+        User user = checkUser();
+        StudyRoom studyRoom = checkStudyRoom(studyRoomId);
+        checkUserJoinedStudyRoom(user, studyRoom);
+
+        Page<StudyRoomPost> post = studyRoomPostRepository.findByStudyRoom(studyRoom, pageable);
+        return post.map(StudyRoomPostDto::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PostDto getPost(Long studyRoomId, Long postId) {
-        HashMap<String, Object> map = checkValidation(studyRoomId);
+    public StudyRoomPostDto getPost(Long studyRoomId, Long postId) {
+        User user = checkUser();
+        StudyRoom studyRoom = checkStudyRoom(studyRoomId);
+        checkUserJoinedStudyRoom(user, studyRoom);
+
         StudyRoomPost studyRoomPost = studyRoomPostRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당 포스트를 찾을 수 없습니다."));
-        if(!isStudyRoomHasPost((StudyRoom) map.get("studyRoom"), studyRoomPost)) throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 스터디룸에 포스트가 존재하지 않습니다");
+        if(!isStudyRoomHasPost(studyRoom, studyRoomPost)) throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 스터디룸에 포스트가 존재하지 않습니다");
         studyRoomPost.addViewCount();
-        return PostDto.toDto(studyRoomPost);
+        return StudyRoomPostDto.toDto(studyRoomPost);
     }
 
     @Override
     @Transactional
-    public PostDto changePost(Long studyRoomId, Long postId, PostRequestDto postRequestDto) {
-        HashMap<String, Object> map = checkValidation(studyRoomId);
+    public StudyRoomPostDto changePost(Long studyRoomId, Long postId, StudyRoomPostRequestDto studyRoomPostRequestDto) {
+        User user = checkUser();
+        StudyRoom studyRoom = checkStudyRoom(studyRoomId);
+        checkUserJoinedStudyRoom(user, studyRoom);
+
         StudyRoomPost studyRoomPost = studyRoomPostRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당 포스트를 찾을 수 없습니다."));
-        if(!isUserPostOwner((User) map.get("user"), studyRoomPost)) throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 포스트의 주인이 아닙니다.");
-        studyRoomPost.setTitle(postRequestDto.getTitle());
-        studyRoomPost.setContent(postRequestDto.getContent());
-        studyRoomPost.setCategory(postRequestDto.getCategory());
-        return PostDto.toDto(studyRoomPost);
+        checkUserPostOwner(user, studyRoomPost);
+
+        studyRoomPost.setTitle(studyRoomPostRequestDto.getTitle());
+        studyRoomPost.setContent(studyRoomPostRequestDto.getContent());
+        studyRoomPost.setCategory(studyRoomPostRequestDto.getCategory());
+        return StudyRoomPostDto.toDto(studyRoomPost);
     }
 
     @Override
     @Transactional
     public void removePost(Long studyRoomId, Long postId) {
-        HashMap<String, Object> map = checkValidation(studyRoomId);
+        User user = checkUser();
+        StudyRoom studyRoom = checkStudyRoom(studyRoomId);
+        checkUserJoinedStudyRoom(user, studyRoom);
+
         StudyRoomPost studyRoomPost = studyRoomPostRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당 포스트를 찾을 수 없습니다."));
-        if(!isUserPostOwner((User) map.get("user"), studyRoomPost)) throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 포스트의 주인이 아닙니다.");
+        checkUserPostOwner(user, studyRoomPost);
         studyRoomPostRepository.delete(studyRoomPost);
     }
 
@@ -82,31 +96,24 @@ public class StudyRoomPostServiceImpl implements StudyRoomPostService {
         if(studyRoom.getStudyRoomPosts().contains(studyRoomPost)) return true;
         return false;
     }
-    @Transactional(readOnly = true)
-    private HashMap<String, Object> checkValidation(Long studyRoomId) {
-        HashMap<String, Object> map = new HashMap<>();
-        User user = userRepository.findByUserid(SecurityUtil.getCurrentUserId()).orElseThrow(
-                () -> new CustomException(ErrorCode.VALIDATION_ERROR, "유저를 찾을 수 없습니다.")
-        );
-        StudyRoom studyRoom = studyRoomRepository.findById(studyRoomId).orElseThrow(
-                () -> new CustomException(ErrorCode.VALIDATION_ERROR, "스터디룸을 찾을 수 없습니다.")
-        );
-        if(!isUserJoinedStudyRoom(user, studyRoom)) throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 스터디룸 가입자가 아닙니다.");
-        map.put("user", user);
-        map.put("studyRoom", studyRoom);
 
-        return map;
+    private User checkUser() {
+        return userRepository.findByUserid(SecurityUtil.getCurrentUserId()).orElseThrow(() -> new CustomException(ErrorCode.VALIDATION_ERROR, "유저를 찾을 수 없습니다."));
     }
 
-    private boolean isUserJoinedStudyRoom(User user, StudyRoom studyRoom) {
+    private StudyRoom checkStudyRoom(Long studyRoomId) {
+        return studyRoomRepository.findById(studyRoomId).orElseThrow(() -> new CustomException(ErrorCode.VALIDATION_ERROR, "스터디룸을 찾을 수 없습니다."));
+    }
+
+    private boolean checkUserJoinedStudyRoom(User user, StudyRoom studyRoom) {
         for(StudyRoomUser studyRoomUser: user.getStudyRoomUserList()) {
             if(studyRoomUser.getStudyRoom().getId() == studyRoom.getId()) return true;
         }
-        return false;
+        throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 해당 스터디룸 가입자가 아닙니다.");
     }
 
-    private boolean isUserPostOwner(User user, StudyRoomPost studyRoomPost) {
+    private boolean checkUserPostOwner(User user, StudyRoomPost studyRoomPost) {
         if(studyRoomPost.getUser().getId() == user.getId()) return true;
-        return false;
+        throw new CustomException(ErrorCode.VALIDATION_ERROR, "해당 유저는 게시글 작성자가 아닙니다.");
     }
 }

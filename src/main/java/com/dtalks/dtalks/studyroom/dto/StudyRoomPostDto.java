@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class PostDto {
+public class StudyRoomPostDto {
 
     @Schema(description = "pk")
     private Long id;
@@ -37,8 +37,8 @@ public class PostDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedDate;
 
-    public static PostDto toDto(StudyRoomPost studyRoomPost) {
-        return PostDto.builder()
+    public static StudyRoomPostDto toDto(StudyRoomPost studyRoomPost) {
+        return StudyRoomPostDto.builder()
                 .id(studyRoomPost.getId())
                 .title(studyRoomPost.getTitle())
                 .content(studyRoomPost.getContent())

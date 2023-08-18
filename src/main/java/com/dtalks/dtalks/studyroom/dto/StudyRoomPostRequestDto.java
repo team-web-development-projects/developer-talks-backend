@@ -3,10 +3,12 @@ package com.dtalks.dtalks.studyroom.dto;
 import com.dtalks.dtalks.studyroom.enums.Category;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class PostRequestDto {
+@Builder
+public class StudyRoomPostRequestDto {
 
     @NotNull
     @Schema(description = "제목")
