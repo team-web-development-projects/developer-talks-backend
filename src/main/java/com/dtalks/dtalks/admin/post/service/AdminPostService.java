@@ -5,8 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface AdminPostService {
-    Page<AdminPostDto> getAllPosts(Pageable pageable);
-    Page<AdminPostDto> getAllRemovedPosts(Pageable pageable);
-    void removePost(Long id);
+    Page<AdminPostDto> getAllPosts(Pageable pageable, boolean removed);
+    void forbidPost(Long id);
     void restorePost(Long id);
 }

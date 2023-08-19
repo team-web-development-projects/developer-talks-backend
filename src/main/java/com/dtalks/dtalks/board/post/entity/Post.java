@@ -105,11 +105,11 @@ public class Post extends BaseTimeEntity {
         this.favoriteCount--;
     }
 
-    public void forbiddenSetting() {
+    public void forbid() {
         this.forbidden = true;
     }
 
-    public void restoreSetting() {
+    public void restore() {
         this.forbidden = false;
     }
 }

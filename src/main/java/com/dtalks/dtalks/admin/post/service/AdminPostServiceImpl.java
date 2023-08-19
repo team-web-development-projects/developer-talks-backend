@@ -26,27 +26,25 @@ public class AdminPostServiceImpl implements AdminPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminPostDto> getAllPosts(Pageable pageable) {
-        Page<Post> posts = postRepository.findByForbiddenFalse(pageable);
-        return posts.map(AdminPostDto::toDto);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<AdminPostDto> getAllRemovedPosts(Pageable pageable) {
-        Page<Post> posts = postRepository.findByForbiddenTrue(pageable);
+    public Page<AdminPostDto> getAllPosts(Pageable pageable, boolean removed) {
+        Page<Post> posts;
+        if (removed == true) {
+            posts = postRepository.findByForbiddenFalse(pageable);
+        } else {
+            posts = postRepository.findByForbiddenTrue(pageable);
+        }
         return posts.map(AdminPostDto::toDto);
     }
 
     @Override
     @Transactional
-    public void removePost(Long id) {
+    public void forbidPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글을 찾을 수 없습니다."));
         User user = post.getUser();
-        post.forbiddenSetting();
+        post.forbid();
         if (user.getUserid() != null) {
-            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user, NotificationType.POST_REMOVED,
-                    messageSource.getMessage("notification.admin.post.remove", new Object[]{post.getTitle()}, null)));
+            applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user, NotificationType.POST_FORBIDDEN,
+                    messageSource.getMessage("notification.admin.post.forbidden", new Object[]{post.getTitle()}, null)));
         }
     }
 
@@ -55,11 +53,11 @@ public class AdminPostServiceImpl implements AdminPostService {
     public void restorePost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND_ERROR, "해당하는 게시글을 찾을 수 없습니다."));
         if (!post.isForbidden()) {
-            throw new CustomException(ErrorCode.VALIDATION_ERROR, "삭제 처리된 게시글이 아닙니다.");
+            throw new CustomException(ErrorCode.VALIDATION_ERROR, "접근 금지 처리된 게시글이 아닙니다.");
         }
 
         User user = post.getUser();
-        post.restoreSetting();
+        post.restore();
         if (user.getUserid() != null) {
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, user, NotificationType.POST_RESTORED,
                     messageSource.getMessage("notification.admin.post.restore", new Object[]{post.getTitle()}, null)));
