@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface AdminReportService {
-    Page<ReportedUserDto> searchAllUserReports(Pageable pageable);
-    Page<ReportDetailDto> getAllReportsByUser(Long reportedUserId, Pageable pageable);
+    Page<ReportedUserDto> searchAllNotProgressedUserReports(Pageable pageable);
+    Page<ReportDetailDto> getAllNotProgressedReportsByUser(Long reportedUserId, Pageable pageable);
     ResultType handleReport(Long reportedUserId, ResultType resultType);
 }

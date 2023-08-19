@@ -12,9 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SuperBuilder
 public abstract class Report extends ReportTimeEntity {
     @Id
@@ -39,4 +37,12 @@ public abstract class Report extends ReportTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ResultType resultType;
+
+    public void reportProcessed() {
+        this.processed = true;
+    }
+
+    public void updateResult(ResultType type) {
+        this.resultType = type;
+    }
 }
