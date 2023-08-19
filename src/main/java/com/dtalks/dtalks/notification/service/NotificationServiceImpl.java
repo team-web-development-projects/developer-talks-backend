@@ -24,9 +24,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void updateStatus(Long id) {
-        Notification alarm = notificationRepository.findById(id)
+        Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND_ERROR, "해당하는 알람을 찾을 수 없습니다."));
-        alarm.setReadStatus(ReadStatus.READ);
+        notification.updateReadStatus();
     }
 
     @Override
@@ -35,7 +35,7 @@ public class NotificationServiceImpl implements NotificationService {
         User user = SecurityUtil.getUser();
         List<Notification> notificationList = notificationRepository.findByReceiverIdAndReadStatus(user.getId(), ReadStatus.WAIT);
         for (Notification notification : notificationList) {
-            notification.setReadStatus(ReadStatus.READ);
+            notification.updateReadStatus();
         }
     }
 

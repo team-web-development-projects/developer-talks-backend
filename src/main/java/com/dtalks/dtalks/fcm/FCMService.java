@@ -22,7 +22,7 @@ public class FCMService {
     @Transactional
     public void sendMessage(Long userId, Long refId, User receiver, NotificationType type, String content, String url) {
         String token = fcmTokenManager.getToken(String.valueOf(userId));
-        notificationRepository.save(Notification.createNotification(refId, receiver, type, content, url));
+        notificationRepository.save(Notification.builder().refId(refId).receiver(receiver).type(type).message(content).url(url).build());
 
         log.info("[FCMService]- sendMessage");
         if (token != null) {
