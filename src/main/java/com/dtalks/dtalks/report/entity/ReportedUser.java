@@ -7,9 +7,7 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SuperBuilder
 @DiscriminatorValue("USER")
 public class ReportedUser extends Report {

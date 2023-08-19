@@ -31,33 +31,33 @@ public class AdminReportServiceImpl implements AdminReportService {
     private final MessageSource messageSource;
 
     @Override
-    public Page<ReportedUserDto> searchAllUserReports(Pageable pageable) {
+    public Page<ReportedUserDto> searchAllNotProgressedUserReports(Pageable pageable) {
        return customReportedUserRepository.findDistinctByProcessed(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ReportDetailDto> getAllReportsByUser(Long reportedUserId, Pageable pageable) {
-        Page<ReportedUser> reportedUser = reportedUserRepository.findByReportedUserIdAndProcessed(reportedUserId, false, pageable);
+    public Page<ReportDetailDto> getAllNotProgressedReportsByUser(Long reportedUserId, Pageable pageable) {
+        Page<ReportedUser> reportedUser = reportedUserRepository.findByProcessedFalseAndReportedUserId(reportedUserId, pageable);
         return reportedUser.map(ReportDetailDto::toDto);
     }
 
     @Override
     @Transactional
     public ResultType handleReport(Long reportedUserId, ResultType resultType) {
-        List<ReportedUser> report = reportedUserRepository.findByReportedUserIdAndProcessedAndCreateDateLessThan(reportedUserId, false, LocalDateTime.now());
+        List<ReportedUser> report = reportedUserRepository.findByProcessedFalseAndReportedUserIdAndCreateDateLessThan(reportedUserId, LocalDateTime.now());
         User reportedUser = report.get(0).getReportedUser();
         for (ReportedUser reported : report) {
-            reported.setProcessed(true);
-            reported.setResultType(resultType);
+            reported.reportProcessed();
+            reported.updateResult(resultType);
         }
 
         String message = "";
         if (resultType.equals(ResultType.BAN)) {
-            reportedUser.setStatus(ActiveStatus.BAN);
+            reportedUser.updateStatus(ActiveStatus.BAN);
             message = messageSource.getMessage("notification.reported.result.ban", null, null);
         } else if (resultType.equals(ResultType.SUSPENSION)) {
-            reportedUser.setStatus(ActiveStatus.SUSPENSION);
+            reportedUser.updateStatus(ActiveStatus.SUSPENSION);
             message = messageSource.getMessage("notification.reported.result.suspension", null, null);
         }
 

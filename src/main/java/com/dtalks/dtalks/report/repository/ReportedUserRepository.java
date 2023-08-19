@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ReportedUserRepository extends JpaRepository<ReportedUser, Long> {
     boolean existsByDtypeAndReportUserIdAndReportedUserIdAndProcessed(String dtype, Long reportUserId, Long reportedUserId, boolean processed);
-    Page<ReportedUser> findByReportedUserIdAndProcessed(Long reportedUserId, boolean processed, Pageable pageable);
-    List<ReportedUser> findByReportedUserIdAndProcessedAndCreateDateLessThan(Long reportedUserId, boolean processed, LocalDateTime createDate);
+    Page<ReportedUser> findByProcessedFalseAndReportedUserId(Long reportedUserId, Pageable pageable);
+    List<ReportedUser> findByProcessedFalseAndReportedUserIdAndCreateDateLessThan(Long reportedUserId, LocalDateTime createDate);
     List<ReportedUser> findByReportedUserId(Long reportedUserId);
 }

@@ -17,18 +17,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/user")
+@RequestMapping("/admin/users")
 public class AdminUserController {
 
     private final UserManageService userManageService;
 
-    @Operation(summary = "사용자 전체 조회 (탈퇴 사용자 제외)", parameters = {
+    @Operation(summary = "사용자 전체 조회 (탈퇴 사용자 제외)", description = "파라미터 없으면 탈퇴 사용자 제외 전체 조회, 있다면 해당하는 타입의 사용자만 조회",
+            parameters = {
             @Parameter(name = "pageable", description = "페이지, size=10, sort=id,desc 적용 중"),
     })
-    @GetMapping(value = {"/", "/{status}"})
+    @GetMapping
     public ResponseEntity<Page<UserManageDto>> searchAllUsersExceptQuit(
             @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable,
-            @PathVariable(required = false) ActiveStatus status) {
+            @RequestParam(required = false) ActiveStatus status) {
         return ResponseEntity.ok(userManageService.searchAllUsersExceptQuit(pageable, status));
     }
 
@@ -45,9 +46,9 @@ public class AdminUserController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "관리자에 의한 사용자 계정 정지")
-    @PutMapping("/suspend/{id}/{type}")
-    public ResponseEntity<Void> suspendUser(@PathVariable Long id, @PathVariable ActiveStatus type) {
+    @Operation(summary = "관리자에 의한 사용자 계정 정지, type에는 SUSPENSION, BAN만 들어가야됨")
+    @PutMapping("/suspend/{id}")
+    public ResponseEntity<Void> suspendUser(@PathVariable Long id, @RequestParam ActiveStatus type) {
         userManageService.suspendUser(id, type);
         return ResponseEntity.ok().build();
     }

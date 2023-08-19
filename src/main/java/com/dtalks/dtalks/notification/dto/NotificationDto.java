@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class NotificationDto {
     private Long id;
@@ -39,7 +39,6 @@ public class NotificationDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedDate;
 
-    @Builder
     public static NotificationDto toDto(Notification noti) {
         return NotificationDto.builder()
                 .id(noti.getId())

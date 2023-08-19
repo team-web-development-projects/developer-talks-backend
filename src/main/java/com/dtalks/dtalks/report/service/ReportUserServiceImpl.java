@@ -35,14 +35,14 @@ public class ReportUserServiceImpl implements ReportUserService {
         User reportedUser = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 사용자를 찾을 수 없습니다."));
 
         if (!reportedUser.getIsActive()) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "탈퇴한 사용자입니다.");
+            throw new CustomException(ErrorCode.ACCEPTED_BUT_IMPOSSIBLE, "탈퇴한 사용자는 신고할 수 없습니다.");
         } else if (reportedUser.getStatus() != ActiveStatus.ACTIVE) {
             throw new CustomException(ErrorCode.ACCEPTED_BUT_ALREADY_EXISTS, "신고로 인해 정지된 계정입니다.");
         }
 
         boolean reportExists = reportedUserRepository.existsByDtypeAndReportUserIdAndReportedUserIdAndProcessed("USER", reportUser.getId(), reportedUser.getId(), false);
         if (reportExists) {
-            throw new CustomException(ErrorCode.ACCEPTED_BUT_ALREADY_EXISTS, "해당 사용자에 대해 처리되지 않은 신고 접수 내역이 존재합니다.");
+            throw new CustomException(ErrorCode.ACCEPTED_BUT_ALREADY_EXISTS, "해당 사용자에 대해 처리되지 않은 신고 내역이 존재합니다.");
         }
 
         ReportedUser report = ReportedUser.builder()

@@ -1,20 +1,20 @@
 package com.dtalks.dtalks.notification.entity;
 
 import com.dtalks.dtalks.base.entity.BaseTimeEntity;
-import com.dtalks.dtalks.notification.enums.ReadStatus;
 import com.dtalks.dtalks.notification.enums.NotificationType;
+import com.dtalks.dtalks.notification.enums.ReadStatus;
 import com.dtalks.dtalks.user.entity.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification extends BaseTimeEntity{
 
     @Id
@@ -40,15 +40,17 @@ public class Notification extends BaseTimeEntity{
     private String url;
 
     @Builder
-    public static Notification createNotification(Long refId, User receiver, NotificationType type, String message, String url) {
-        return Notification.builder()
-                .refId(refId)
-                .receiver(receiver)
-                .type(type)
-                .message(message)
-                .readStatus(ReadStatus.WAIT)
-                .url(url)
-                .build();
+    public Notification (Long refId, User receiver, NotificationType type, String message, String url) {
+        this.refId = refId;
+        this.receiver = receiver;
+        this.type = type;
+        this.message = message;
+        this.readStatus = ReadStatus.WAIT;
+        this.url = url;
+    }
+
+    public void updateReadStatus() {
+        this.readStatus = ReadStatus.READ;
     }
 
     public void readDataDeleteSetting() {

@@ -22,17 +22,17 @@ public class AdminReportController {
 
     @Operation(summary = "신고가 들어온 사용자들 페이지로 보기 (size=10, sort=id,desc 적용)")
     @GetMapping("/all")
-    public ResponseEntity<Page<ReportedUserDto>> searchUserReports(
+    public ResponseEntity<Page<ReportedUserDto>> searchAllNotProgressedUserReports(
             @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(adminReportService.searchAllUserReports(pageable));
+        return ResponseEntity.ok(adminReportService.searchAllNotProgressedUserReports(pageable));
     }
 
     @Operation(summary = "신고된 사용자에게 해당하는 신고 내역 보기 (size=10, sort=id,desc 적용)")
     @GetMapping("/user/{reportedUserId}")
-    public ResponseEntity<Page<ReportDetailDto>> getAllReportsByUser(
+    public ResponseEntity<Page<ReportDetailDto>> getAllNotProgressedReportsByUser(
             @PathVariable Long reportedUserId,
             @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(adminReportService.getAllReportsByUser(reportedUserId, pageable));
+        return ResponseEntity.ok(adminReportService.getAllNotProgressedReportsByUser(reportedUserId, pageable));
     }
 
     @Operation(summary = "신고 처리, resultType=\"BAN / SUSPENSION / NP\"")

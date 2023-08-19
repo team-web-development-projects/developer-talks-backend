@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Schema(description = "신고 당한 사용자의 정보와 처리 내용")
 public class ReportedUserDto {

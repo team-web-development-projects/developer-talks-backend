@@ -153,4 +153,20 @@ public class User extends BaseTimeEntity implements UserDetails{
                 .isPrivate(false)
                 .build();
     }
+
+    public void updateStatus(ActiveStatus status){
+        this.status = status;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }

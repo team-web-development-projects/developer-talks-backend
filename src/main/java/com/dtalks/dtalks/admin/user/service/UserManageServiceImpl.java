@@ -53,8 +53,8 @@ public class UserManageServiceImpl implements UserManageService {
     @Transactional
     public UserManageDto updateUserInfo(Long id, UserInfoChangeRequestDto dto) {
         User user = userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "사용자를 찾을 수 없습니다."));
-        user.setNickname(dto.getNickname());
-        user.setEmail(dto.getEmail());
+        user.updateNickname(dto.getNickname());
+        user.updateEmail(dto.getEmail());
 
         return UserManageDto.toDto(user);
     }
@@ -64,7 +64,7 @@ public class UserManageServiceImpl implements UserManageService {
     public void updateUserPassword(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "사용자를 찾을 수 없습니다."));
         String password = createCode();
-        user.setPassword(passwordEncoder.encode(password));
+        user.updatePassword(passwordEncoder.encode(password));
         javaMailSender.send(createPasswordChangingMessage(user.getEmail(), password));
     }
 
@@ -80,7 +80,7 @@ public class UserManageServiceImpl implements UserManageService {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "정지가 불가능한 상태입니다.");
         }
 
-        user.setStatus(type);
+        user.updateStatus(type);
         String message;
         if (type.equals(ActiveStatus.SUSPENSION)) {
             message = "관리자에 의해 계정이 일시 정지되었습니다. 1주 후 활동이 가능합니다.";
