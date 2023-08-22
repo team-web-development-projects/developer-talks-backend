@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StudyRoomRepository extends JpaRepository<StudyRoom, Long> {
     Page<StudyRoom> findAll(Pageable pageable);
+    Page<StudyRoom> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String title, String content, Pageable pageable);
 }
