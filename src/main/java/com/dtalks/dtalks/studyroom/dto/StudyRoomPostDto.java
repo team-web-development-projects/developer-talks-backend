@@ -25,6 +25,10 @@ public class StudyRoomPostDto {
     @Schema(description = "내용")
     private String content;
 
+    @NotNull
+    @Schema(description = "작성자")
+    private String writer;
+
     @Schema(description = "카테고리")
     private Category category;
 
@@ -42,6 +46,7 @@ public class StudyRoomPostDto {
                 .id(studyRoomPost.getId())
                 .title(studyRoomPost.getTitle())
                 .content(studyRoomPost.getContent())
+                .writer(studyRoomPost.getUser().getNickname())
                 .category(studyRoomPost.getCategory())
                 .viewCount(studyRoomPost.getViewCount())
                 .createDate(studyRoomPost.getCreateDate())
