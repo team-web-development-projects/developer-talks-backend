@@ -139,7 +139,7 @@ public class User extends BaseTimeEntity implements UserDetails{
     }
 
     public boolean isAdmin() {
-        return this.roles.contains("ADMIN");
+        return this.roles.contains("ROLE_ADMIN");
     }
 
     public static User toUser(UserDto userDto) {
