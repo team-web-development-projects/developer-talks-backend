@@ -18,6 +18,7 @@ import com.dtalks.dtalks.studyroom.repository.StudyRoomUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
+import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +82,8 @@ public class StudyRoomServiceImpl implements StudyRoomService{
 
     @Override
     @Transactional(readOnly = true)
-    public Page<StudyRoomResponseDto> findAll(Pageable pageable) {
-        Page<StudyRoom> studyRooms = studyRoomRepository.findAll(pageable);
+    public Page<StudyRoomResponseDto> getStudyRooms(String search, Pageable pageable) {
+        Page<StudyRoom> studyRooms = studyRoomRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(search, search, pageable);
         return studyRooms.map(StudyRoomResponseDto::toDto);
     }
 

@@ -14,7 +14,7 @@ public interface StudyRoomService {
 
     public StudyRoomResponseDto findStudyRoomById(Long studyRoomId);
 
-    public Page<StudyRoomResponseDto> findAll(Pageable pageable);
+    public Page<StudyRoomResponseDto> getStudyRooms(String search, Pageable pageable);
 
     public StudyRoomResponseDto updateStudyRoom(Long id, StudyRoomRequestDto studyRoomRequestDto);
 

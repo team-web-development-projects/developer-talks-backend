@@ -53,9 +53,10 @@ public class StudyRoomController {
     @Operation(summary = "스터디룸 리스트 조회")
     @GetMapping("")
     public ResponseEntity<Page<StudyRoomResponseDto>> findAll(
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC, page = 0) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC, page = 0) @ParameterObject Pageable pageable,
+            @RequestParam(defaultValue = "") String search
     ) {
-        return ResponseEntity.ok(studyRoomService.findAll(pageable));
+        return ResponseEntity.ok(studyRoomService.getStudyRooms(search, pageable));
     }
 
     @Operation(summary = "스터디룸 수정")
