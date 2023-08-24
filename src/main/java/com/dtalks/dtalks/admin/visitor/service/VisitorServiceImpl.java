@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -65,24 +63,30 @@ public class VisitorServiceImpl implements VisitorService{
     }
 
     private static String getClientIpAddr(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
 
-        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
+        Set<String> headerNamesToCheck = new HashSet<>(Arrays.asList("Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"));
+        Set<String> headerNames = new HashSet<>(Collections.list(request.getHeaderNames()));
+
+        headerNames.retainAll(headerNamesToCheck);
+
+        String ip = null;
+
+        for (String headerName : headerNames) {
+            String headerValue = request.getHeader(headerName);
+            if (isInvalidIp(headerValue)) {
+                ip = headerValue;
+                break;
+            }
         }
-        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+
+        if (isInvalidIp(ip)) {
             ip = request.getRemoteAddr();
         }
 
         return ip;
+    }
+
+    private static boolean isInvalidIp(String ip) {
+        return ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip);
     }
 }
