@@ -14,7 +14,6 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/visitors")
 public class VisitorController {
     private final VisitorService visitorService;
 
@@ -22,7 +21,7 @@ public class VisitorController {
             @Parameter(name = "startDate", description = "조회 시작 날짜 0000-00-00 형태"),
             @Parameter(name = "endDate", description = "조회 끝 날짜 0000-00-00 형태")
     })
-    @GetMapping("/daily-count")
+    @GetMapping("/admin/visitors/daily-count")
     public ResponseEntity<Map<LocalDate, Integer>> getDailyVisitorCounts(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -32,7 +31,7 @@ public class VisitorController {
     }
 
     @Operation(summary = "일일 방문자수 증가, 같은 ip는 해당 날짜 최초방문시에만 count 증가")
-    @PostMapping("/increase")
+    @PostMapping("/visitors/increase")
     public ResponseEntity<Void> increaseVisitorCount(HttpServletRequest request) {
         visitorService.increaseVisitorCount(request);
         return ResponseEntity.ok().build();

@@ -2,6 +2,10 @@ package com.dtalks.dtalks.admin.visitor.service;
 
 import com.dtalks.dtalks.admin.visitor.entity.Visitor;
 import com.dtalks.dtalks.admin.visitor.repository.VisitorRepository;
+import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.user.Util.SecurityUtil;
+import com.dtalks.dtalks.user.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,11 @@ public class VisitorServiceImpl implements VisitorService{
 
     @Override
     public Map<LocalDate, Integer> getDailyVisitorCounts(LocalDate startDate, LocalDate endDate) {
+        User user = SecurityUtil.getUser();
+        if (!user.isAdmin()) {
+            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "관리자 권한이 아닙니다. ");
+        }
+
         Map<LocalDate, Integer> dailyCounts = new HashMap<>();
         LocalDate currentDate = startDate;
 
