@@ -89,8 +89,9 @@ public class ReportServiceImpl implements ReportService {
 
         User reportedUser = userRepository.findById(post.getUser().getId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "해당하는 사용자를 찾을 수 없습니다."));
 
+        ReportType reportType = dto.getReportType();
         if (reportedUser.getIsActive()) {
-            String type = dto.getReportType().equals(ReportType.OTHER) ? "기타" : "욕설";
+            String type = reportType.equals(ReportType.OTHER) ? "기타" : (reportType.equals(ReportType.SPAM) ? "스팸" : "욕설");
             applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(null, null, reportedUser,
                     NotificationType.REPORTED, messageSource.getMessage("notification.reported.post", new Object[]{post.getTitle(), type}, null)));
         }
