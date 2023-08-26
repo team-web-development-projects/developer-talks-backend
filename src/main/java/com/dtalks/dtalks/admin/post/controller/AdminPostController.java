@@ -27,15 +27,15 @@ public class AdminPostController {
     }
 
     @Operation(summary = "게시글 접근금지 처리 (forbidden이 true로 바뀜, 사용자 접근 불가능으로 바뀜)")
-    @PutMapping("/forbid/{id}")
-    public ResponseEntity<Void> forbidPost(@PathVariable Long id) {
+    @PutMapping("/forbid")
+    public ResponseEntity<Void> forbidPost(@RequestParam Long id) {
         adminPostService.forbidPost(id);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "게시글 복구 처리 (forbidden이 false로 바뀜, 사용자 접근 가능해짐)")
-    @PutMapping("/restore/{id}")
-    public ResponseEntity<Void> restorePost(@PathVariable Long id) {
+    @PutMapping("/restore")
+    public ResponseEntity<Void> restorePost(@RequestParam Long id) {
         adminPostService.restorePost(id);
         return ResponseEntity.ok().build();
     }
