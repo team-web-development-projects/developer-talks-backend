@@ -12,5 +12,6 @@ public interface ReportedUserRepository extends JpaRepository<ReportedUser, Long
     boolean existsByDtypeAndReportUserIdAndReportedUserIdAndProcessed(String dtype, Long reportUserId, Long reportedUserId, boolean processed);
     Page<ReportedUser> findByProcessedFalseAndReportedUserId(Long reportedUserId, Pageable pageable);
     List<ReportedUser> findByProcessedFalseAndReportedUserIdAndCreateDateLessThan(Long reportedUserId, LocalDateTime createDate);
+    List<ReportedUser> findByProcessedFalseAndReportedUserId(Long reportedUserId);
     List<ReportedUser> findByReportedUserId(Long reportedUserId);
 }
