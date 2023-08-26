@@ -26,12 +26,12 @@ public class AdminPostServiceImpl implements AdminPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminPostDto> getAllPosts(Pageable pageable, boolean removed) {
+    public Page<AdminPostDto> getAllPosts(Pageable pageable, boolean forbidden) {
         Page<Post> posts;
-        if (removed == true) {
-            posts = postRepository.findByForbiddenFalse(pageable);
-        } else {
+        if (forbidden) {
             posts = postRepository.findByForbiddenTrue(pageable);
+        } else {
+            posts = postRepository.findByForbiddenFalse(pageable);
         }
         return posts.map(AdminPostDto::toDto);
     }
