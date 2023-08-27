@@ -34,28 +34,28 @@ public class AdminUserController {
     }
 
     @Operation(summary = "회원 정보 수정(닉네임, 이메일)")
-    @PutMapping("/update/{id}/info")
-    public ResponseEntity<UserManageDto> updateUserInfo(@PathVariable Long id, @RequestBody @Valid UserInfoChangeRequestDto dto) {
+    @PutMapping("/update/info")
+    public ResponseEntity<UserManageDto> updateUserInfo(@RequestParam Long id, @RequestBody @Valid UserInfoChangeRequestDto dto) {
         return ResponseEntity.ok(userManageService.updateUserInfo(id, dto));
     }
 
     @Operation(summary = "회원 임시 비밀번호 발급")
-    @PutMapping("/update/{id}/password")
-    public ResponseEntity<Void> updateUserPassword(@PathVariable Long id) {
+    @PutMapping("/update/password")
+    public ResponseEntity<Void> updateUserPassword(@RequestParam Long id) {
         userManageService.updateUserPassword(id);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "관리자에 의한 사용자 계정 정지, type에는 SUSPENSION, BAN만 들어가야됨")
-    @PutMapping("/suspend/{id}")
-    public ResponseEntity<Void> suspendUser(@PathVariable Long id, @RequestParam ActiveStatus type) {
+    @PutMapping("/suspend")
+    public ResponseEntity<Void> suspendUser(@RequestParam Long id, @RequestParam ActiveStatus type) {
         userManageService.suspendUser(id, type);
         return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "정지 상태인 계정 정지 해제")
-    @PutMapping("/unsuspend/{id}")
-    public ResponseEntity<Void> unSuspendUser(@PathVariable Long id) {
+    @PutMapping("/unsuspend")
+    public ResponseEntity<Void> unSuspendUser(@RequestParam Long id) {
         userManageService.unSuspendUser(id);
         return ResponseEntity.ok().build();
     }

@@ -6,6 +6,10 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.notification.dto.NotificationRequestDto;
 import com.dtalks.dtalks.notification.enums.NotificationType;
+import com.dtalks.dtalks.report.entity.Report;
+import com.dtalks.dtalks.report.entity.ReportedUser;
+import com.dtalks.dtalks.report.enums.ResultType;
+import com.dtalks.dtalks.report.repository.ReportedUserRepository;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.UserRepository;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -32,6 +37,8 @@ import java.util.Random;
 public class UserManageServiceImpl implements UserManageService {
 
     private final UserRepository userRepository;
+    private final ReportedUserRepository reportedUserRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JavaMailSender javaMailSender;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -81,6 +88,15 @@ public class UserManageServiceImpl implements UserManageService {
         }
 
         user.updateStatus(type);
+        List<ReportedUser> reportList = reportedUserRepository.findByProcessedFalseAndReportedUserId(user.getId());
+        if (!reportList.isEmpty()) {
+            for (Report report : reportList) {
+                report.reportProcessed();
+                ResultType resultType = type.equals(ActiveStatus.SUSPENSION) ? ResultType.SUSPENSION : ResultType.BAN;
+                report.updateResult(resultType);
+            }
+        }
+
         String message;
         if (type.equals(ActiveStatus.SUSPENSION)) {
             message = "관리자에 의해 계정이 일시 정지되었습니다. 1주 후 활동이 가능합니다.";

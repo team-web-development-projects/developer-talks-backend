@@ -1,6 +1,6 @@
 package com.dtalks.dtalks.admin.report.dto;
 
-import com.dtalks.dtalks.report.entity.ReportedUser;
+import com.dtalks.dtalks.report.entity.Report;
 import com.dtalks.dtalks.report.enums.ReportType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,7 +37,7 @@ public class ReportDetailDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime modifiedDate;
 
-    public static ReportDetailDto toDto(ReportedUser report) {
+    public static ReportDetailDto toDto(Report report) {
         return ReportDetailDto.builder()
                 .id(report.getId())
                 .reportUserNickname(report.getReportUser().getNickname())
