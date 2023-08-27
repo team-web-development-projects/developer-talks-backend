@@ -26,7 +26,8 @@ public class FCMService {
 
         log.info("[FCMService]- sendMessage");
         if (token != null) {
-            com.google.firebase.messaging.Notification notification = com.google.firebase.messaging.Notification.builder().setTitle(type.name())
+            com.google.firebase.messaging.Notification notification = com.google.firebase.messaging.Notification.builder()
+                    .setTitle("Developer-Talks")
                     .setBody(content).build();
             Message message = Message.builder()
                     .setToken(token)
