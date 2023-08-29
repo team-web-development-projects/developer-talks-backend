@@ -14,37 +14,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/announcements")
 @RequiredArgsConstructor
 public class AnnouncementController {
     private final AnnouncementService announcementService;
 
     @Operation(summary = "특정 공지문 id로 조회")
-    @GetMapping("/{id}")
+    @GetMapping("/announcements/{id}")
     public ResponseEntity<AnnouncementResponseDto> searchById(@PathVariable Long id) {
         return ResponseEntity.ok(announcementService.searchById(id));
     }
 
     @Operation(summary = "모든 공지문 조회")
-    @GetMapping("/all")
+    @GetMapping("/announcements/all")
     public ResponseEntity<Page<AnnouncementResponseDto>> searchAll(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(announcementService.searchAllAnnouncement(pageable));
     }
 
     @Operation(summary = "공지문 작성")
-    @PostMapping
+    @PostMapping("/admin/announcements")
     public ResponseEntity<Long> createAnnouncement(@Valid @RequestBody AnnounceDto announceDto) {
         return ResponseEntity.ok(announcementService.createAnnouncement(announceDto));
     }
 
     @Operation(summary = "공지문 수정")
-    @PutMapping("/{id}")
+    @PutMapping("/admin/announcements/{id}")
     public ResponseEntity<Long> updateAnnouncement(@Valid @RequestBody AnnounceDto announceDto, @PathVariable Long id) {
         return ResponseEntity.ok(announcementService.updateAnnouncement(announceDto, id));
     }
 
     @Operation(summary = "공지문 삭제")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/announcements/{id}")
     public void deleteAnnouncement(@PathVariable Long id) {
         announcementService.deleteAnnouncement(id);
     }
