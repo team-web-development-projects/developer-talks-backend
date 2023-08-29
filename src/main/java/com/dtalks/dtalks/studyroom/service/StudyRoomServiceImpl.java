@@ -13,6 +13,7 @@ import com.dtalks.dtalks.studyroom.dto.StudyRoomResponseDto;
 import com.dtalks.dtalks.studyroom.entity.StudyRoom;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
 import com.dtalks.dtalks.studyroom.enums.StudyRoomLevel;
+import com.dtalks.dtalks.studyroom.repository.ChatRoomRepository;
 import com.dtalks.dtalks.studyroom.repository.StudyRoomRepository;
 import com.dtalks.dtalks.studyroom.repository.StudyRoomUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
@@ -46,7 +47,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final ChatService chatService;
-
+    private final ChatRoomRepository chatRoomRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MessageSource messageSource;
 
@@ -134,7 +135,7 @@ public class StudyRoomServiceImpl implements StudyRoomService{
         for(StudyRoomUser studyRoomUser: studyRoomUsers) {
             if(studyRoomUser.getStudyRoomLevel().equals(StudyRoomLevel.LEADER)) {
                 if(studyRoomUser.getUser().getUserid().equals(SecurityUtil.getUser().getUserid())) {
-                    studyRoomRepository.delete(studyRoom);
+                    chatRoomRepository.delete(chatRoomRepository.findById(studyRoom.getId()).get());
                     return;
                 }
             }
