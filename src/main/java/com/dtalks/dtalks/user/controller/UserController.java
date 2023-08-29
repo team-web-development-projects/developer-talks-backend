@@ -1,12 +1,16 @@
 package com.dtalks.dtalks.user.controller;
 
 import com.dtalks.dtalks.base.dto.DocumentResponseDto;
+import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.service.UserActivityService;
 import com.dtalks.dtalks.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -97,6 +101,9 @@ public class UserController {
     @GetMapping(value = "/recent/activity/{nickname}")
     @Operation(summary = "특정 유저의 최근활동 조회 (페이지 사용, size = 10, sort=\"createDate\" desc 적용)", parameters = {
             @Parameter(name = "nickname", description = "조회할 유저의 닉네임")
+    }, responses = {
+            @ApiResponse(responseCode = "202", description = "비공개 설정 사용자를 존재함", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "해당 사용자가 db에 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     public ResponseEntity<Page<RecentActivityDto>> getRecentActivities(@AuthenticationPrincipal UserDetails userDetails,
                                                                        @PathVariable String nickname,
@@ -107,6 +114,8 @@ public class UserController {
 
     @Operation(summary = "특정 유저의 비공개 여부 조회", parameters = {
             @Parameter(name = "id", description = "조회할 유저의 로그인 아이디"),
+    }, responses = {
+            @ApiResponse(responseCode = "400", description = "해당 사용자가 db에 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     @GetMapping(value = "/private/{id}")
     public ResponseEntity<Boolean> getPrivateStatus(@PathVariable String id) {

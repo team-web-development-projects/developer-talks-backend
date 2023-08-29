@@ -5,8 +5,12 @@ import com.dtalks.dtalks.admin.report.dto.ReportedPostDto;
 import com.dtalks.dtalks.admin.report.dto.ReportedUserDto;
 import com.dtalks.dtalks.admin.report.enums.DType;
 import com.dtalks.dtalks.admin.report.service.AdminReportService;
+import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
 import com.dtalks.dtalks.report.enums.ResultType;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,7 +56,10 @@ public class AdminReportController {
         return ResponseEntity.ok(adminReportService.getAllNotProgressedReportsByPost(reportedPostId, pageable));
     }
 
-    @Operation(summary = "신고된 사용자 또는 게시글 처리", description = "사용자일 경우에는 BAN, SUSPENSION, NP / 게시글은 NP, FORBIDDEN")
+    @Operation(summary = "신고된 사용자 또는 게시글 처리", description = "사용자일 경우에는 BAN, SUSPENSION, NP / 게시글은 NP, FORBIDDEN", responses = {
+            @ApiResponse(responseCode = "400", description = "USER(NP,SUSPENSION,BAN)나 POST(NP,FORBIDDEN)에 처리할 수 있는 타입이 다른데 잘못 들어올때 발생하는 에러", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "해당 신고 내역이 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+    })
     @PutMapping("/handle/{dtype}")
     public ResponseEntity<ResultType> handleReports(@PathVariable DType dtype, @RequestParam Long reportedObjectId, @RequestParam ResultType resultType) {
         return ResponseEntity.ok(adminReportService.handleReports(dtype, reportedObjectId, resultType));

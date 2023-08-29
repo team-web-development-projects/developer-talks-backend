@@ -2,7 +2,11 @@ package com.dtalks.dtalks.admin.post.controller;
 
 import com.dtalks.dtalks.admin.post.dto.AdminPostDto;
 import com.dtalks.dtalks.admin.post.service.AdminPostService;
+import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,14 +30,18 @@ public class AdminPostController {
         return ResponseEntity.ok(adminPostService.getAllPosts(pageable, forbidden));
     }
 
-    @Operation(summary = "게시글 접근금지 처리 (forbidden이 true로 바뀜, 사용자 접근 불가능으로 바뀜)")
+    @Operation(summary = "게시글 접근금지 처리 (forbidden이 true로 바뀜, 사용자 접근 불가능으로 바뀜)", responses = {
+            @ApiResponse(responseCode = "404", description = "해당 게시글이 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+    })
     @PutMapping("/forbid")
     public ResponseEntity<Void> forbidPost(@RequestParam Long id) {
         adminPostService.forbidPost(id);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "게시글 복구 처리 (forbidden이 false로 바뀜, 사용자 접근 가능해짐)")
+    @Operation(summary = "게시글 복구 처리 (forbidden이 false로 바뀜, 사용자 접근 가능해짐)", responses = {
+            @ApiResponse(responseCode = "400", description = "접근 금지 게시글이 아님", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+    })
     @PutMapping("/restore")
     public ResponseEntity<Void> restorePost(@RequestParam Long id) {
         adminPostService.restorePost(id);

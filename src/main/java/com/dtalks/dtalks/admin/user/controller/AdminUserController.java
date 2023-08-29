@@ -3,9 +3,13 @@ package com.dtalks.dtalks.admin.user.controller;
 import com.dtalks.dtalks.admin.user.dto.UserInfoChangeRequestDto;
 import com.dtalks.dtalks.admin.user.dto.UserManageDto;
 import com.dtalks.dtalks.admin.user.service.UserManageService;
+import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -46,14 +50,18 @@ public class AdminUserController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "관리자에 의한 사용자 계정 정지, type에는 SUSPENSION, BAN만 들어가야됨")
+    @Operation(summary = "관리자에 의한 사용자 계정 정지, type에는 SUSPENSION, BAN만 들어가야됨", responses = {
+            @ApiResponse(responseCode = "400", description = "사용자가 없을 때/ BAN,SUSPENSION이 아닌 ACTIVE나 QUIT이 들어온 경우/ 정지하려는 사용자가 ACTIVE 상태가 아닐 때 발생", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+    })
     @PutMapping("/suspend")
     public ResponseEntity<Void> suspendUser(@RequestParam Long id, @RequestParam ActiveStatus type) {
         userManageService.suspendUser(id, type);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "정지 상태인 계정 정지 해제")
+    @Operation(summary = "정지 상태인 계정 정지 해제", responses = {
+            @ApiResponse(responseCode = "400", description = "사용자가 없을 때/ 계정이 정지 상태가 아닐 때 발생", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+    })
     @PutMapping("/unsuspend")
     public ResponseEntity<Void> unSuspendUser(@RequestParam Long id) {
         userManageService.unSuspendUser(id);

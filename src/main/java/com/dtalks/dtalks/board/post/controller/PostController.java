@@ -7,8 +7,12 @@ import com.dtalks.dtalks.board.post.service.PostService;
 import com.dtalks.dtalks.board.post.dto.PostDto;
 import com.dtalks.dtalks.board.post.dto.PostRequestDto;
 import com.dtalks.dtalks.board.post.service.RecommendPostService;
+import com.dtalks.dtalks.exception.dto.ErrorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,7 +34,10 @@ public class PostController {
     private final FavoritePostService favoritePostService;
     private final RecommendPostService recommendPostService;
 
-    @Operation(summary = "특정 게시글 id로 조회, 조회수 + 1 작동")
+    @Operation(summary = "특정 게시글 id로 조회, 조회수 + 1 작동", responses = {
+            @ApiResponse(responseCode = "202", description = "관리자에 의해 접근 금지 처리 된 게시글", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "db에 존재하지 않는 게시글", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+    })
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> searchById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.searchById(id));
@@ -93,7 +100,10 @@ public class PostController {
     }
 
 
-    @Operation(summary = "게시글 삭제")
+    @Operation(summary = "게시글 삭제", responses = {
+            @ApiResponse(responseCode = "403", description = "해당 게시글을 삭제할 수 있는 권한이 없음. 게시글 작성자가 아님", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "202", description = "댓글이 존재하는 게시글은 삭제할 수 없음.", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
@@ -117,6 +127,9 @@ public class PostController {
 
     @Operation(summary = "게시글 즐겨찾기 설정", parameters = {
             @Parameter(name = "id", description = "즐겨찾기할 게시글의 id")
+    }, responses = {
+            @ApiResponse(responseCode = "202", description = "작성한 글에는 즐겨찾기 불가능, 이미 즐겨찾기로 설정되어 있음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "해당 게시글이 db에 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     @PostMapping("/favorite/{id}")
     public ResponseEntity<Integer> favorite(@PathVariable Long id) {
@@ -126,6 +139,8 @@ public class PostController {
 
     @Operation(summary = "게시글 즐겨찾기 취소", parameters = {
             @Parameter(name = "id", description = "즐겨찾기를 취소할 게시글의 id")
+    }, responses = {
+            @ApiResponse(responseCode = "404", description = "해당 게시글을 즐겨찾기 하지 않았음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     @DeleteMapping("/favorite/{id}")
     public ResponseEntity<Integer> unFavorite(@PathVariable Long id) {
@@ -135,6 +150,9 @@ public class PostController {
 
     @Operation(summary = "게시글 추천", parameters = {
             @Parameter(name = "id", description = "추천할 게시글의 id")
+    }, responses = {
+            @ApiResponse(responseCode = "202", description = "작성한 글에는 추천 불가능, 이미 추천 설정되어 있음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "해당 게시글이 db에 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     @PostMapping("/recommend/{id}")
     public ResponseEntity<Integer> recommend(@PathVariable Long id) {
@@ -144,6 +162,8 @@ public class PostController {
 
     @Operation(summary = "게시글 추천 취소", parameters = {
             @Parameter(name = "id", description = "추천을 취소할 게시글의 id")
+    }, responses = {
+            @ApiResponse(responseCode = "404", description = "해당 게시글은 추천 상태가 아님 / 게시글이 존재하지 않음 / 게시글 작성자에게 추천 알림 기록이 없음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     @DeleteMapping("/recommend/{id}")
     public ResponseEntity<Integer> cancelRecommend(@PathVariable Long id) {
