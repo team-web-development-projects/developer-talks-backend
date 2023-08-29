@@ -1,10 +1,12 @@
 package com.dtalks.dtalks.exception.dto;
 
 import com.dtalks.dtalks.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+@Schema(description = "에러 응답 DTO")
 @Data
 public class ErrorResponseDto {
 
