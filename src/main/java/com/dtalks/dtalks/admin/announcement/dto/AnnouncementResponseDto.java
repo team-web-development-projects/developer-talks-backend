@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @Builder
 @Schema(description = "공지사항 응답 DTO")
 public class AnnouncementResponseDto {
+    private Long id;
+
     @NotBlank
     private String title;
 
@@ -35,6 +37,7 @@ public class AnnouncementResponseDto {
 
     public static AnnouncementResponseDto toDto(Announcement announcement) {
         return AnnouncementResponseDto.builder()
+                .id(announcement.getId())
                 .title(announcement.getTitle())
                 .content(announcement.getContent())
                 .writer("관리자")
