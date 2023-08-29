@@ -4,6 +4,7 @@ import com.dtalks.dtalks.studyroom.enums.Skill;
 import com.dtalks.dtalks.user.entity.User;
 import lombok.Builder;
 import lombok.Data;
+import org.hibernate.Hibernate;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class UserResponseDto {
     private String registrationId;
 
     public static UserResponseDto toDto(User user) {
+        Hibernate.initialize(user.getSkills());
         return UserResponseDto.builder()
                 .userid(user.getUserid())
                 .nickname(user.getNickname())
