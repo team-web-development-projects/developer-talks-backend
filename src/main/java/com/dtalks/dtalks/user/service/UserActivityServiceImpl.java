@@ -45,7 +45,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         if (user.getIsPrivate()) {
             User currentUser = (User) userDetails;
             if (userDetails == null || !currentUser.getNickname().equals(nickname)) {
-                throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "비공개 설정으로 사용자의 최근활동 조회가 불가능합니다.");
+                throw new CustomException(ErrorCode.ACCEPTED_BUT_IMPOSSIBLE, "비공개 설정으로 사용자의 최근활동 조회가 불가능합니다.");
             }
         }
 

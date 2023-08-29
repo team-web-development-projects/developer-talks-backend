@@ -40,7 +40,7 @@ public class RecommendPostServiceImpl implements RecommendPostService {
 
         User postWriter = post.getUser();
         if (user.getId() == postWriter.getId()) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "작성한 글에는 추천이 불가능합니다.");
+            throw new CustomException(ErrorCode.ACCEPTED_BUT_IMPOSSIBLE, "작성한 글에는 추천이 불가능합니다.");
         }
         
         if (recommendPostRepository.findByPostIdAndUserId(postId, user.getId()).isPresent()) {

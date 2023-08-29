@@ -35,7 +35,7 @@ public class FavoritePostServiceImpl implements FavoritePostService {
         User user = SecurityUtil.getUser();
 
         if (user == post.getUser()) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "작성한 글에는 즐겨찾기가 불가능합니다.");
+            throw new CustomException(ErrorCode.ACCEPTED_BUT_IMPOSSIBLE, "작성한 글에는 즐겨찾기가 불가능합니다.");
         }
 
         if (favoritePostRepository.existsByPostIdAndUserId(postId, user.getId())) {
