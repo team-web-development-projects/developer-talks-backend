@@ -15,6 +15,7 @@ public class ReportedUserInfoDto {
     private String userid;
     private String email;
     private String nickname;
+    private String profileImgUrl;
 
     public static ReportedUserInfoDto toDto(User user) {
         return ReportedUserInfoDto.builder()
@@ -22,6 +23,7 @@ public class ReportedUserInfoDto {
                 .userid(user.getUserid())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .profileImgUrl(user.getProfileImage() != null ? user.getProfileImage().getUrl() : null)
                 .build();
     }
 }
