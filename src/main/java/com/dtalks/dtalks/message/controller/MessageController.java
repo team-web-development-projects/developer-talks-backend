@@ -16,10 +16,11 @@ import java.util.List;
 public class MessageController {
 
     private final MessageService messageService;
-    @Operation(summary = "특정 쪽지 id로 조회")
-    @GetMapping("/{id}")
-    public ResponseEntity<MessageDto> searchById(@PathVariable Long id) {
-        return ResponseEntity.ok(messageService.searchById(id));
+
+    @Operation(summary = "쪽지 리스트 받는이 닉네임으로 조회")
+    @GetMapping("/byNickname/{nickname}")
+    public ResponseEntity<List<MessageDto>> searchByNickname(@PathVariable String nickname) {
+        return ResponseEntity.ok(messageService.searchByNickname(nickname));
     }
 
     @Operation(summary = "보낸 쪽지함 조회")

@@ -13,10 +13,8 @@ import com.dtalks.dtalks.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,24 +31,31 @@ public class MessageServiceImpl implements MessageService{
 
     @Override
     @Transactional(readOnly = true)
-    public MessageDto searchById(Long id) {
-        Optional<Message> messageOptional = messageRepository.findById(id);
-        if (messageOptional.isEmpty()) {
+    public List<MessageDto> searchByNickname(String nickname) {
+        User sender = SecurityUtil.getUser(); //조회하려는 사람
+
+        User receiver = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "존재하지 않는 회원입니다. "));
+
+        List<Message> messageList = messageRepository.findByReceiverAndSenderOrderByCreateDateAsc(receiver, sender);
+        if (messageList.isEmpty()) {
             throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND_ERROR, "쪽지가 존재하지 않습니다. ");
         }
-        Message message = messageOptional.get();
-        MessageDto messageDto = MessageDto.toDto(message);
-        return messageDto;
+        List<MessageDto> messageDtoList = messageList.stream()
+                .map(MessageDto::toDto)
+                .collect(Collectors.toList());
+
+        return messageDtoList;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MessageDto> searchSentMessage() {
         User user = SecurityUtil.getUser();
-        List<Message> messageList = messageRepository.findBySender(user);
+        List<Message> messageList = messageRepository.findBySenderOrderByCreateDateAsc(user);
 
         if (messageList.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "보낸 쪽지가 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND_ERROR, "보낸 쪽지가 존재하지 않습니다. ");
         }
 
         List<MessageDto>  sentMessages = messageList.stream()
@@ -65,7 +70,7 @@ public class MessageServiceImpl implements MessageService{
     @Transactional(readOnly = true)
     public List<MessageDto> searchReceiveMessage() {
         User user = SecurityUtil.getUser();
-        List<Message> messageList = messageRepository.findByReceiver(user);
+        List<Message> messageList = messageRepository.findByReceiverOrderByCreateDateAsc(user);
 
         if (messageList.isEmpty()) {
             throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND_ERROR, "받은 쪽지가 존재하지 않습니다. ");

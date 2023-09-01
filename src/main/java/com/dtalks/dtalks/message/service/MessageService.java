@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface MessageService {
 
-    MessageDto searchById(Long id);
+    List<MessageDto> searchByNickname(String nickname);
 
     List<MessageDto> searchSentMessage();
 
