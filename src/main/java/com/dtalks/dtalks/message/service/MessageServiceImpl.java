@@ -98,7 +98,7 @@ public class MessageServiceImpl implements MessageService{
         Message message = Message.toEntity(messageDto, sender, receiver);
         messageRepository.save(message);
         applicationEventPublisher.publishEvent(NotificationRequestDto.toDto(message.getId(), message.getId(), receiver,
-                NotificationType.MESSAGE, messageSource.getMessage("notification.message", new Object[]{message.getSender()}, null)));
+                NotificationType.MESSAGE, messageSource.getMessage("notification.message", new Object[]{sender.getNickname()}, null)));
 
         return message.getId();
     }
