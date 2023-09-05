@@ -7,6 +7,7 @@ import com.dtalks.dtalks.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import org.hibernate.Hibernate;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class StudyRoomJoinResponseDto {
     private List<Skill> skills;
 
     public static StudyRoomJoinResponseDto toDto(StudyRoom studyRoom, StudyRoomUser studyRoomUser, User user) {
+        Hibernate.initialize(user.getSkills());
         return StudyRoomJoinResponseDto.builder()
                 .studyRoomId(studyRoom.getId())
                 .title(studyRoom.getTitle())
