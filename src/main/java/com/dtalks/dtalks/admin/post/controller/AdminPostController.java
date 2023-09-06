@@ -26,7 +26,7 @@ public class AdminPostController {
     @GetMapping("/all")
     public ResponseEntity<Page<AdminPostDto>> getAllPosts(
             @PageableDefault(size = 10, sort = "id",  direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) boolean forbidden) {
+            @RequestParam(required = false) Boolean forbidden) {
         return ResponseEntity.ok(adminPostService.getAllPosts(pageable, forbidden));
     }
 
