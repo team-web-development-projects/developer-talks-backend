@@ -86,11 +86,6 @@ public class TokenServiceImpl implements TokenService {
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-            Date date = Date.from(user.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant());
-            // 토큰 발행일이 유저 데이터 수정일 이전이면 유효하지 않은 토큰임
-            if(claims.getBody().getIssuedAt().before(date)) {
-                throw new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 토큰입니다.");
-            }
             return !claims.getBody().getExpiration().before(new Date());
         }
         catch (Exception e) {
