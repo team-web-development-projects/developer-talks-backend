@@ -132,13 +132,13 @@ public class UserController {
 
     @Operation(summary = "유저 닉네임 변경")
     @PutMapping(value = "/profile/nickname")
-    public ResponseEntity<SignInResponseDto> updateNickname(@RequestBody UserNicknameDto userNicknameDto) {
+    public ResponseEntity<UserResponseDto> updateNickname(@RequestBody UserNicknameDto userNicknameDto) {
         return ResponseEntity.ok(userService.updateNickname(userNicknameDto));
     }
 
     @Operation(summary = "유저 아이디 변경")
     @PutMapping(value = "/profile/userid")
-    public ResponseEntity<SignInResponseDto> updateUserid(
+    public ResponseEntity<UserResponseDto> updateUserid(
             @RequestBody @Valid UseridDto useridDto
     ) {
         return ResponseEntity.ok(userService.updateUserid(useridDto));
@@ -146,15 +146,16 @@ public class UserController {
 
     @Operation(summary = "유저 비밀번호 변경")
     @PutMapping(value = "/profile/password")
-    public ResponseEntity<SignInResponseDto> updateUserPassword(
+    public ResponseEntity<Void> updateUserPassword(
             @RequestBody @Valid UserPasswordDto userPasswordDto
     ) {
-        return ResponseEntity.ok(userService.updatePassword(userPasswordDto));
+        userService.updatePassword(userPasswordDto);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "유저 이메일 변경")
     @PutMapping(value = "/profile/email")
-    public ResponseEntity<SignInResponseDto> updateUserEmail(
+    public ResponseEntity<UserResponseDto> updateUserEmail(
             @RequestBody @Valid UserEmailDto userEmailDto
     ) {
         return ResponseEntity.ok(userService.updateEmail(userEmailDto));
