@@ -60,6 +60,7 @@ public class OAuthServiceImpl implements OAuth2UserService<OAuth2UserRequest, OA
     private Map customAttribute(Map attributes, String userNameAttributeName, User user) {
         Map<String, Object> customAttribute = new LinkedHashMap<>();
         customAttribute.put(userNameAttributeName, attributes.get(userNameAttributeName));
+        customAttribute.put("id", user.getId());
         customAttribute.put("email", user.getEmail());
         customAttribute.put("userid", user.getEmail());
         customAttribute.put("registrationId", user.getRegistrationId());

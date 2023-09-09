@@ -2,7 +2,6 @@ package com.dtalks.dtalks.user.service;
 
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
-import com.dtalks.dtalks.user.dto.UserTokenDto;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.UserRepository;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,11 +45,8 @@ public class TokenServiceImpl implements TokenService {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
     }
     @Override
-    public String createAccessToken(UserTokenDto userTokenDto) {
-        Claims claims = Jwts.claims().setSubject(userTokenDto.getEmail());
-        claims.put("userid", userTokenDto.getUserid());
-        claims.put("nickname", userTokenDto.getNickname());
-        claims.put("provider", userTokenDto.getProvider());
+    public String createAccessToken(Long id) {
+        Claims claims = Jwts.claims().setSubject(Long.toString(id));
         Date now = new Date();
 
         String accessToken = Jwts.builder()
@@ -65,11 +60,8 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String createRefreshToken(UserTokenDto userTokenDto) {
-        Claims claims = Jwts.claims().setSubject(userTokenDto.getEmail());
-        claims.put("userid", userTokenDto.getUserid());
-        claims.put("nickname", userTokenDto.getNickname());
-        claims.put("provider", userTokenDto.getProvider());
+    public String createRefreshToken(Long id) {
+        Claims claims = Jwts.claims().setSubject(Long.toString(id));
         Date now = new Date();
 
         String refreshToken = Jwts.builder()

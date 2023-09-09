@@ -70,10 +70,9 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(savedUser.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(savedUser.getId()));
 
         return signInResponseDto;
     }
@@ -111,7 +110,6 @@ public class UserServiceImpl implements UserService {
         log.info("로그인");
         User user = findUser(signInDto.getUserid());
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
         log.info(signInDto.getPassword() + " " + user.getPassword());
         passwordValidation(signInDto.getPassword(), user.getPassword());
 
@@ -122,8 +120,8 @@ public class UserServiceImpl implements UserService {
             deleteAndSaveFCMToken(user.getId(), signInDto.getFcmToken());
         }
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .accessToken(tokenService.createAccessToken(userTokenDto))
-                .refreshToken(tokenService.createRefreshToken(userTokenDto))
+                .accessToken(tokenService.createAccessToken(user.getId()))
+                .refreshToken(tokenService.createRefreshToken(user.getId()))
                 .build();
         return signInResponseDto;
     }
@@ -133,7 +131,6 @@ public class UserServiceImpl implements UserService {
     public SignInResponseDto adminSignIn(SignInDto signInDto) {
         User user = findUser(signInDto.getUserid());
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
         passwordValidation(signInDto.getPassword(), user.getPassword());
 
         if(!user.getIsActive())
@@ -144,8 +141,8 @@ public class UserServiceImpl implements UserService {
         }
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .accessToken(tokenService.createAccessToken(userTokenDto))
-                .refreshToken(tokenService.createRefreshToken(userTokenDto))
+                .accessToken(tokenService.createAccessToken(user.getId()))
+                .refreshToken(tokenService.createRefreshToken(user.getId()))
                 .build();
         return signInResponseDto;
     }
@@ -193,10 +190,9 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findByEmail(tokenService.getEmailByToken(refreshToken)).get();
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
 
         return signInResponseDto;
     }
@@ -217,11 +213,10 @@ public class UserServiceImpl implements UserService {
         user.setUserid(useridDto.getUserid());
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
 
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
         return signInResponseDto;
     }
 
@@ -236,11 +231,10 @@ public class UserServiceImpl implements UserService {
         user.setNickname(userNicknameDto.getNickname());
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
 
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
         return signInResponseDto;
     }
 
@@ -264,11 +258,10 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(userPasswordDto.getNewPassword()));
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
 
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
         return signInResponseDto;
     }
 
@@ -284,11 +277,10 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userEmailDto.getEmail());
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
 
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
         return signInResponseDto;
     }
 

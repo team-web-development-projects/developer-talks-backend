@@ -1,6 +1,5 @@
 package com.dtalks.dtalks.user.config;
 
-import com.dtalks.dtalks.user.dto.UserTokenDto;
 import com.dtalks.dtalks.user.service.TokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,11 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,23 +34,19 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         LOGGER.info("onAuthenticationSuccess 호출됨");
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        Long id = oAuth2User.getAttribute("id");
 
-        UserTokenDto userTokenDto = UserTokenDto.builder().build();
-        userTokenDto.setEmail(oAuth2User.getAttribute("email"));
-        userTokenDto.setNickname(oAuth2User.getAttribute("nickname"));
-        userTokenDto.setUserid(oAuth2User.getAttribute("userid"));
-        userTokenDto.setProvider(oAuth2User.getAttribute("registrationId"));
         boolean isActive = oAuth2User.getAttribute("isActive");
 
         String targetUrl;
         if(!isActive) {
             targetUrl = UriComponentsBuilder.fromUriString(firstUrl)
-                    .queryParam("accessToken", tokenService.createAccessToken(userTokenDto))
+                    .queryParam("accessToken", tokenService.createAccessToken(id))
                     .build().toString();
         }
         else {
-            String accessToken = tokenService.createAccessToken(userTokenDto);
-            String refreshToken = tokenService.createRefreshToken(userTokenDto);
+            String accessToken = tokenService.createAccessToken(id);
+            String refreshToken = tokenService.createRefreshToken(id);
 
             targetUrl = UriComponentsBuilder.fromUriString(url)
                     .queryParam("accessToken", accessToken)
