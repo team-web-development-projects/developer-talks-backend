@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,9 +32,11 @@ public class AdminPostServiceImpl implements AdminPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminPostDto> getAllPosts(Pageable pageable, boolean forbidden) {
+    public Page<AdminPostDto> getAllPosts(Pageable pageable, Boolean forbidden) {
         Page<Post> posts;
-        if (forbidden) {
+        if (forbidden == null) {
+            posts = postRepository.findAll(pageable);
+        } else if (forbidden){
             posts = postRepository.findByForbiddenTrue(pageable);
         } else {
             posts = postRepository.findByForbiddenFalse(pageable);
