@@ -38,7 +38,7 @@ public class ReportedPostDto {
                 .writerId(post.getUser().getId())
                 .writerNickname(post.getUser().getNickname())
                 .createDate(post.getCreateDate())
-                .processed(false)
+                .processed(post.isForbidden())
                 .build();
     }
 
