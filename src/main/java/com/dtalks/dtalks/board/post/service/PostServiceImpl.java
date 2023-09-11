@@ -83,7 +83,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostDto> searchByWord(String keyword, Pageable pageable) {
-        Page<Post> posts = postRepository.findByForbiddenFalseAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword, pageable);
+        Page<Post> posts = postRepository.findByForbiddenFalseAndTitleContainingIgnoreCaseOrForbiddenFalseAndContentContainingIgnoreCase(keyword, keyword, pageable);
         return posts.map(PostDto::toDto);
     }
 
