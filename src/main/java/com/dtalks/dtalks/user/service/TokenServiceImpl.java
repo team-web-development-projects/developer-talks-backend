@@ -82,8 +82,6 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional(readOnly = true)
     public boolean validateToken(String token) {
-        User user = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
-                () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
