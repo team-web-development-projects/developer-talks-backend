@@ -16,6 +16,8 @@ import com.dtalks.dtalks.board.post.repository.RecommendPostRepository;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.board.post.repository.PostRepository;
 import com.dtalks.dtalks.exception.ErrorCode;
+import com.dtalks.dtalks.report.entity.ReportedPost;
+import com.dtalks.dtalks.report.repository.ReportedPostRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.repository.UserRepository;
@@ -38,6 +40,7 @@ public class PostServiceImpl implements PostService {
     private final FavoritePostRepository favoritePostRepository;
     private final RecommendPostRepository recommendPostRepository;
     private final CommentRepository commentRepository;
+    private final ReportedPostRepository reportedPostRepository;
 
     private final PostImageRepository imageRepository;
     private final DocumentRepository documentRepository;
@@ -238,6 +241,10 @@ public class PostServiceImpl implements PostService {
             recommendPostRepository.delete(recommendPost);
         }
 
+        List<ReportedPost> reportedPostList = reportedPostRepository.findByPostId(postId);
+        for (ReportedPost reportedPost : reportedPostList) {
+            reportedPostRepository.delete(reportedPost);
+        }
         List<PostImage> imageList = post.getImageList();
         postRepository.delete(post);
 
