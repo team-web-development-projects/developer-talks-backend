@@ -188,7 +188,7 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 코드입니다.");
         }
 
-        User user = userRepository.findByEmail(tokenService.getEmailByToken(refreshToken)).get();
+        User user = userRepository.findById(tokenService.getIdByToken(refreshToken)).get();
 
         SignInResponseDto signInResponseDto = new SignInResponseDto();
         signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));

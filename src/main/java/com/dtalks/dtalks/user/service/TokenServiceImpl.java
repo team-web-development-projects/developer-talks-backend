@@ -94,7 +94,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional(readOnly = true)
     public Authentication getAuthentication(String token) {
-        User user = userRepository.findByEmail(this.getEmailByToken(token)).orElseThrow(
+        User user = userRepository.findById(this.getIdByToken(token)).orElseThrow(
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
         if (user.getStatus() != ActiveStatus.ACTIVE) {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "현재 정지 상태로 활동이 불가능합니다.");
@@ -104,14 +104,13 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String getEmailByToken(String token) {
+    public Long getIdByToken(String token) {
         String info = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-        return info;
+        return Long.parseLong(info);
     }
 
     @Override
     public User getUserByToken(String token) {
-        String email = getEmailByToken(token);
-        return userRepository.findByEmail(email).get();
+        return userRepository.findById(getIdByToken(token)).get();
     }
 }
