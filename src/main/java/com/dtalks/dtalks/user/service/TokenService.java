@@ -11,7 +11,7 @@ public interface TokenService {
 
     String resolveToken(HttpServletRequest request);
 
-    String getEmailByToken(String token);
+    Long getIdByToken(String token);
 
     boolean validateToken(String token);
 
