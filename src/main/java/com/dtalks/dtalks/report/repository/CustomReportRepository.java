@@ -3,6 +3,9 @@ package com.dtalks.dtalks.report.repository;
 import com.dtalks.dtalks.admin.report.dto.ReportedPostDto;
 import com.dtalks.dtalks.admin.report.dto.ReportedUserDto;
 import com.dtalks.dtalks.board.post.entity.Post;
+import com.dtalks.dtalks.board.post.entity.QPost;
+import com.dtalks.dtalks.report.entity.QReport;
+import com.dtalks.dtalks.user.entity.QUser;
 import com.dtalks.dtalks.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
@@ -25,8 +28,8 @@ public class CustomReportRepository {
     public Page<ReportedUserDto> findDistinctReportedUserByProcessed(Pageable pageable) {
         List<User> user = jpaQueryFactory.select(reportedUser1.reportedUser)
                 .from(reportedUser1)
-                .where(jpaQueryFactory.selectFrom(reportedUser1)
-                        .where(reportedUser1.processed.eq(false)).exists())
+                .innerJoin(QReport.report).on(reportedUser1.id.eq(QReport.report.id).and(QReport.report.processed.eq(false)))
+                .innerJoin(reportedUser1.reportedUser, QUser.user)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -41,10 +44,10 @@ public class CustomReportRepository {
     }
 
     public Page<ReportedPostDto> findDistinctReportedPostByProcessed(Pageable pageable) {
-        List<Post> post = jpaQueryFactory.select(reportedPost.post)
+        List<Post> post = jpaQueryFactory.select(reportedPost.post).distinct()
                 .from(reportedPost)
-                .where(jpaQueryFactory.selectFrom(reportedPost)
-                        .where(reportedPost.processed.eq(false)).exists())
+                .innerJoin(QReport.report).on(reportedPost.id.eq(QReport.report.id).and(QReport.report.processed.eq(false)))
+                .innerJoin(reportedPost.post, QPost.post)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

@@ -14,4 +14,6 @@ public interface ReportedPostRepository extends JpaRepository<ReportedPost, Long
 
     List<ReportedPost> findByProcessedFalseAndPostIdAndCreateDateLessThan(Long postId, LocalDateTime createDate);
     List<ReportedPost> findByProcessedFalseAndPostId(Long postId);
+
+    List<ReportedPost> findByPostId(Long postId);
 }

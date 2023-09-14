@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByForbiddenFalseAndUserId(Long id, Pageable pageable);
-    Page<Post> findByForbiddenFalseAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String title, String content, Pageable pageable);
+    Page<Post> findByForbiddenFalseAndTitleContainingIgnoreCaseOrForbiddenFalseAndContentContainingIgnoreCase(String title, String content, Pageable pageable);
     List<Post> findByForbiddenFalseAndUserIdAndCreateDateBetween(Long userId, LocalDateTime goe, LocalDateTime loe);
     List<Post> findTop5ByForbiddenFalseAndCreateDateGreaterThanEqualAndRecommendCountGreaterThanOrderByRecommendCountDesc(LocalDateTime goe, int cnt);
     Page<Post> findByForbiddenFalse(Pageable pageable);
