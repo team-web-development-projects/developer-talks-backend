@@ -4,7 +4,6 @@ import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.dto.AccessTokenDto;
 import com.dtalks.dtalks.user.dto.TimerDto;
-import com.dtalks.dtalks.user.dto.UserTokenDto;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
 import com.dtalks.dtalks.user.entity.EmailAuthentication;
 import com.dtalks.dtalks.user.entity.User;
@@ -67,14 +66,9 @@ public class EmailServiceImpl implements EmailService{
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "인증번호가 틀렸습니다.");
         }
 
-        Optional<User> optionalUser = userRepository.findByEmail(optionalEmailAuthentication.get().getEmail());
-        if(optionalUser.isEmpty()) {
-            throw new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 유저입니다.");
-        }
+        User user = userRepository.findByEmail(optionalEmailAuthentication.get().getEmail()).orElseThrow(() -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 유저입니다."));
 
-
-        UserTokenDto userTokenDto = UserTokenDto.toDto(optionalUser.get());
-        String accessToken = tokenService.createAccessToken(userTokenDto);
+        String accessToken = tokenService.createAccessToken(user.getId());
         AccessTokenDto accessTokenDto = new AccessTokenDto();
         accessTokenDto.setAccessToken(accessToken);
 

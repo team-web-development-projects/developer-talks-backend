@@ -29,13 +29,13 @@ public interface UserService {
 
     SignInResponseDto reSignIn(String refreshToken);
 
-    SignInResponseDto updateUserid(UseridDto useridDto);
+    UserResponseDto updateUserid(UseridDto useridDto);
 
-    SignInResponseDto updateNickname(UserNicknameDto userNicknameDto);
+    UserResponseDto updateNickname(UserNicknameDto userNicknameDto);
 
-    SignInResponseDto updatePassword(UserPasswordDto userPasswordDto);
+    void updatePassword(UserPasswordDto userPasswordDto);
 
-    SignInResponseDto updateEmail(UserEmailDto userEmailDto);
+    UserResponseDto updateEmail(UserEmailDto userEmailDto);
 
     UserResponseDto updateProfile(UserProfileRequestDto userProfileRequestDto);
 

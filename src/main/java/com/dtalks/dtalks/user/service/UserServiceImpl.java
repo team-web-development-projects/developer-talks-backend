@@ -70,10 +70,9 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(savedUser.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(savedUser.getId()));
 
         return signInResponseDto;
     }
@@ -111,7 +110,6 @@ public class UserServiceImpl implements UserService {
         log.info("로그인");
         User user = findUser(signInDto.getUserid());
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
         log.info(signInDto.getPassword() + " " + user.getPassword());
         passwordValidation(signInDto.getPassword(), user.getPassword());
 
@@ -122,8 +120,8 @@ public class UserServiceImpl implements UserService {
             deleteAndSaveFCMToken(user.getId(), signInDto.getFcmToken());
         }
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .accessToken(tokenService.createAccessToken(userTokenDto))
-                .refreshToken(tokenService.createRefreshToken(userTokenDto))
+                .accessToken(tokenService.createAccessToken(user.getId()))
+                .refreshToken(tokenService.createRefreshToken(user.getId()))
                 .build();
         return signInResponseDto;
     }
@@ -133,7 +131,6 @@ public class UserServiceImpl implements UserService {
     public SignInResponseDto adminSignIn(SignInDto signInDto) {
         User user = findUser(signInDto.getUserid());
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
         passwordValidation(signInDto.getPassword(), user.getPassword());
 
         if(!user.getIsActive())
@@ -144,8 +141,8 @@ public class UserServiceImpl implements UserService {
         }
 
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
-                .accessToken(tokenService.createAccessToken(userTokenDto))
-                .refreshToken(tokenService.createRefreshToken(userTokenDto))
+                .accessToken(tokenService.createAccessToken(user.getId()))
+                .refreshToken(tokenService.createRefreshToken(user.getId()))
                 .build();
         return signInResponseDto;
     }
@@ -193,60 +190,43 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findByEmail(tokenService.getEmailByToken(refreshToken)).get();
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(user);
         SignInResponseDto signInResponseDto = new SignInResponseDto();
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
+        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
 
         return signInResponseDto;
     }
 
     @Override
     @Transactional
-    public SignInResponseDto updateUserid(UseridDto useridDto) {
+    public UserResponseDto updateUserid(UseridDto useridDto) {
         User user = SecurityUtil.getUser();
 
         if(user.getRegistrationId() != null) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "구글 로그인 유저는 아이디 변경이 불가능합니다.");
         }
 
-        Optional<User> optionalUser = userRepository.findByUserid(useridDto.getUserid());
-        if(!optionalUser.isEmpty())
-            throw new CustomException(ErrorCode.VALIDATION_ERROR, "이미 존재하는 아이디입니다.");
-
-        user.setUserid(useridDto.getUserid());
+        userRepository.findByUserid(useridDto.getUserid()).orElseThrow(() -> new CustomException(ErrorCode.VALIDATION_ERROR, "이미 존재하는 아이디입니다."));
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
-        SignInResponseDto signInResponseDto = new SignInResponseDto();
-
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
-        return signInResponseDto;
+        return UserResponseDto.toDto(savedUser);
     }
 
     @Override
     @Transactional
-    public SignInResponseDto updateNickname(UserNicknameDto userNicknameDto) {
+    public UserResponseDto updateNickname(UserNicknameDto userNicknameDto) {
         User user = SecurityUtil.getUser();
-        Optional<User> optionalUser = userRepository.findByNickname(userNicknameDto.getNickname());
-        if(!optionalUser.isEmpty())
-            throw new CustomException(ErrorCode.VALIDATION_ERROR, "이미 존재하는 닉네임입니다.");
+        userRepository.findByNickname(userNicknameDto.getNickname()).orElseThrow(() -> new CustomException(ErrorCode.VALIDATION_ERROR, "이미 존재하는 닉네임입니다."));
 
         user.setNickname(userNicknameDto.getNickname());
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
-        SignInResponseDto signInResponseDto = new SignInResponseDto();
-
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
-        return signInResponseDto;
+        return UserResponseDto.toDto(savedUser);
     }
 
     @Override
     @Transactional
-    public SignInResponseDto updatePassword(UserPasswordDto userPasswordDto) {
+    public void updatePassword(UserPasswordDto userPasswordDto) {
         User user = SecurityUtil.getUser();
 
         if(user.getRegistrationId() != null) {
@@ -262,19 +242,12 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPassword(passwordEncoder.encode(userPasswordDto.getNewPassword()));
-        User savedUser = userRepository.save(user);
-
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
-        SignInResponseDto signInResponseDto = new SignInResponseDto();
-
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
-        return signInResponseDto;
+        userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public SignInResponseDto updateEmail(UserEmailDto userEmailDto) {
+    public UserResponseDto updateEmail(UserEmailDto userEmailDto) {
         User user = SecurityUtil.getUser();
 
         if(user.getRegistrationId() != null) {
@@ -284,12 +257,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userEmailDto.getEmail());
         User savedUser = userRepository.save(user);
 
-        UserTokenDto userTokenDto = UserTokenDto.toDto(savedUser);
-        SignInResponseDto signInResponseDto = new SignInResponseDto();
-
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(userTokenDto));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(userTokenDto));
-        return signInResponseDto;
+        return UserResponseDto.toDto(savedUser);
     }
 
     @Override
