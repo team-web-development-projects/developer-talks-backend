@@ -3,6 +3,7 @@ package com.dtalks.dtalks.studyroom.dto;
 import com.dtalks.dtalks.studyroom.entity.StudyRoom;
 import com.dtalks.dtalks.studyroom.entity.StudyRoomUser;
 import com.dtalks.dtalks.studyroom.enums.Skill;
+import com.dtalks.dtalks.user.dto.UserSimpleDto;
 import com.dtalks.dtalks.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -24,8 +25,8 @@ public class StudyRoomJoinResponseDto {
     @Schema(description = "스터디룸 유저 id")
     private Long studyRoomUserId;
 
-    @Schema(description = "신청자 이름")
-    private String nickname;
+    @Schema(description = "유저 정보")
+    private UserSimpleDto userInfo;
 
     @Schema(description = "신청자 내 소개")
     private String description;
@@ -35,11 +36,13 @@ public class StudyRoomJoinResponseDto {
 
     public static StudyRoomJoinResponseDto toDto(StudyRoom studyRoom, StudyRoomUser studyRoomUser, User user) {
         Hibernate.initialize(user.getSkills());
+
+        String profile = (user.getProfileImage() != null ? user.getProfileImage().getUrl() : null);
         return StudyRoomJoinResponseDto.builder()
                 .studyRoomId(studyRoom.getId())
                 .title(studyRoom.getTitle())
                 .studyRoomUserId(studyRoomUser.getId())
-                .nickname(user.getNickname())
+                .userInfo(UserSimpleDto.createUserInfo(user.getNickname(), profile))
                 .description(user.getDescription())
                 .skills(user.getSkills())
                 .build();
