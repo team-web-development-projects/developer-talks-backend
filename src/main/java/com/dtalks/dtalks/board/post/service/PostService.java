@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface PostService {
-    PostDto searchById(Long id);
+    PostDto searchById(Long id, Boolean adminPage);
     Page<PostDto> searchAllPost(Pageable pageable);
     Page<PostDto> searchPostsByUser(String nickname, Pageable pageable);
     Page<PostDto> searchByWord(String keyword, Pageable pageable);
