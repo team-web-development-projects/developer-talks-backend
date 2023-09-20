@@ -49,12 +49,15 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostDto searchById(Long id) {
+    public PostDto searchById(Long id, Boolean adminPage) {
         Post post = findPost(id);
-        if (post.isForbidden()) {
-            throw new CustomException(ErrorCode.ACCEPTED_BUT_FORBIDDEN_BY_ADMIN, "관리자에 의해 접근이 불가능한 게시글입니다.");
+        if (adminPage == null) {
+            if (post.isForbidden()) {
+                throw new CustomException(ErrorCode.ACCEPTED_BUT_FORBIDDEN_BY_ADMIN, "관리자에 의해 접근이 불가능한 게시글입니다.");
+            } else {
+                post.updateViewCount();
+            }
         }
-        post.updateViewCount();
 
         List<PostImage> imageList = imageRepository.findByPostIdOrderByOrderNum(id);
         List<String> urls = new ArrayList<>();

@@ -39,8 +39,8 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "db에 존재하지 않는 게시글", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<PostDto> searchById(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.searchById(id));
+    public ResponseEntity<PostDto> searchById(@PathVariable Long id, @RequestParam(required = false) Boolean adminPage) {
+        return ResponseEntity.ok(postService.searchById(id, adminPage));
     }
 
 
