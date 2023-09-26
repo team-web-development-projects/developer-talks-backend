@@ -11,9 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -22,6 +24,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(TokenService tokenService) {
         this.tokenService = tokenService;
+    }
+
+    private static final String[] SHOULD_NOT_FILTER_URI_ALL_LIST = new String[]{
+            "/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
+            ,"/token/refresh", "/ws/chat/**", "/sub/**", "/pub/**", "/notifications/**", "/admin/sign-in",
+            "**exception**", "/users/recent/activity/**", "/users/private/**"
+    };
+
+    private static final String[] SHOULD_NOT_FILTER_URI_GET_LIST = new String[]{
+            "/post/**", "/comment/**", "/questions/**", "/answers/**", "/news", "/users/userid",
+            "/announcements/**", "/announcements/**"
+    };
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        if (Arrays.stream(SHOULD_NOT_FILTER_URI_ALL_LIST)
+                .anyMatch(e -> new AntPathMatcher().match(e, request.getServletPath()))) {
+            return true;
+        } else {
+            if (request.getMethod().equals("GET")) {
+                return Arrays.stream(SHOULD_NOT_FILTER_URI_GET_LIST)
+                        .anyMatch(e -> new AntPathMatcher().match(e, request.getServletPath()));
+            }
+        }
+        return false;
     }
 
     @Override
