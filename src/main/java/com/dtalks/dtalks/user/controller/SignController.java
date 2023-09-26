@@ -41,7 +41,7 @@ public class SignController {
     }
 
     @Operation(summary = "refresh 토큰을 이용한 토큰 재발급")
-    @PostMapping(value = "token/refresh")
+    @PostMapping(value = "/token/refresh")
     public ResponseEntity<SignInResponseDto> tokenRefresh(@RequestBody()RefreshTokenDto refreshToken) {
         SignInResponseDto signInResponseDto = userService.reSignIn(refreshToken.getRefreshToken());
 
