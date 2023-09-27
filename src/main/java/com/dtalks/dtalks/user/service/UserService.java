@@ -49,7 +49,7 @@ public interface UserService {
 
     void updatePrivate(boolean status);
 
-    Boolean getPrivateStatus(String id);
+    Boolean getPrivateStatus(String nickname);
 
     void findUserid(String email);
 
