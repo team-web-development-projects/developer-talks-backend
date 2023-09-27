@@ -1,6 +1,9 @@
 package com.dtalks.dtalks.user.config;
 
+import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
+import com.dtalks.dtalks.user.entity.User;
+import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,14 +30,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private static final String[] SHOULD_NOT_FILTER_URI_ALL_LIST = new String[]{
-            "/sign-in/**", "/sign-up", "exception", "/users/check/**", "/email/**"
-            ,"/token/refresh", "/ws/chat/**", "/sub/**", "/pub/**", "/admin/sign-in",
-            "**exception**", "/users/recent/activity/**", "/users/private/**"
+            "/sign-in/**", "/sign-up", "exception",
+            "/token/refresh", "/admin/sign-in",
+            "**exception**", "/users/recent/activity/**"
     };
 
     private static final String[] SHOULD_NOT_FILTER_URI_GET_LIST = new String[]{
+            "/email/**", "/users/private/**",
             "/post/**", "/comment/**", "/questions/**", "/answers/**", "/news", "/users/userid",
-            "/announcements/**", "/announcements/**"
+            "/announcements/**"
+    };
+
+    private static final String[] SHOULD_FILTER_URI_GET_LIST = new String[] {
+            "/**/check/**"
     };
 
     @Override
@@ -43,7 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .anyMatch(e -> new AntPathMatcher().match(e, request.getServletPath()))) {
             return true;
         } else {
-            if (request.getMethod().equals("GET")) {
+            if (request.getMethod().equals("GET") &&
+                    Arrays.stream(SHOULD_FILTER_URI_GET_LIST).noneMatch(e -> new AntPathMatcher().match(e, request.getServletPath()))) {
                 return Arrays.stream(SHOULD_NOT_FILTER_URI_GET_LIST)
                         .anyMatch(e -> new AntPathMatcher().match(e, request.getServletPath()));
             }
@@ -66,9 +75,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = tokenService.resolveToken(request);
 
         try {
+            Authentication authentication = null;
             if(token != null && tokenService.validateToken(token)) {
-                Authentication authentication = tokenService.getAuthentication(token);
+                authentication = tokenService.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
+            if (!request.getMethod().equals("GET")) {
+                if (authentication != null) {
+                    User user = (User) authentication.getPrincipal();
+                    if (user.getStatus() != ActiveStatus.ACTIVE) {
+                        throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "현재 정지 상태로 활동이 불가능합니다.");
+                    }
+                }
             }
 
             filterChain.doFilter(request, response);
