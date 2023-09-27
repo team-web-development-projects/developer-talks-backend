@@ -113,13 +113,13 @@ public class UserController {
     }
 
     @Operation(summary = "특정 유저의 비공개 여부 조회", parameters = {
-            @Parameter(name = "id", description = "조회할 유저의 로그인 아이디"),
+            @Parameter(name = "nickname", description = "조회할 유저의 닉네임"),
     }, responses = {
             @ApiResponse(responseCode = "400", description = "해당 사용자가 db에 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
-    @GetMapping(value = "/private/{id}")
-    public ResponseEntity<Boolean> getPrivateStatus(@PathVariable String id) {
-        return ResponseEntity.ok(userService.getPrivateStatus(id));
+    @GetMapping(value = "/private/{nickname}")
+    public ResponseEntity<Boolean> getPrivateStatus(@PathVariable String nickname) {
+        return ResponseEntity.ok(userService.getPrivateStatus(nickname));
     }
 
     @Operation(summary = "특정 유저의 비공개 여부 설정", parameters = {

@@ -3,7 +3,6 @@ package com.dtalks.dtalks.user.service;
 import com.dtalks.dtalks.exception.ErrorCode;
 import com.dtalks.dtalks.exception.exception.CustomException;
 import com.dtalks.dtalks.user.entity.User;
-import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 
@@ -96,9 +94,6 @@ public class TokenServiceImpl implements TokenService {
     public Authentication getAuthentication(String token) {
         User user = userRepository.findById(this.getIdByToken(token)).orElseThrow(
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
-        if (user.getStatus() != ActiveStatus.ACTIVE) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "현재 정지 상태로 활동이 불가능합니다.");
-        }
 
         return new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
     }

@@ -339,8 +339,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean getPrivateStatus(String id) {
-        User user = findUser(id);
+    public Boolean getPrivateStatus(String nickname) {
+        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR, "유저를 찾을 수 없습니다."));
         return user.getIsPrivate();
     }
 
