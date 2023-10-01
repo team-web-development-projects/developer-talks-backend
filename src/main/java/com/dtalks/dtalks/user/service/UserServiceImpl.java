@@ -25,6 +25,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -154,7 +155,7 @@ public class UserServiceImpl implements UserService {
                 .accessToken(tokenService.createAccessToken(user.getId()))
                 .refreshToken(refreshToken)
                 .build();
-        
+
         RefreshToken rt = new RefreshToken(user.getId(), refreshToken, LocalDateTime.now());
         refreshTokenRepository.save(rt);
 
@@ -195,7 +196,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public SignInResponseDto reSignIn(String refreshToken) {
+    public AccessTokenDto reSignIn(String refreshToken) {
         // 토큰값 검증
         tokenService.validateToken(refreshToken);
         /**
@@ -213,12 +214,9 @@ public class UserServiceImpl implements UserService {
         if (!usernamePasswordAuthenticationToken.isAuthenticated()) {
             throw new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 코드입니다.");
         }
-
-        SignInResponseDto signInResponseDto = new SignInResponseDto();
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
-
-        return signInResponseDto;
+        AccessTokenDto accessTokenDto = new AccessTokenDto();
+        accessTokenDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        return accessTokenDto;
     }
 
     @Override

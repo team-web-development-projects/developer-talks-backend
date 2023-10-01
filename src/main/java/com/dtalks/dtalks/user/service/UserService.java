@@ -27,7 +27,7 @@ public interface UserService {
 
     DuplicateResponseDto emailDuplicated(String email);
 
-    SignInResponseDto reSignIn(String refreshToken);
+    AccessTokenDto reSignIn(String refreshToken);
 
     UserResponseDto updateUserid(UseridDto useridDto);
 
