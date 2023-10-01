@@ -15,9 +15,11 @@ import com.dtalks.dtalks.report.repository.ReportedUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
+import com.dtalks.dtalks.user.entity.RefreshToken;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.AccessTokenPasswordRepository;
+import com.dtalks.dtalks.user.repository.RefreshTokenRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,10 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -50,6 +50,8 @@ public class UserServiceImpl implements UserService {
 
     private final NotificationRepository notificationRepository;
     private final ReportedUserRepository reportedUserRepository;
+
+    private final RefreshTokenRepository refreshTokenRepository;
     private final FCMTokenManager fcmTokenManager;
 
     @Override
@@ -120,10 +122,16 @@ public class UserServiceImpl implements UserService {
         if (signInDto.getFcmToken() != null) {
             deleteAndSaveFCMToken(user.getId(), signInDto.getFcmToken());
         }
+
+        String refreshToken = tokenService.createRefreshToken(user.getId());
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
                 .accessToken(tokenService.createAccessToken(user.getId()))
-                .refreshToken(tokenService.createRefreshToken(user.getId()))
+                .refreshToken(refreshToken)
                 .build();
+
+        RefreshToken rt = new RefreshToken(user.getId(), refreshToken, LocalDateTime.now());
+        refreshTokenRepository.save(rt);
+
         return signInResponseDto;
     }
 
@@ -141,10 +149,15 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "관리자가 아닙니다.");
         }
 
+        String refreshToken = tokenService.createRefreshToken(user.getId());
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
                 .accessToken(tokenService.createAccessToken(user.getId()))
-                .refreshToken(tokenService.createRefreshToken(user.getId()))
+                .refreshToken(refreshToken)
                 .build();
+        
+        RefreshToken rt = new RefreshToken(user.getId(), refreshToken, LocalDateTime.now());
+        refreshTokenRepository.save(rt);
+
         return signInResponseDto;
     }
 
