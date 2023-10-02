@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 public class RefreshToken {
     @Id
-    private Long id;
     private String refreshToken;
+    private Long id;
     private LocalDateTime createDate;
 }

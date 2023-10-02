@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
                 .refreshToken(refreshToken)
                 .build();
 
-        RefreshToken rt = new RefreshToken(user.getId(), refreshToken, LocalDateTime.now());
+        RefreshToken rt = new RefreshToken(refreshToken, user.getId(), LocalDateTime.now());
         refreshTokenRepository.save(rt);
 
         return signInResponseDto;
@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserService {
                 .refreshToken(refreshToken)
                 .build();
 
-        RefreshToken rt = new RefreshToken(user.getId(), refreshToken, LocalDateTime.now());
+        RefreshToken rt = new RefreshToken(refreshToken, user.getId(), LocalDateTime.now());
         refreshTokenRepository.save(rt);
 
         return signInResponseDto;
@@ -199,6 +199,9 @@ public class UserServiceImpl implements UserService {
     public AccessTokenDto reSignIn(String refreshToken) {
         // 토큰값 검증
         tokenService.validateToken(refreshToken);
+
+        RefreshToken redisRefreshToken = refreshTokenRepository.findById(refreshToken).orElseThrow(
+                () -> new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 토큰입니다."));
         /**
          * 이때 계정 정지 상태인 사용자는 tokenService.getAuthentication()에서 403 에러가 발생할 수 밖에 없는데
          * 계정 정지 상태를 모든 인증이 필요한 요청마다 확인하는 방법 제한적 + 오버로딩보다는 여기서 그냥 부르는게 나을 것 같았음
@@ -210,10 +213,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(tokenService.getIdByToken(refreshToken)).orElseThrow(
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
 
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
-        if (!usernamePasswordAuthenticationToken.isAuthenticated()) {
-            throw new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 코드입니다.");
-        }
         AccessTokenDto accessTokenDto = new AccessTokenDto();
         accessTokenDto.setAccessToken(tokenService.createAccessToken(user.getId()));
         return accessTokenDto;
