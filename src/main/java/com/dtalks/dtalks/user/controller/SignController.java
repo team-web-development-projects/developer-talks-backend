@@ -42,10 +42,8 @@ public class SignController {
 
     @Operation(summary = "refresh 토큰을 이용한 토큰 재발급")
     @PostMapping(value = "/token/refresh")
-    public ResponseEntity<SignInResponseDto> tokenRefresh(@RequestBody()RefreshTokenDto refreshToken) {
-        SignInResponseDto signInResponseDto = userService.reSignIn(refreshToken.getRefreshToken());
-
-        return ResponseEntity.ok(signInResponseDto);
+    public ResponseEntity<AccessTokenDto> tokenRefresh(@RequestBody()RefreshTokenDto refreshToken) {
+        return ResponseEntity.ok(userService.reSignIn(refreshToken.getRefreshToken()));
     }
 
     @Operation(summary = "oauth 추가정보 입력")

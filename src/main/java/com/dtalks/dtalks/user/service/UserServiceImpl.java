@@ -15,24 +15,25 @@ import com.dtalks.dtalks.report.repository.ReportedUserRepository;
 import com.dtalks.dtalks.user.Util.SecurityUtil;
 import com.dtalks.dtalks.user.dto.*;
 import com.dtalks.dtalks.user.entity.AccessTokenPassword;
+import com.dtalks.dtalks.user.entity.RefreshToken;
 import com.dtalks.dtalks.user.entity.User;
 import com.dtalks.dtalks.user.enums.ActiveStatus;
 import com.dtalks.dtalks.user.repository.AccessTokenPasswordRepository;
+import com.dtalks.dtalks.user.repository.RefreshTokenRepository;
 import com.dtalks.dtalks.user.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -50,6 +51,8 @@ public class UserServiceImpl implements UserService {
 
     private final NotificationRepository notificationRepository;
     private final ReportedUserRepository reportedUserRepository;
+
+    private final RefreshTokenRepository refreshTokenRepository;
     private final FCMTokenManager fcmTokenManager;
 
     @Override
@@ -120,10 +123,16 @@ public class UserServiceImpl implements UserService {
         if (signInDto.getFcmToken() != null) {
             deleteAndSaveFCMToken(user.getId(), signInDto.getFcmToken());
         }
+
+        String refreshToken = tokenService.createRefreshToken(user.getId());
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
                 .accessToken(tokenService.createAccessToken(user.getId()))
-                .refreshToken(tokenService.createRefreshToken(user.getId()))
+                .refreshToken(refreshToken)
                 .build();
+
+        RefreshToken rt = new RefreshToken(refreshToken, user.getId(), LocalDateTime.now());
+        refreshTokenRepository.save(rt);
+
         return signInResponseDto;
     }
 
@@ -141,10 +150,15 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ErrorCode.PERMISSION_NOT_GRANTED_ERROR, "관리자가 아닙니다.");
         }
 
+        String refreshToken = tokenService.createRefreshToken(user.getId());
         SignInResponseDto signInResponseDto = SignInResponseDto.builder()
                 .accessToken(tokenService.createAccessToken(user.getId()))
-                .refreshToken(tokenService.createRefreshToken(user.getId()))
+                .refreshToken(refreshToken)
                 .build();
+
+        RefreshToken rt = new RefreshToken(refreshToken, user.getId(), LocalDateTime.now());
+        refreshTokenRepository.save(rt);
+
         return signInResponseDto;
     }
 
@@ -182,9 +196,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public SignInResponseDto reSignIn(String refreshToken) {
+    public AccessTokenDto reSignIn(String refreshToken) {
         // 토큰값 검증
         tokenService.validateToken(refreshToken);
+
+        RefreshToken redisRefreshToken = refreshTokenRepository.findById(refreshToken).orElseThrow(
+                () -> new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 토큰입니다."));
         /**
          * 이때 계정 정지 상태인 사용자는 tokenService.getAuthentication()에서 403 에러가 발생할 수 밖에 없는데
          * 계정 정지 상태를 모든 인증이 필요한 요청마다 확인하는 방법 제한적 + 오버로딩보다는 여기서 그냥 부르는게 나을 것 같았음
@@ -196,16 +213,9 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(tokenService.getIdByToken(refreshToken)).orElseThrow(
                 () -> new CustomException(ErrorCode.VALIDATION_ERROR, "존재하지 않는 사용자입니다."));
 
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
-        if (!usernamePasswordAuthenticationToken.isAuthenticated()) {
-            throw new CustomException(ErrorCode.VALIDATION_ERROR, "유효하지 않은 코드입니다.");
-        }
-
-        SignInResponseDto signInResponseDto = new SignInResponseDto();
-        signInResponseDto.setAccessToken(tokenService.createAccessToken(user.getId()));
-        signInResponseDto.setRefreshToken(tokenService.createRefreshToken(user.getId()));
-
-        return signInResponseDto;
+        AccessTokenDto accessTokenDto = new AccessTokenDto();
+        accessTokenDto.setAccessToken(tokenService.createAccessToken(user.getId()));
+        return accessTokenDto;
     }
 
     @Override

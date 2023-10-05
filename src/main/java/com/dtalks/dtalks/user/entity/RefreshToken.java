@@ -7,15 +7,12 @@ import org.springframework.data.redis.core.RedisHash;
 
 import java.time.LocalDateTime;
 
-@RedisHash(value = "email", timeToLive = 300)
-@Getter
+@RedisHash(value = "refresh", timeToLive = 60 * 60 * 24)
 @AllArgsConstructor
-public class EmailAuthentication {
-
+@Getter
+public class RefreshToken {
     @Id
-    private String code;
-
-    private String email;
-
+    private String refreshToken;
+    private Long id;
     private LocalDateTime createDate;
 }
