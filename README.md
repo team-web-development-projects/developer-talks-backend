@@ -35,7 +35,7 @@
 4. cmd창에서 서버 실행 (https://ottl-seo.tistory.com/21) -->
 
 ## swagger
-http://15.165.61.151:8080/swagger-ui/index.html#/
+http://dtalks-api.site/swagger-ui/index.html#/
 
 ## ERD
 <!-- ![캡처](https://github.com/team-web-development-projects/developer-talks-backend/assets/39542757/c3a29c67-ca3d-4ff3-b604-9e564aff1aea) -->
