@@ -60,6 +60,7 @@ http://dtalks-api.site/swagger-ui/index.html#/
 - 신고
   - 사용자 신고, 게시글 신고
 - 스터디
+  - 스터디룸 가입자 실시간 채팅
 
 ### 관리자 기능
 - 공지사항 작성
